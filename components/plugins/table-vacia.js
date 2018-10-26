@@ -15,13 +15,13 @@ const TablaVacia = (props) => {
             <Typography variant="title" gutterBottom>
                 {props.title}
             </Typography>
-            <Button
+            {/* <Button
                 variant="contained"
                 color="primary"
                 onClick={props.handleClickOpen}
             >
                 {props.titleButton}
-            </Button>
+            </Button> */}
         </div>
     );
 }

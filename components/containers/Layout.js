@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import Head from 'next/head'
-import ClippedDrawer from '../components/ClippedDrawer';
 
 //theme
 import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
@@ -10,10 +9,11 @@ import theme from '../../components/theme/theme'
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
-import Login from '../components/Login';
 
-//snackbars
-import setSnackBars from '../plugins/setSnackBars';
+
+//Login
+import Login from '../components/session/Login';
+import LoginContenedor from '../components/session/LoginContenedor';
 
 const themeCont = createMuiTheme({ ...theme });
 
@@ -89,6 +89,7 @@ class Layout extends Component {
 
     render() {
         const { children, title } = this.props
+
         return (
             <div>
                 <Head>
@@ -103,16 +104,16 @@ class Layout extends Component {
                 </Head>
                 <MuiThemeProvider theme={themeCont}>
                     <div id='rootSnackBar'></div>
+
                     {
                         this.state.sesionState === 'iniciada' &&
-                        <ClippedDrawer
-                            title={title}
-                        >
+                        <LoginContenedor title={title} onChangueUserState={this.props.onChangueUserState}>
                             {
                                 children
                             }
-                        </ClippedDrawer>
+                        </LoginContenedor>
                     }
+
                     {
                         this.state.sesionState === 'cerrada' &&
                         <Login />

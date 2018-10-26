@@ -12,6 +12,14 @@ import MenuIcon from '@material-ui/icons/Menu';
 import ChevronLeftIcon from '@material-ui/icons/ChevronLeft';
 import ChevronRightIcon from '@material-ui/icons/ChevronRight';
 
+import Avatar from '@material-ui/core/Avatar';
+import ButtonBase from '@material-ui/core/ButtonBase';
+
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+
+
+
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
@@ -95,6 +103,7 @@ class ClippedDrawer extends React.Component {
 
   state = {
     open: false,
+    anchorEl: null,
   };
 
   handleDrawerOpen = () => {
@@ -105,9 +114,17 @@ class ClippedDrawer extends React.Component {
     this.setState({ open: false });
   };
 
-  render() {
+  handleClick = event => {
+    this.setState({ anchorEl: event.currentTarget });
+  };
 
-    const { classes, theme } = this.props;
+  handleClose = () => {
+    this.setState({ anchorEl: null });
+  };
+
+  render() {
+    const { anchorEl } = this.state;
+    const { classes, theme, user } = this.props;
 
     return (
       <div className={classes.root}>
@@ -128,11 +145,28 @@ class ClippedDrawer extends React.Component {
               {this.props.title}
             </Typography>
 
-            <Button color="inherit"
-              onClick={() => firebase.auth().signOut()}
+
+
+            <ButtonBase onClick={this.handleClick} style={{ marginRight: 20 }}>
+              <Typography variant="subheading" color="inherit" noWrap style={{ marginRight: 10 }}>
+                {user.nombre}
+              </Typography>
+              <Avatar style={{ width: 40, height: 40, fontSize: 20 }}>{user ? user.nombre.toString().charAt(0) : 'none'}</Avatar>
+            </ButtonBase>
+
+            <Menu
+              id="simple-menu"
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={this.handleClose}
             >
-              Cerrar sesion
-          </Button>
+              <MenuItem onClick={this.handleClose}>Perfil</MenuItem>
+              <MenuItem onClick={this.handleClose}>Configuración</MenuItem>
+              <MenuItem onClick={() => {
+                sessionStorage.removeItem("code-status-ser-section");
+                this.props.closeSesion()
+              }}>Cerrar Sesión</MenuItem>
+            </Menu>
           </Toolbar>
         </AppBar>
         <Drawer
@@ -164,11 +198,14 @@ class ClippedDrawer extends React.Component {
             display: 'flex',
             flexDirection: 'row'
           }}>
-            <div style={{width:74}} />
+            
             <div style={{
               display: 'flex',
               flexDirection: 'column',
-              width:'100%'
+              width: '95%',
+              height:'100%',
+              position:'fixed',
+              paddingLeft:'5%',
             }}>
               {this.props.children}
             </div>

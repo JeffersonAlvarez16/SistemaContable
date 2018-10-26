@@ -24,7 +24,6 @@ class Main extends Component {
                             <Layout title="FastBtaApps">
                                 <div>hola</div>
                             </Layout>
-
                         :
                         <div style={{ width: '100%', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                             <img src="/static/spinner.gif"></img>

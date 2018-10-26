@@ -6,9 +6,23 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
+import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import TextField from '@material-ui/core/TextField';
 import AutoCompleteTextField from '../plugins/AutoCompleteTextField';
+import AutoCompleteAdmin from '../plugins/AutoCompleteAdmin';
 import funtions from '../../utils/funtions';
+import Grid from '@material-ui/core/Grid';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import Visibility from '@material-ui/icons/Visibility';
+import VisibilityOff from '@material-ui/icons/VisibilityOff';
+import Divider from '@material-ui/core/Divider';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormHelperText from '@material-ui/core/FormHelperText';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 
 
 import NumberFormat from 'react-number-format';
@@ -18,71 +32,72 @@ import setSnackBars from '../plugins/setSnackBars';
 class ModalNewProducto extends Component {
 
     state = {
-        codigo: '',
-        numeroMayor: '',
-        numeroMenor: '',
-        numeroIva: '',
-        cantidadProductos: '',
-        nombreProducto: '',
-        categoriaProducto: '',
-        proveedorProducto: '',
+        codigo_automatico: '',
+        codigo_barras: '',
+        codigo_referencia: '',
+
+        descripcion_producto: '',
+        categoria_producto: {
+            nombre: ''
+        },
+        proveedor: '',
+        marca_producto: {
+            nombre: ''
+        },
+        porcentaje_iva: '',
+        localizacion_producto: '',
+        numero_ventas: '',
+
+        precio_costo: '',
+        precio_venta_a: '',
+        precio_venta_b: '',
+        precio_venta_c: '',
+
+        stock_actual: '',
+        stock_minimo: '',
+        stock_maximo: '',
+
+        unidad_medida: '',
+        producto_fraccionado: false,
+        cantidad_productos: '',
+
+        fecha_vencimiento: '',
+        fecha_registro: '',
+        hora_registro: '',
+
+        estado_producto: '',
+        usuario:{},
+
+        //estados
+        tiene_iva: false,
+
+
     }
 
     componentDidMount() {
-        if (this.props.item) {
-            this.setState({
-                codigo: this.props.item.codigo,
-                numeroMayor: this.props.item.precio_mayor,
-                numeroMenor: this.props.item.precio_menor,
-                numeroIva: this.props.item.iva,
-                cantidadProductos: this.props.item.cantidad,
-                nombreProducto: this.props.item.nombre,
-                categoriaProducto: this.props.item.categoria,
-                proveedorProducto: this.props.item.proveedor,
-            })
-        }
+        this.setState({
+            usuario: this.props.usuario
+        })
+        /*  if (this.props.item) {
+             this.setState({
+                 codigo_automatico: this.props.item.codigo,
+                 numeroMayor: this.props.item.precio_mayor,
+                 numeroMenor: this.props.item.precio_menor,
+                 numeroIva: this.props.item.iva,
+                 cantidadProductos: this.props.item.cantidad,
+                 descripcion_producto: this.props.item.nombre,
+                 categoriaProducto: this.props.item.categoria,
+                 proveedorProducto: this.props.item.proveedor,
+             })
+         } */
     }
 
-    handleChangeMayor = event => {
-        this.setState({
-            numeroMayor: event.target.value,
-        })
-    };
 
-    handleChangeMenor = event => {
-        this.setState({
-            numeroMenor: event.target.value,
-        })
-    };
-
-    handleChangeIva = event => {
-        this.setState({
-            numeroIva: event.target.value,
-        })
-    };
-
-    handleChangeCantidadProductos = event => {
-        this.setState({
-            cantidadProductos: event.target.value,
-        })
-    };
-
-    changueTextCategorias = (value) => {
-        this.setState({
-            categoriaProducto: value
-        })
-    }
-
-    changueTextProveedores = (value) => {
-        this.setState({
-            proveedorProducto: value
-        })
-    }
 
     checkFormProduc = () => {
         if (
-            this.state.codigo.length > 0 &&
-            this.state.nombreProducto.length > 0 &&
+            this.state.codigo_automatico.length > 0 &&
+            this.state.descripcion_producto.length > 0 &&
             this.state.categoriaProducto.length > 0 &&
             this.state.proveedorProducto.length > 0 &&
             this.state.numeroMayor.length > 0 &&
@@ -94,9 +109,9 @@ class ModalNewProducto extends Component {
                 cantidad: this.state.cantidadProductos.replace(' productos', ''),
                 categoria: this.state.categoriaProducto,
                 proveedor: this.state.proveedorProducto,
-                codigo: this.state.codigo,
+                codigo: this.state.codigo_automatico,
                 iva: this.state.numeroIva.replace('% ', ''),
-                nombre: this.state.nombreProducto,
+                nombre: this.state.descripcion_producto,
                 precio_mayor: this.state.numeroMayor,
                 precio_menor: this.state.numeroMenor
             }
@@ -121,7 +136,7 @@ class ModalNewProducto extends Component {
         const styles = {
             styleText: {
                 margin: 10,
-                width: '46%'
+                width: '100%'
             },
             styleAutoComplete: {
                 margin: 10,
@@ -151,37 +166,278 @@ class ModalNewProducto extends Component {
                     </Toolbar>
                 </AppBar>
 
-                <div style={{
-                    marginTop: 50,
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <div style={{
-                        maxWidth: 500
-                    }}>
-                        <form autoComplete="off">
-                            <TextField
-                                style={styles.styleText}
-                                id="standard-codigo"
-                                label="Codigo automático"
-                                error={this.state.codigo.length > 0 ? false : true}
-                                required
-                                onChange={(event) => this.setState({ codigo: event.target.value })}
-                                value={this.state.codigo}
-                                margin="normal"
-                                variant="outlined"
-                            />
 
+                <form autoComplete="off">
+                    <Grid container spacing={24} style={{ width: '100vw' }}>
+                        <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-codigo-automatico"
+                                    label="Codigo automático"
+                                    error={this.state.codigo_automatico.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
+                                    value={this.state.codigo_automatico}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-codigo-barras"
+                                    label="Codigo de barras"
+                                    error={this.state.codigo_barras.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ codigo_barras: event.target.value })}
+                                    value={this.state.codigo_barras}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-codigo-referencia"
+                                    label="Codigo de referencia"
+                                    error={this.state.codigo_referencia.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
+                                    value={this.state.codigo_referencia}
+                                    margin="normal"
+                                    variant="filled" />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-precio-costo"
+                                    label="Precio costo"
+                                    error={this.state.codigo_automatico.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
+                                    value={this.state.codigo_automatico}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-precio-a"
+                                    label="Precio A"
+                                    error={this.state.codigo_automatico.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
+                                    value={this.state.codigo_automatico}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+
+                                <Grid container spacing={24}>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-precio-b"
+                                            label="Precio B"
+                                            error={this.state.codigo_barras.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ codigo_barras: event.target.value })}
+                                            value={this.state.codigo_barras}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-precio-c"
+                                            label="Precio C"
+                                            error={this.state.codigo_referencia.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
+                                            value={this.state.codigo_referencia}
+                                            margin="normal"
+                                            variant="filled" />
+                                    </Grid>
+                                </Grid>
+
+
+
+                            </Grid>
+
+                        </Grid>
+                        <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                            <Grid item xs={6}>
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-descripcion-producto"
+                                    label="Descripcion del producto"
+                                    error={this.state.descripcion_producto.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                    value={this.state.descripcion_producto}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+                                <AutoCompleteAdmin
+                                    id="standard-categoria-productos"
+                                    styleText={styles.styleText}
+                                    nameTextFiel="Categoria"
+                                    dataRef="categorias"
+                                    dataRefObject="categoria"
+                                    itemCategoria={this.state.categoria_producto}
+                                    changueText={item => this.setState({ categoria_producto: item })}
+                                    textItemVacio='Categorias vacias'
+                                />
+
+                                <AutoCompleteAdmin
+                                    id="standard-categoria-marcas"
+                                    styleText={styles.styleText}
+                                    nameTextFiel="Marca"
+                                    dataRef="marcas"
+                                    dataRefObject="marca"
+                                    itemCategoria={this.state.marca_producto}
+                                    changueText={item => this.setState({ marca_producto: item })}
+                                    textItemVacio='Marcas vacias'
+                                />
+                            </Grid>
+                            <Grid item xs={6}>
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-localizacion-producto"
+                                    label="Localización"
+                                    error={this.state.descripcion_producto.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                    value={this.state.descripcion_producto}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+                                <TextField
+                                    style={styles.styleText}
+                                    id="standard-stock-actual"
+                                    label="Stock actual"
+                                    error={this.state.descripcion_producto.length > 0 ? false : true}
+                                    required
+                                    onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                    value={this.state.descripcion_producto}
+                                    margin="normal"
+                                    variant="filled"
+                                />
+                                <Grid container spacing={24}>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-stock-minimo"
+                                            label="Stock minimo"
+                                            error={this.state.descripcion_producto.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                            value={this.state.descripcion_producto}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-stock-maximo"
+                                            label="Stock máximo"
+                                            error={this.state.descripcion_producto.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                            value={this.state.descripcion_producto}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                </Grid>
+                            </Grid>
+
+                        </Grid>
+                    </Grid>
+
+                    <Divider />
+
+                    <Grid container spacing={24} style={{ width: '100vw' }}>
+                        <Grid item xs={4}>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={this.state.tiene_iva}
+                                        onChange={() => this.setState({ tiene_iva: !this.state.tiene_iva })}
+                                    />}
+                                label="Tiene iva"
+                            />
                             <TextField
-                                error={this.state.nombreProducto.length > 0 ? false : true}
-                                value={`${this.state.nombreProducto}`}
-                                onChange={(event) => this.setState({ nombreProducto: event.target.value })}
+                                style={styles.styleText}
+                                id="standard-porcentaje-iva"
+                                label="Porcentaje Iva"
+                                disabled={!this.state.tiene_iva}
+                                //error={this.state.descripcion_producto.length > 0 ? false : true}
+                                required
+                                onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
+                                value={this.state.descripcion_producto}
+                                margin="normal"
+                                variant="filled"
+                            />
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={this.state.producto_fraccionado}
+                                        onChange={() => this.setState({ producto_fraccionado: !this.state.producto_fraccionado })}
+                                    />}
+                                label="Venta fraccionada"
+                            />
+                        </Grid>
+                        <Grid item xs={4}>
+                            <FormControl style={{ width: '100%' }}>
+                                <InputLabel htmlFor="unidad-medida">Unidad de medida</InputLabel>
+                                <Select
+                                    value={this.state.unidad_medida}
+                                    onChange={event => this.setState({ unidad_medida: event.target.value })}
+                                    inputProps={{
+                                        name: 'unidad-medidad-de',
+                                        id: 'unid-medida',
+                                    }}
+                                >
+                                    <MenuItem value={'unidades'}>Unidades</MenuItem>
+                                    <MenuItem value={'litros'}>Litros</MenuItem>
+                                    <MenuItem value={'metros'}>Metros</MenuItem>
+                                    <MenuItem value={'cajas'}>Cajas</MenuItem>
+                                    <MenuItem value={'piezas'}>Piezas</MenuItem>
+                                    <MenuItem value={'kilos'}>Kilos</MenuItem>
+                                    <MenuItem value={'libras'}>Libras</MenuItem>
+                                </Select>
+                            </FormControl>
+
+                            <form noValidate>
+                                <TextField
+                                    id="date-fecha-vencimiento"
+                                    label="Fecha de vencimiento"
+                                    type="date"
+                                    //defaultValue={`${new Date().getDate()+'-'+new Date().getMonth()+'-'+new Date().getFullYear()}`}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                />
+                            </form>
+                        </Grid>
+                        <Grid item xs={4}>
+                        {
+                            console.log(`${new Date().getFullYear()+'-'+new Date().getMonth()+'-'+new Date().getDate()}`)
+                            
+                        }
+                        {`${new Date().getFullYear()+'-'+new Date().getMonth()+'-'+new Date().getDate()}`}
+
+                        </Grid>
+                    </Grid>
+
+                    {/* <TextField
+                                error={this.state.descripcion_producto.length > 0 ? false : true}
+                                value={`${this.state.descripcion_producto}`}
+                                onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
                                 style={styles.styleText}
                                 required
-                                id="standard-nombre-p"
-                                label="Nombre del producto"
+                                id="standard-descripcion-producto"
+                                label="Descripción del producto"
                                 margin="normal"
                                 variant="outlined"
                             />
@@ -265,11 +521,10 @@ class ModalNewProducto extends Component {
                                 }}
                                 margin="normal"
                                 variant="outlined"
-                            />
+                            /> */}
 
-                        </form>
-                    </div>
-                </div>
+                </form>
+
             </div>
         );
     }

@@ -14,7 +14,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-import setSnackBars from '../plugins/setSnackBars'
+import setSnackBars from '../../plugins/setSnackBars'
 
 // firebase
 import firebase from 'firebase/app'

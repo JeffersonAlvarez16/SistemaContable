@@ -3,6 +3,10 @@ import Layout from '../components/containers/Layout';
 import Search from '../components/components/Search';
 import SimpleTable from '../components/components/TableList';
 
+import AppBar from '@material-ui/core/AppBar';
+import Tabs from '@material-ui/core/Tabs';
+import Tab from '@material-ui/core/Tab';
+
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
@@ -12,6 +16,11 @@ import funtions from '../utils/funtions';
 import FullScreenDialog from '../components/components/FullScreenDialog';
 import ModalNewProducto from '../components/modals_container/ModalNewProducto';
 import setSnackBars from '../components/plugins/setSnackBars';
+
+import ListaProductos from '../components/components/productos/components/ListaProductos'
+import Stock from '../components/components/productos/components/Stock'
+import Proveedores from '../components/components/productos/components/Proveedores'
+import ControlVencimiento from '../components/components/productos/components/ControlVencimiento'
 
 
 
@@ -32,7 +41,14 @@ class Inventario extends Component {
             { id: 'precio_menor', numeric: true, disablePadding: false, label: 'Precio Menor' },
             { id: 'iva', numeric: true, disablePadding: false, label: 'Iva (%)' },
             { id: 'cantidad', numeric: true, disablePadding: false, label: 'Cantidad' }
-        ]
+        ],
+        //valor para cambiar de tab
+        valueTab: 0,
+        //usuario 
+        usuario: {
+            codigo: '',
+            nombre: ''
+        },
     }
 
     componentDidMount() {
@@ -212,12 +228,35 @@ class Inventario extends Component {
         });
     }
 
+    handleChangeTab = (event, valueTab) => {
+        this.setState({ valueTab });
+    };
+
     render() {
 
+
         return (
-            <Layout title="Inventario">
-                <div id="rootSnackBar"></div>
-                <Search
+            <Layout title="Productos" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+
+                {/* Tab bar */}
+                <AppBar position="static" color="inherit">
+                    <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
+                        <Tab label="Lista de productos" />
+                        <Tab label="Stock" />
+                        <Tab label="Control de vencimiento" />
+                        <Tab label="Proveedores" />
+                    </Tabs>
+                </AppBar>
+
+                <div>
+                    {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario}/>}
+                    {this.state.valueTab === 1 && <Stock />}
+                    {this.state.valueTab === 2 && <ControlVencimiento />}
+                    {this.state.valueTab === 3 && <Proveedores usuario={this.state.usuario}/>}
+                </div>
+
+
+                {/* <Search
                     id='buscar-producto'
                     textoSearch="Ingrese el codigo de su producto"
                     textoTooltip="Buscar por codigo de producto"
@@ -227,8 +266,8 @@ class Inventario extends Component {
                     title="Categorias de productos"
                     data={this.state.categorias}
                     handleChangueList={this.handleChangueList}
-                />
-                <SimpleTable
+                /> */}
+                {/* <SimpleTable
                     textoTitleP="Productos"
                     textoTitleS="Producto"
                     data={this.state.arryList}
@@ -249,7 +288,7 @@ class Inventario extends Component {
                         setUpdateProducto={this.setUpdateProducto}
                     >
                     </ModalNewProducto>
-                </FullScreenDialog>
+                </FullScreenDialog> */}
             </Layout>
         );
     }
