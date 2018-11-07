@@ -6,23 +6,10 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import TextField from '@material-ui/core/TextField';
-import AutoCompleteTextField from '../plugins/AutoCompleteTextField';
-import AutoCompleteAdmin from '../plugins/AutoCompleteAdmin';
 import funtions from '../../utils/funtions';
 import Grid from '@material-ui/core/Grid';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import Divider from '@material-ui/core/Divider';
-import Switch from '@material-ui/core/Switch';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 
 
 import NumberFormat from 'react-number-format';
@@ -49,14 +36,9 @@ class ModalNewEditProveedor extends Component {
         observacion: '',
         fecha_registro: '',
         hora_registro: '',
-        usuario: {
-            code: '',
-            nombre: '',
-        },
+        usuario: '',
         estado:true,
-
-
-
+        order:'',
     }
 
     componentDidMount() {
@@ -75,18 +57,13 @@ class ModalNewEditProveedor extends Component {
                 fecha_registro: this.props.item.fecha,
                 hora_registro: this.props.item.hora,
                 estado: this.props.item.estado,
-                usuario: {
-                    code: this.props.item.usuario.code,
-                    nombre: this.props.item.usuario.nombre,
-                },
+                usuario: this.props.item.usuario,
+                order: this.props.item.order
             })
         } else {
             this.setState({
                 codigo: funtions.guidGenerator(),
-                usuario: {
-                    code: this.props.usuario.code,
-                    nombre: this.props.usuario.nombre
-                }
+                usuario: this.props.usuario.code,
             })
         }
     }
@@ -116,6 +93,7 @@ class ModalNewEditProveedor extends Component {
             this.state.direccion.length > 0 &&
             this.state.tipo_proveedor.length > 0
         ) {
+            var order = new Date()
             const item = {
                 codigo: this.state.codigo,
                 nombre: this.state.nombre,
@@ -130,7 +108,8 @@ class ModalNewEditProveedor extends Component {
                 fecha: this.props.item?this.state.fecha_registro:`${new Date().getDate()+"-"+(new Date().getMonth()+1)+"-"+new Date().getFullYear()}`,
                 hora: this.props.item?this.state.hora_registro:`${new Date().getHours()+":"+new Date().getMinutes()+":"+new Date().getSeconds()}`,
                 usuario: this.state.usuario,
-                estado: this.state.estado
+                estado: this.state.estado,
+                order: this.props.item? this.state.order : order + "",
             }
             if (this.props.item) {
                 this.setUpdateProducto(item)

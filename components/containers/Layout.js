@@ -107,7 +107,7 @@ class Layout extends Component {
 
                     {
                         this.state.sesionState === 'iniciada' &&
-                        <LoginContenedor title={title} onChangueUserState={this.props.onChangueUserState}>
+                        <LoginContenedor title={title} onChangueUserState={usuario=>this.props.onChangueUserState(usuario)}>
                             {
                                 children
                             }

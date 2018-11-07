@@ -82,7 +82,8 @@ class ControlVencimiento extends Component {
     render() {
         return (
             <div>
-                <MenuHerramientas>
+                Éstá en desarrollo
+                {/* <MenuHerramientas>
                     <ItemMenuHerramienta
                         titleButton="Button"
                         color="primary"
@@ -104,7 +105,7 @@ class ControlVencimiento extends Component {
                     rows={this.state.rowslistaStock}
                     handleGetData={this.handleGetData}
                     estadoTabla={this.state.estadoTabla}
-                />
+                /> */}
             </div>
         );
     }

@@ -1,67 +1,68 @@
 import React, { Component } from 'react';
-import MenuHerramientas from '../../menus/MenuHerramientas'
-import ItemMenuHerramienta from '../../menus/ItemMenuHerramienta'
-import TablaNormal from '../../tables/TableNormal'
-import Divider from '@material-ui/core/Divider';
+import Layout from '../components/containers/Layout';
+import funtions from '../utils/funtions';
+import SimpleTable from '../components/components/TableList';
 
-//firebase 
-import firebase from 'firebase/app';
+import firebase, { functions } from 'firebase/app';
 import 'firebase/database';
-import 'firebase/auth'
+import Search from '../components/components/Search';
+import FullScreenDialog from '../components/components/FullScreenDialog';
+import setSnackBars from '../components/plugins/setSnackBars';
+import ModalNewCliente from '../components/modals_container/ModalNewCliente';
+import ChipsArray from '../components/components/ChipArray';
+import MenuHerramientas from '../components/components/menus/MenuHerramientas';
+import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
+import TablaNormal from '../components/components/tables/TableNormal';
 
-import funtions from '../../../../utils/funtions';
+import Divider from '@material-ui/core/Divider';
+import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
+import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactivar';
+import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
-//dialogs
-import FullScreenDialog from '../../../../components/components/FullScreenDialog';
-import ModalNewEditProveedor from '../../../../components/modals_container/ModalNewEditProveedor';
-import ModalContainerNormal from '../../../modals_container/ModalContainerNormal';
-import DeleteActivarDesactivar from '../../../plugins/deleteActivarDesactivar';
-import setSnackBars from '../../../plugins/setSnackBars';
-import ReturnTextTable from '../../tables/ReturnTextTable';
-import Search from '../../Search';
 
-class Proveedores extends Component {
+class Clientes extends Component {
 
     state = {
-        listaProveedores: [],
-        rowslistaStock: [
+        listaClientes: [],
+        estadoTabla: 'cargando',
+        listaClientesTemporal: [],
+        openModalNewCliente: false,
+        itemCliente: null,
+        itemsSeleccionados: [],
+        rowslistaClientes: [
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
-            { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
-            { id: 'tipo', numeric: true, disablePadding: false, label: 'Tipo' },
-            { id: 'celular', numeric: true, disablePadding: false, label: 'celular' },
+            { id: 'tipo_cliente', numeric: true, disablePadding: false, label: 'Tipo Cliente' },
+            { id: 'fecha_nacimiento', numeric: true, disablePadding: false, label: 'Fecha Nacimiento' },
+            { id: 'sexo', numeric: true, disablePadding: false, label: 'Sexo' },
             { id: 'telefono', numeric: true, disablePadding: false, label: 'Telefono' },
+            { id: 'celular', numeric: true, disablePadding: false, label: 'Telefono' },
+            { id: 'numero_identificacion', numeric: true, disablePadding: false, label: 'Numero identificación' },
             { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
-            { id: 'observacion', numeric: true, disablePadding: false, label: 'Observacion' },
-            { id: 'usuario', numeric: true, disablePadding: false, label: 'Empleado' },
-            { id: 'ciudad', numeric: true, disablePadding: false, label: 'Ciudad' },
             { id: 'barrio', numeric: true, disablePadding: false, label: 'Barrio' },
-            { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha de registro' },
-            { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
+            { id: 'ciudad', numeric: true, disablePadding: false, label: 'Ciudad' },
+            { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
+            { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
+            { id: 'limite_deuda', numeric: true, disablePadding: false, label: 'Límite deuda' },
+            { id: 'credito', numeric: true, disablePadding: false, label: 'Crédito' },
+            { id: 'fecha_registro', numeric: true, disablePadding: false, label: 'Fecha registro' },
+            { id: 'hora_registro', numeric: true, disablePadding: false, label: 'Hora registro' },
+            { id: 'usuario', numeric: true, disablePadding: false, label: 'Usuario' },
         ],
-        estadoTabla: 'llena',
-
-        //modals
-        openModalFullScreen: false,
-        estadoModalSimple: false,
-        estadoModalDeleteActivarDesactivar: 'eliminar',
-        //item Selecionado
-        itemsSeleccionados: [],
-        //uid de usuario
-        usuarioUID: ''
+        //usuario
+        usuario: '',
     }
 
     componentDidMount() {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                this.setState({ usuarioUID: user.uid })
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/proveedores');
+                var productosRef = db.ref('users/' + user.uid + '/clientes');
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
-                            listaProveedores: [],
-                            listaProveedoresTemporal: [],
+                            listaClientes: [],
+                            listaClientesTemporal: [],
                             estadoTabla: 'cargando'
                         })
                         var lista = funtions.snapshotToArray(snapshot)
@@ -71,85 +72,100 @@ class Proveedores extends Component {
                             return a > b ? -1 : a < b ? 1 : 0;
                         })
                         this.setState({
-                            listaProveedores: filterList,
-                            listaProveedoresTemporal: filterList,
+                            listaClientes: filterList,
+                            listaClientesTemporal: filterList,
                             estadoTabla: 'llena'
                         })
                     } else {
                         this.setState({
-                            listaProveedores: [],
-                            listaProveedoresTemporal: [],
-                            //categorias: [],
-                            //proveedores: [],
+                            listaClientes: [],
+                            listaClientesTemporal: [],
                             estadoTabla: 'vacio'
                         })
                     }
                 });
-                /*for(var i=0;i<400;i++){
-                    this.setNewProductosData()
-                } */
-
             }
         });
     }
 
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
-            return n.codigo
+            return this.getColorActivadoDesactivado(n.estado, n.codigo)
         }
+
         if (item.id === 'nombre') {
-            return <div style={{ width: 'max-content' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.nombre)}
-            </div>
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.nombre)}</div>
         }
-        if (item.id === 'email') {
-            return this.getColorActivadoDesactivado(n.estado, n.email)
+
+        if (item.id === 'tipo_cliente') {
+            return this.getColorActivadoDesactivado(n.estado, n.empresa === true ? 'empresa' : 'persona')
         }
-        if (item.id === 'tipo') {
-            return this.getColorActivadoDesactivado(n.estado, n.tipo)
+
+        if (item.id === 'fecha_nacimiento') {
+            return this.getColorActivadoDesactivado(n.estado, n.fecha_nacimiento)
         }
-        if (item.id === 'celular') {
-            return this.getColorActivadoDesactivado(n.estado, n.celular)
+
+        if (item.id === 'sexo') {
+            return this.getColorActivadoDesactivado(n.estado, n.sexo)
         }
+
         if (item.id === 'telefono') {
             return this.getColorActivadoDesactivado(n.estado, n.telefono)
         }
+
+        if (item.id === 'celular') {
+            return this.getColorActivadoDesactivado(n.estado, n.celular)
+        }
+
+        if (item.id === 'numero_identificacion') {
+            return this.getColorActivadoDesactivado(n.estado, n.numero_identificacion)
+        }
+
         if (item.id === 'direccion') {
-            return <div style={{ width: 'max-content' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.direccion)}
-            </div>
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.direccion)}</div>
         }
-        if (item.id === 'observacion') {
-            return <div style={{ width: '200px' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.observacion)}
-            </div>
-        }
-        if (item.id === 'usuario') {
-            return <ReturnTextTable
-                referencia="usuarios"
-                codigo={n.usuario}
-                datoTraido="nombre"
-                estado={n.estado}
-            />
-        }
-        if (item.id === 'ciudad') {
-            return this.getColorActivadoDesactivado(n.estado, n.ciudad)
-        }
+
         if (item.id === 'barrio') {
             return this.getColorActivadoDesactivado(n.estado, n.barrio)
         }
-        if (item.id === 'fecha') {
-            return <div style={{ width: 'max-content' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.fecha)}
-            </div>
-        }
-        if (item.id === 'hora') {
-            return this.getColorActivadoDesactivado(n.estado, n.hora)
+
+        if (item.id === 'ciudad') {
+            return this.getColorActivadoDesactivado(n.estado, n.ciudad)
         }
 
+        if (item.id === 'email') {
+            return this.getColorActivadoDesactivado(n.estado, n.email)
+        }
+
+        if (item.id === 'observacion') {
+            return this.getColorActivadoDesactivado(n.estado, n.observacion)
+        }
+
+        if (item.id === 'limite_deuda') {
+            return this.getColorActivadoDesactivado(n.estado, n.limite_deuda)
+        }
+
+        if (item.id === 'credito') {
+            return this.getColorActivadoDesactivado(n.estado, n.credito)
+        }
+
+        if (item.id === 'fecha_registro') {
+            return this.getColorActivadoDesactivado(n.estado, n.fecha_registro)
+        }
+
+        if (item.id === 'hora_registro') {
+            return this.getColorActivadoDesactivado(n.estado, n.hora_registro)
+        }
+
+        if (item.id === 'usuario') {
+            return <ReturnTextTable
+            referencia="usuarios"
+            codigo={n.usuario}
+            datoTraido="nombre"
+            estado={n.estado}
+        />
+        }
     }
-
-
 
     getColorActivadoDesactivado = (estado, texto) =>
         estado === false ?
@@ -158,13 +174,29 @@ class Proveedores extends Component {
             </div>
             : texto
 
+    handleSearch = (codigo) => {
+        this.setState({ listaProductos: [], estadoTabla: 'cargando' })
+        funtions.setTime(300, () => {
+            let array = funtions.filterObjectsCodigo(this.state.listaClientesTemporal, codigo)
+            if (array.length > 0) {
+                this.setState({ estadoTabla: 'llena' })
+            } else {
+                this.setState({ estadoTabla: 'sin_resultados' })
+            }
+            this.setState({
+                listaProductos: array
+            })
+
+        })
+    }
+
 
     handleEliminarItems = (itemsSeleccionados) => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
                 itemsSeleccionados.forEach(element => {
-                    var productosRef = db.ref('users/' + user.uid + '/proveedores/' + element.codigo);
+                    var productosRef = db.ref('users/' + user.uid + '/clientes/' + element.codigo);
                     productosRef.remove()
                 });
             }
@@ -173,7 +205,7 @@ class Proveedores extends Component {
             itemsSeleccionados: [],
             estadoModalSimple: false
         })
-        setSnackBars.openSnack('success', 'rootSnackBar', 'Proveedores eliminados correctamente', 2000)
+        setSnackBars.openSnack('success', 'rootSnackBar', 'Clientes eliminados correctamente', 2000)
     }
 
     handleActivarItems = (itemsSeleccionados) => {
@@ -181,7 +213,7 @@ class Proveedores extends Component {
             if (user) {
                 var db = firebase.database();
                 itemsSeleccionados.forEach(element => {
-                    var productosRef = db.ref('users/' + user.uid + '/proveedores/' + element.codigo);
+                    var productosRef = db.ref('users/' + user.uid + '/clientes/' + element.codigo);
                     productosRef.update({
                         estado: true
                     })
@@ -189,7 +221,7 @@ class Proveedores extends Component {
             }
         })
         this.setState({ estadoModalSimple: false })
-        setSnackBars.openSnack('info', 'rootSnackBar', 'Proveedores activados correctamente', 2000)
+        setSnackBars.openSnack('info', 'rootSnackBar', 'Clientes activados correctamente', 2000)
     }
 
     handleDesactivarItems = (itemsSeleccionados) => {
@@ -197,7 +229,7 @@ class Proveedores extends Component {
             if (user) {
                 var db = firebase.database();
                 itemsSeleccionados.forEach(element => {
-                    var productosRef = db.ref('users/' + user.uid + '/proveedores/' + element.codigo);
+                    var productosRef = db.ref('users/' + user.uid + '/clientes/' + element.codigo);
                     productosRef.update({
                         estado: false
                     })
@@ -205,47 +237,26 @@ class Proveedores extends Component {
             }
         })
         this.setState({ estadoModalSimple: false })
-        setSnackBars.openSnack('warning', 'rootSnackBar', 'Proveedores desactivados correctamente', 2000)
+        setSnackBars.openSnack('warning', 'rootSnackBar', 'Clientes desactivados correctamente', 2000)
     }
-
-    handleSearch = (codigo) => {
-        this.setState({ listaProveedores: [], estadoTabla: 'cargando' })
-        funtions.setTime(300, () => {
-            let array = funtions.filterObjectsCodigo(this.state.listaProveedoresTemporal, codigo)
-            if (array.length > 0) {
-                this.setState({ estadoTabla: 'llena' })
-            } else {
-                this.setState({ estadoTabla: 'sin_resultados' })
-            }
-            this.setState({
-                listaProveedores: array
-            })
-
-        })
-    }
-
 
     render() {
         return (
-            <div>
+            <Layout title="Clientes" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+
                 <MenuHerramientas>
                     <ItemMenuHerramienta
                         titleButton="Nuevo"
                         color="primary"
                         visible={true}
-                        disabled={this.state.itemsSeleccionados.length > 0}
-                        onClick={() => this.setState({ openModalFullScreen: true })}
+                        onClick={() => this.setState({ openModalNewCliente: true })}
                     />
                     <ItemMenuHerramienta
                         titleButton="Editar"
                         color="primary"
                         visible={true}
                         disabled={this.state.itemsSeleccionados.length === 1 ? false : true}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ openModalFullScreen: true })
-                            }
-                        }}
+                        onClick={() => this.setState({ openModalNewCliente: true })}
                     />
                     <ItemMenuHerramienta
                         titleButton="Eliminar"
@@ -281,12 +292,12 @@ class Proveedores extends Component {
                         }}
                     />
 
-                    <div style={{ flex: 0.8 }}></div>
+                    <div style={{ flex: 0.9 }}></div>
 
                     <Search
-                        id='buscar-producto'
+                        id='buscar-cliente-clientes'
                         textoSearch="Buscar..."
-                        textoTooltip="Buscar producto"
+                        textoTooltip="Buscar Cliente"
                         handleSearch={this.handleSearch}
                     />
                 </MenuHerramientas>
@@ -294,23 +305,25 @@ class Proveedores extends Component {
                 <Divider />
 
                 <TablaNormal
-                    textoTitleP="Proveedores"
-                    textoTitleS="Proveedor"
+                    textoTitleP="Clientes"
+                    textoTitleS="Cliente"
                     selectedItems={false}
                     toolbar={false}
-                    data={this.state.listaProveedores}
-                    rows={this.state.rowslistaStock}
+                    notTab={true}
+                    data={this.state.listaClientes}
+                    rows={this.state.rowslistaClientes}
                     handleGetData={this.handleGetData}
                     estadoTabla={this.state.estadoTabla}
                     itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
                 />
 
-                <FullScreenDialog openModal={this.state.openModalFullScreen}>
-                    <ModalNewEditProveedor
+                <FullScreenDialog openModal={this.state.openModalNewCliente}>
+                    <ModalNewCliente
                         item={this.state.itemsSeleccionados[0]}
-                        handleClose={() => this.setState({ openModalFullScreen: false })}
-                        usuario={this.props.usuario}
-                    />
+                        handleClose={() => this.setState({ openModalNewCliente: false })}
+                        usuario={this.state.usuario}
+                    >
+                    </ModalNewCliente>
                 </FullScreenDialog>
 
                 <ModalContainerNormal
@@ -325,9 +338,9 @@ class Proveedores extends Component {
                         handleDesactivarItems={() => this.handleDesactivarItems(this.state.itemsSeleccionados)}
                     />
                 </ModalContainerNormal>
-            </div>
+            </Layout>
         );
     }
 }
 
-export default Proveedores;
+export default Clientes

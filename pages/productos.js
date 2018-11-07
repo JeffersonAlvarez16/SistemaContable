@@ -24,7 +24,7 @@ import ControlVencimiento from '../components/components/productos/components/Co
 
 
 
-class Inventario extends Component {
+class Productos extends Component {
 
     state = {
         arryList: [],
@@ -45,10 +45,7 @@ class Inventario extends Component {
         //valor para cambiar de tab
         valueTab: 0,
         //usuario 
-        usuario: {
-            codigo: '',
-            nombre: ''
-        },
+        usuario: {}
     }
 
     componentDidMount() {
@@ -234,7 +231,6 @@ class Inventario extends Component {
 
     render() {
 
-
         return (
             <Layout title="Productos" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
@@ -250,48 +246,14 @@ class Inventario extends Component {
 
                 <div>
                     {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario}/>}
-                    {this.state.valueTab === 1 && <Stock />}
-                    {this.state.valueTab === 2 && <ControlVencimiento />}
+                    {this.state.valueTab === 1 && <Stock usuario={this.state.usuario}/>}
+                    {this.state.valueTab === 2 && <ControlVencimiento usuario={this.state.usuario}/>}
                     {this.state.valueTab === 3 && <Proveedores usuario={this.state.usuario}/>}
                 </div>
 
-
-                {/* <Search
-                    id='buscar-producto'
-                    textoSearch="Ingrese el codigo de su producto"
-                    textoTooltip="Buscar por codigo de producto"
-                    handleSearch={this.handleSearch}
-                />
-                <ChipsArray
-                    title="Categorias de productos"
-                    data={this.state.categorias}
-                    handleChangueList={this.handleChangueList}
-                /> */}
-                {/* <SimpleTable
-                    textoTitleP="Productos"
-                    textoTitleS="Producto"
-                    data={this.state.arryList}
-                    rows={this.state.rows}
-                    handleGetData={this.handleGetData}
-                    handleClickOpen={this.handleClickOpen}
-                    handleEditItem={this.handleEditItem}
-                    handleDeleteItems={this.handleDeleteItems}
-                    estadoTabla={this.state.estadoTabla}
-                />
-                <FullScreenDialog openModal={this.state.openModal}>
-                    <ModalNewProducto
-                        item={this.state.itemProducto}
-                        handleClose={this.handleClose}
-                        dataAutoCompleteCategorias={this.state.categorias}
-                        dataAutoCompleteProveedores={this.state.proveedores}
-                        setNewProducto={this.setNewProducto}
-                        setUpdateProducto={this.setUpdateProducto}
-                    >
-                    </ModalNewProducto>
-                </FullScreenDialog> */}
             </Layout>
         );
     }
 }
 
-export default Inventario;
+export default Productos;

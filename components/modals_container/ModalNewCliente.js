@@ -8,154 +8,163 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import MenuItem from '@material-ui/core/MenuItem';
-
+import Grid from '@material-ui/core/Grid';
+import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
 
 
 import NumberFormat from 'react-number-format';
 import setSnackBars from '../plugins/setSnackBars';
 import funtions from '../../utils/funtions';
 
-const tiposCliente = [
-    {
-        value: 'ruc',
-        label: 'RUC'
-    },
-    {
-        value: 'cedula',
-        label: 'CEDULA'
-    },
-    {
-        value: 'pasaporte',
-        label: 'PASAPORTE'
-    }
-]
+//firebase 
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/auth'
 
 
 class ModalNewCliente extends Component {
 
     state = {
-        tipo_identificacion: '',
-        cedula: '',
-        nombres: '',
-        direccion: '',
-        correo: '',
-        ciudad: '',
+        codigo: '',
+        empresa: '',
+        nombre: '',
+        fecha_nacimiento: '',
+        sexo: '',
         telefono: '',
-        tipo: '',
-
-        stateCedula: 'normal',
-
-        razon_social: '',
+        celular: '',
+        numero_identificacion: '',
+        tipo_identificacion: 0,
+        direccion: '',
+        email: '',
+        observacion: '',
+        barrio: '',
+        ciudad: '',
+        limite_deuda: '',
+        credito: '',
+        estado: '',
+        fecha_registro: '',
+        hora_registro: '',
+        usuario: '',
+        order: '',
     }
 
     componentDidMount() {
         if (this.props.item) {
             this.setState({
-                tipo_identificacion: this.props.item.tipo_identificacion,
-                cedula: this.props.item.cedula,
-                nombres: this.props.item.nombres,
-                direccion: this.props.item.direccion,
-                correo: this.props.item.correo,
-                ciudad: this.props.item.ciudad,
+                codigo: this.props.item.codigo,
+                empresa: this.props.item.empresa,
+                nombre: this.props.item.nombre,
+                fecha_nacimiento: this.props.item.fecha_nacimiento,
+                sexo: this.props.item.sexo,
                 telefono: this.props.item.telefono,
-
-                tipo: this.props.item.tipo,
-                razon_social: this.props.item.razon_social,
-            })
-        }
-    }
-
-    handleChangeCedula = event => {
-        const array = this.props.cedulas.filter((item) => item.nombre === event.target.value)
-        if (array.length > 0) {
-            this.setState({
-                cedula: event.target.value,
-                stateCedula: 'error'
+                celular: this.props.item.celular,
+                numero_identificacion: this.props.item.numero_identificacion,
+                tipo_identificacion: this.props.item.tipo_identificacion,
+                direccion: this.props.item.direccion,
+                email: this.props.item.email,
+                observacion: this.props.item.observacion,
+                barrio: this.props.item.barrio,
+                ciudad: this.props.item.ciudad,
+                limite_deuda: this.props.item.limite_deuda,
+                credito: this.props.item.credito,
+                estado: this.props.item.estado,
+                fecha_registro: this.props.item.fecha_registro,
+                hora_registro: this.props.item.hora_registro,
+                usuario: this.props.item.usuario,
+                order: this.props.item.order,
             })
         } else {
             this.setState({
-                cedula: event.target.value,
-                stateCedula: 'normal'
+                usuario: this.props.usuario.code,
+                empresa: false,
+                codigo: funtions.guidGenerator(),
+                tipo_identificacion: '05',
             })
         }
-
-    };
-
-    handleChangeNombres = event => {
-        this.setState({
-            nombres: event.target.value,
-        })
-    };
-
-    handleChangeDireccion = event => {
-        this.setState({
-            direccion: event.target.value,
-        })
-    };
-
-    handleChangeCorreo = event => {
-        this.setState({
-            correo: event.target.value,
-        })
-    };
-
-    changueTextCiudad = (value) => {
-        this.setState({
-            ciudad: value
-        })
     }
 
-    changueTextTelefono = (value) => {
-        this.setState({
-            telefono: value
-        })
+    getCheckFormEmpresa = valor => {
+        if (valor === true) {
+            var ce1 = this.state.celular.length > 0
+            var ce2 = this.state.telefono.length > 0
+            return ce1 && ce2 ? true : false
+        } else {
+            return true
+        }
     }
 
     checkFormProduc = () => {
+
         if (
-            this.state.tipo_identificacion.length > 0 &&
-            this.state.cedula.length > 0 &&
-            this.state.stateCedula === 'normal' &&
-            this.state.nombres.length > 0 &&
-            //this.state.direccion.length > 0 &&
-            this.state.correo.length > 0 &&
-            this.state.ciudad.length > 0 &&
-            this.state.telefono.length > 0 &&
-            this.state.tipo.length > 0 
+            this.state.codigo.length > 0 &&
+            this.state.nombre.length > 0 &&
+            this.state.email.length > 0 &&
+            this.state.numero_identificacion.length > 0 &&
+            this.state.direccion.length > 0 &&
+            this.getCheckFormEmpresa(this.state.empresa)
         ) {
+            var order = new Date()
             const item = {
+                codigo: this.state.codigo,
+                empresa: this.state.empresa,
+                nombre: this.state.nombre,
+                fecha_nacimiento: this.state.fecha_nacimiento,
+                sexo: this.state.sexo,
+                telefono: this.state.telefono,
+                celular: this.state.celular,
+                numero_identificacion: this.state.numero_identificacion,
                 tipo_identificacion: this.state.tipo_identificacion,
-                cedula: this.state.cedula.replace('CI: ', ''),
-                nombres: this.state.nombres,
                 direccion: this.state.direccion,
-                correo: this.state.correo,
+                email: this.state.email,
+                observacion: this.state.observacion,
+                barrio: this.state.barrio,
                 ciudad: this.state.ciudad,
-                telefono: this.state.telefono.replace('TEL: ', ''),
-                tipo: this.state.tipo,
-                razon_social: this.state.razon_social
+                limite_deuda: this.state.limite_deuda,
+                credito: this.state.credito,
+                estado: this.props.item ? this.state.estado : true,
+                fecha_registro: this.props.item ? this.state.fecha_registro : `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                hora_registro: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+                usuario: this.props.item ? this.state.usuario : this.props.usuario.code,
+                order: this.props.item ? this.state.order : order + "",
             }
             if (this.props.item) {
-                this.props.setUpdateProducto(item)
-                setSnackBars.openSnack('success', 'rootSnackBar', 'Contacto actualizado correctamente', 2000)
+                this.setUpdateProducto(item)
+                setSnackBars.openSnack('success', 'rootSnackBar', 'Cliente actualizado correctamente', 2000)
                 this.props.handleClose()
 
             } else {
-                this.props.setNewProducto(item)
-                setSnackBars.openSnack('success', 'rootSnackBar', 'Contacto creado correctamente', 2000)
+                this.setNewProducto(item)
+                setSnackBars.openSnack('success', 'rootSnackBar', 'Cliente creado correctamente', 2000)
                 this.props.handleClose()
 
             }
         } else {
-            setSnackBars.openSnack('error', 'rootSnackBarERROR', 'Ingrese el contacto correctamente', 2000)
+            setSnackBars.openSnack('error', 'rootSnackBarERROR', 'Ingrese el cliente correctamente', 2000)
         }
+    }
+
+    setNewProducto = (producto) => {
+        var db = firebase.database();
+        var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/clientes/' + producto.codigo);
+        productosRef.set({
+            ...producto
+        });
+    }
+
+    setUpdateProducto = (producto) => {
+        var db = firebase.database();
+        var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/clientes/' + producto.codigo);
+        productosRef.update({
+            ...producto
+        });
     }
 
     render() {
 
         const styles = {
             styleText: {
-                margin: 10,
-                width: '46%'
+                width: '100%'
             },
             styleAutoComplete: {
                 margin: 10,
@@ -175,7 +184,7 @@ class ModalNewCliente extends Component {
                             <CloseIcon />
                         </IconButton>
                         <Typography variant="title" color="inherit" style={{ flex: 1, marginLeft: 30 }}>
-                            {this.props.item ? 'Editar contacto' : 'Nuevo contacto'}
+                            {this.props.item ? 'Editar cliente' : 'Nuevo cliente'}
                         </Typography>
                         <Button color="inherit"
                             onClick={this.checkFormProduc}
@@ -185,171 +194,291 @@ class ModalNewCliente extends Component {
                     </Toolbar>
                 </AppBar>
 
-                <div style={{
-                    marginTop: 50,
-                    width: '100%',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                }}>
-                    <div style={{
-                        maxWidth: 500
-                    }}>
+                <div>
+                    <div >
                         <form autoComplete="off">
 
-                            <TextField
-                                id="standard-tipo"
-                                select
-                                error={this.state.tipo.length > 0 ? false : true}
-                                value={`${this.state.tipo}`}
-                                onChange={(event) => this.setState({ tipo: event.target.value })}
-                                style={styles.styleAutoComplete}
-                                required
-                                label="Tipo de contacto"
-                                margin="normal"
-                                variant="outlined"
-                            >
+                            <Grid container spacing={24} style={{ width: '100vw' }}>
+                                <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                                    <Grid item xs={6}>
 
-                                <MenuItem key="1" value="Cliente">
-                                    Cliente
-                                </MenuItem>
-                                <MenuItem key="2" value="Proveedor">
-                                    Proveedor
-                                </MenuItem>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-codigo-automatico"
+                                            label="Codigo automático"
+                                            //error={this.state.codigo.length > 0 ? false : true}
+                                            required
+                                            disabled
+                                            //onChange={(event) => this.setState({ codigo: event.target.value })}
+                                            value={this.state.codigo}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
 
-                            </TextField>
+                                        {
+                                            this.state.empresa === false &&
+                                            <>
+                                                <TextField
+                                                    id="filled-sexo-cliente"
+                                                    select
+                                                    label="Sexo"
+                                                    //error={this.state.sexo.length > 0 ? false : true}
+                                                    value={this.state.sexo}
+                                                    onChange={event => this.setState({ sexo: event.target.value })}
+                                                    margin="normal"
+                                                    variant="outlined"
+                                                    style={styles.styleText}
+                                                >
+                                                    <MenuItem value={'masculino'}>Masculino</MenuItem>
+                                                    <MenuItem value={'femenino'}>Femenino</MenuItem>
+                                                    <MenuItem value={'otro'}>Otro</MenuItem>
+                                                </TextField>
 
-                            <TextField
-                                id="standard-tipo-identifi"
-                                select
-                                error={this.state.tipo_identificacion.length > 0 ? false : true}
-                                value={`${this.state.tipo_identificacion}`}
-                                onChange={(event) => this.setState({ tipo_identificacion: event.target.value })}
-                                style={styles.styleText}
-                                required
-                                label="Tipo de identificación"
-                                margin="normal"
-                                variant="outlined"
-                            >
-                                {tiposCliente.map(option => (
-                                    <MenuItem key={option.value} value={option.value}>
-                                        {option.label}
-                                    </MenuItem>
-                                ))}
-                            </TextField>
-
-                            <TextField
-                                error={this.state.cedula.length > 0 ? this.state.stateCedula === 'error' ? true : false : true}
-                                disabled={this.state.tipo_identificacion.length > 0 ? false : true}
-                                style={styles.styleText}
-                                id="standard-cedula"
-                                label={`Número de ${this.state.tipo_identificacion}`}
-                                required
-                                value={this.state.cedula}
-                                onChange={this.handleChangeCedula}
-                                margin="normal"
-                                variant="outlined"
-                                helperText={this.state.stateCedula === 'error' ? 'Cédula registrada' : ''}
-                            />
-
-                            {
-                                this.state.tipo_identificacion === 'ruc' &&
-                              
-                                    <TextField
-                                        error={this.state.razon_social.length > 0 ? false : true}
-                                        style={styles.styleAutoComplete}
-                                        id="standard-razon"
-                                        label={`Razón social`}
-                                        required
-                                        value={this.state.razon_social}
-                                        onChange={(event) => this.setState({ razon_social: event.target.value })}
-                                        margin="normal"
-                                        variant="outlined"
-                                    />
-
-                            }
-
-                            <TextField
-                                error={this.state.nombres.length > 0 ? false : true}
-                                value={`${this.state.nombres}`}
-                                id="standard-nombre"
-                                onChange={(event) => this.setState({ nombres: event.target.value })}
-                                style={styles.styleAutoComplete}
-                                required
-                                label={`Nombres del ${this.state.tipo}`}
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Telefono"
-                                required
-                                id="standard-telefono"
-                                error={this.state.telefono.length > 0 ? false : true}
-                                value={`${this.state.telefono}`}
-                                onChange={(event) => this.setState({ telefono: event.target.value })}
-                                margin="normal"
-                                variant="outlined"
-                                InputProps={{
-                                    inputComponent: NumberFormatTelefono,
-                                }}
-                            />
-
-
-                            {/*    <AutoCompleteTextField
-                                styleText={styles.styleAutoComplete}
-                                nameTextFiel="Categoria"
-                                dataAutoComplete={this.props.dataAutoCompleteCategorias}
-                                value={this.state.categoriaProducto}
-                                changueText={this.changueTextCategorias}
-                                textItemVacio='Esta categoria no existe, pero será creada'
-                            /> */}
-
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Direccion"
-                                //required
-                                id="standard-direccion"
-                                //error={this.state.direccion.length > 0 ? false : true}
-                                value={`${this.state.direccion}`}
-                                onChange={(event) => this.setState({ direccion: event.target.value })}
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Correo"
-                                type="email"
-                                required
-                                autoComplete="email"
-                                id="standard-coreo"
-                                error={this.state.correo.length > 0 ? false : true}
-                                value={`${this.state.correo}`}
-                                onChange={(event) => this.setState({ correo: event.target.value })}
-                                /* InputProps={{
-                                    inputComponent: NumberFormatCustom,
-                                }} */
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Ciudad"
-                                id="standard-ciudad"
-                                error={this.state.ciudad.length > 0 ? false : true}
-                                value={`${this.state.ciudad}`}
-                                required
-                                onChange={(event) => this.setState({ ciudad: event.target.value })}
-                                margin="normal"
-                                variant="outlined"
-                            />
+                                                <TextField
+                                                    id="date-fecha-nacimiento-cliente"
+                                                    label="Fecha Nacimiento"
+                                                    type="date"
+                                                    //defaultValue={`${new Date().getDate()+'-'+new Date().getMonth()+'-'+new Date().getFullYear()}`}
+                                                    InputLabelProps={{
+                                                        shrink: true,
+                                                    }}
+                                                    onChange={(event) => this.setState({ fecha_nacimiento: event.target.value })}
+                                                    value={this.state.fecha_nacimiento}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                    style={styles.styleText}
+                                                />
+                                            </>
+                                        }
 
 
 
+
+                                    </Grid>
+                                    <Grid item xs={6}>
+
+
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-nombre-cliente"
+                                            label="Nombre"
+                                            error={this.state.nombre.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ nombre: event.target.value })}
+                                            value={this.state.nombre}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+
+                                        <TextField
+                                            id="filled-email-cliente"
+                                            label="Email"
+                                            required
+                                            error={this.state.email.length > 0 ? false : true}
+                                            value={this.state.email}
+                                            onChange={event => this.setState({ email: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                        <TextField
+                                            id="filled-tipo-identificacion"
+                                            select
+                                            label="Tipo de indentificación"
+                                            //error={this.state.sexo.length > 0 ? false : true}
+                                            value={this.state.tipo_identificacion}
+                                            onChange={event => this.setState({ tipo_identificacion: event.target.value })}
+                                            margin="normal"
+                                            variant="outlined"
+                                            style={styles.styleText}
+                                        >
+                                            <MenuItem value={'04'}>RUC</MenuItem>
+                                            <MenuItem value={'05'}>Cedula</MenuItem>
+                                            <MenuItem value={'06'}>Pasaporte</MenuItem>
+                                            <MenuItem value={'07'}>Consumidor Final</MenuItem>
+                                        </TextField>
+
+                                        <TextField
+                                            id="filled-numero-identificacion-cliente"
+                                            label="Número de identificación"
+                                            required
+                                            error={this.state.numero_identificacion.length > 0 ? false : true}
+                                            value={this.state.numero_identificacion}
+                                            onChange={event => this.setState({ numero_identificacion: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                    </Grid>
+                                </Grid>
+                                <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                                    <Grid item xs={6}>
+                                        <FormControlLabel
+                                            style={{
+                                                height: 56,
+                                                marginBottom: 8,
+                                                marginTop: 16
+                                            }}
+                                            control={
+                                                <Switch
+                                                    checked={this.state.empresa}
+                                                    onChange={() => this.setState({ empresa: !this.state.empresa })}
+                                                />}
+                                            label="Empresa"
+                                        />
+
+                                        <TextField
+                                            id="filled-tipo-direccion-cliente"
+                                            label="Dirección"
+                                            required
+                                            error={this.state.direccion.length > 0 ? false : true}
+                                            value={this.state.direccion}
+                                            onChange={event => this.setState({ direccion: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                        <Grid container spacing={24}>
+                                            <Grid item xs={6}>
+                                                <TextField
+                                                    id="filled-barrio-cliente"
+                                                    label="Barrio"
+                                                    //error={this.state.barrio.length > 0 ? false : true}
+                                                    value={this.state.barrio}
+                                                    onChange={event => this.setState({ barrio: event.target.value })}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                    style={styles.styleText}
+                                                >
+                                                </TextField>
+                                            </Grid>
+                                            <Grid item xs={6}>
+                                                <TextField
+                                                    id="filled-ciudad-cliente"
+                                                    label="Ciudad"
+                                                    //error={this.state.ciudad.length > 0 ? false : true}
+                                                    value={this.state.ciudad}
+                                                    onChange={event => this.setState({ ciudad: event.target.value })}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                    style={styles.styleText}
+                                                >
+                                                </TextField>
+                                            </Grid>
+                                        </Grid>
+
+
+
+                                    </Grid>
+                                    <Grid item xs={6}>
+
+                                        {
+                                            this.state.empresa === true &&
+                                            <>
+                                                <TextField
+                                                    style={styles.styleText}
+                                                    id="standard-celular-cliente"
+                                                    label="Celular"
+                                                    error={this.state.celular.length > 0 ? false : true}
+                                                    required
+                                                    onChange={(event) => this.setState({ celular: event.target.value })}
+                                                    value={this.state.celular}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                />
+
+                                                <TextField
+                                                    id="filled-telefono-cliente"
+                                                    label="Telefono"
+                                                    required
+                                                    error={this.state.telefono.length > 0 ? false : true}
+                                                    value={this.state.telefono}
+                                                    onChange={event => this.setState({ telefono: event.target.value })}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                    style={styles.styleText}
+                                                >
+                                                </TextField>
+                                            </>
+                                        }
+
+                                        {
+                                            this.state.empresa === false &&
+                                            <>
+                                                <TextField
+                                                    style={styles.styleText}
+                                                    id="standard-celular-cliente"
+                                                    label="Celular"
+                                                    //error={this.state.celular.length > 0 ? false : true}
+                                                    required
+                                                    onChange={(event) => this.setState({ celular: event.target.value })}
+                                                    value={this.state.celular}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                />
+
+                                                <TextField
+                                                    id="filled-telefono-cliente"
+                                                    label="Telefono"
+                                                    required
+                                                    //error={this.state.telefono.length > 0 ? false : true}
+                                                    value={this.state.telefono}
+                                                    onChange={event => this.setState({ telefono: event.target.value })}
+                                                    margin="normal"
+                                                    variant="filled"
+                                                    style={styles.styleText}
+                                                >
+                                                </TextField>
+                                            </>
+                                        }
+
+
+
+                                        <TextField
+                                            id="filled-observacion-cliente"
+                                            label="Observación"
+                                            //error={this.state.observacion.length > 0 ? false : true}
+                                            value={this.state.observacion}
+                                            onChange={event => this.setState({ observacion: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                        <TextField
+                                            id="filled-limite-cliente"
+                                            label="Límite de deuda"
+                                            //error={this.state.limite_deuda.length > 0 ? false : true}
+                                            value={this.state.limite_deuda}
+                                            onChange={event => this.setState({ limite_deuda: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                        <TextField
+                                            id="filled-credito-cliente"
+                                            label="Crédito"
+                                            //error={this.state.credito.length > 0 ? false : true}
+                                            value={this.state.credito}
+                                            onChange={event => this.setState({ credito: event.target.value })}
+                                            margin="normal"
+                                            variant="filled"
+                                            style={styles.styleText}
+                                        >
+                                        </TextField>
+
+                                    </Grid>
+                                </Grid>
+                            </Grid>
                         </form>
                     </div>
                 </div>

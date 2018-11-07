@@ -10,8 +10,12 @@ class FUNTIONS {
 
     filterObjectsCodigo = (array, codigo) => {
         var arrayReturn = []
+        
         array.forEach(item => {
-            if (item.codigo.toString().includes(codigo)) {
+            var itemData=JSON.stringify(item);
+            itemData=itemData.toLowerCase()
+            var itemFilter=itemData.includes(codigo)
+            if (itemFilter) {
                 arrayReturn.push(item)
             }
         })

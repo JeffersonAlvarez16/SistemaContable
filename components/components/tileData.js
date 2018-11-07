@@ -33,9 +33,9 @@ export const mailFolderListItems = (
                 <ListItemText primary="Inicio" />
             </ListItem>
         </Link>
-        <Link prefetch href="/inventario">
+        <Link prefetch href="/productos">
             <ListItem button>
-                <Tooltip title="Inventario" placement="right">
+                <Tooltip title="Productos" placement="right">
                     <ListItemIcon>
                         <Assignment />
                     </ListItemIcon>
@@ -43,24 +43,14 @@ export const mailFolderListItems = (
                 <ListItemText primary="Inventario" />
             </ListItem>
         </Link>
-        <Link prefetch href="/contactos">
+        <Link prefetch href="/clientes">
             <ListItem button>
-                <Tooltip title="Contactos" placement="right">
+                <Tooltip title="Clientes" placement="right">
                     <ListItemIcon>
                         <SupervisedUserCircle />
                     </ListItemIcon>
                 </Tooltip>
                 <ListItemText primary="Contactos" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/proveedores">
-            <ListItem button>
-                <Tooltip title="Proveedores" placement="right">
-                    <ListItemIcon>
-                        <SupervisorAccount />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Proveedores" />
             </ListItem>
         </Link>
         <Link prefetch href="/ventas">

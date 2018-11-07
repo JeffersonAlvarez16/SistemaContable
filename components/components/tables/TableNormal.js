@@ -139,13 +139,15 @@ class TablaNormal extends React.Component {
             textoTitleS,
             handleGetData,
             rows,
-            toolbar
+            toolbar,
+            notTab
         } = this.props
         //variables comprovadas de props con valor por defecto
         this.selectedItems = this.selectedItems != null ? this.selectedItems : true
         this.toolbar = this.toolbar != null ? this.toolbar : true
         this.textoTitleP = this.textoTitleP != null ? this.textoTitleP : 'Plural'
         this.textoTitleS = this.textoTitleS != null ? this.textoTitleS : 'Singular'
+        this.notTab = this.notTab != null ? this.notTab : false
 
         return (
             <div>
@@ -174,7 +176,7 @@ class TablaNormal extends React.Component {
                         <div style={{
                             overflowX: 'auto',
                             overflowY: 'auto',
-                            height: '66vh'
+                            height: notTab===true? '73vh':'66vh'
                         }}>
                             <Table aria-labelledby="tableTitle" style={{ minWidth: 300 }}>
                                 <TableNormalHead
@@ -185,7 +187,7 @@ class TablaNormal extends React.Component {
                                     onRequestSort={this.handleRequestSort}
                                     rowCount={data.length}
                                     rows={rows}
-                                    actionsNot={selectedItems}
+                                    selectedItems={selectedItems}
                                 />
                                 <TableBody>
                                     {stableSort(data, getSorting(order, orderBy))

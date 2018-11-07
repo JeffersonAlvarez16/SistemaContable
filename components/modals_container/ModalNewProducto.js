@@ -6,44 +6,37 @@ import Toolbar from '@material-ui/core/Toolbar';
 import IconButton from '@material-ui/core/IconButton';
 import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
-import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import TextField from '@material-ui/core/TextField';
-import AutoCompleteTextField from '../plugins/AutoCompleteTextField';
 import AutoCompleteAdmin from '../plugins/AutoCompleteAdmin';
 import funtions from '../../utils/funtions';
 import Grid from '@material-ui/core/Grid';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import Visibility from '@material-ui/icons/Visibility';
-import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import Divider from '@material-ui/core/Divider';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
 
+
+//firebase 
+import firebase from 'firebase/app';
+import 'firebase/database';
+import 'firebase/auth'
 
 import NumberFormat from 'react-number-format';
 import setSnackBars from '../plugins/setSnackBars';
+import AutoCompleteProveedor from '../plugins/AutoCompleteProveedores';
 
 
 class ModalNewProducto extends Component {
 
     state = {
-        codigo_automatico: '',
+        codigo: '',
         codigo_barras: '',
         codigo_referencia: '',
 
         descripcion_producto: '',
-        categoria_producto: {
-            nombre: ''
-        },
-        proveedor: '',
-        marca_producto: {
-            nombre: ''
-        },
+        categoria_producto: 'null',
+        proveedor: 'null',
+        marca_producto: 'null',
         porcentaje_iva: '',
         localizacion_producto: '',
         numero_ventas: '',
@@ -54,8 +47,8 @@ class ModalNewProducto extends Component {
         precio_venta_c: '',
 
         stock_actual: '',
-        stock_minimo: '',
-        stock_maximo: '',
+        stock_minimo: '10',
+        stock_maximo: '100',
 
         unidad_medida: '',
         producto_fraccionado: false,
@@ -66,62 +59,206 @@ class ModalNewProducto extends Component {
         hora_registro: '',
 
         estado_producto: '',
-        usuario:{},
+        usuario: '',
+        order:'',
 
         //estados
         tiene_iva: false,
+        estado: true,
+
+        //cantidad actual para actualizar
+        cantidad_actual_temporal: '',
 
 
     }
 
     componentDidMount() {
-        this.setState({
-            usuario: this.props.usuario
-        })
-        /*  if (this.props.item) {
-             this.setState({
-                 codigo_automatico: this.props.item.codigo,
-                 numeroMayor: this.props.item.precio_mayor,
-                 numeroMenor: this.props.item.precio_menor,
-                 numeroIva: this.props.item.iva,
-                 cantidadProductos: this.props.item.cantidad,
-                 descripcion_producto: this.props.item.nombre,
-                 categoriaProducto: this.props.item.categoria,
-                 proveedorProducto: this.props.item.proveedor,
-             })
-         } */
+        //pregutnando si biene un item por los props para saber si esditar y crear
+        if (this.props.item) {
+            this.setState({
+                codigo: this.props.item.codigo,
+                codigo_barras: this.props.item.codigo_barras,
+                codigo_referencia: this.props.item.codigo_referencia,
+
+                precio_costo: this.props.item.precio_costo,
+                precio_venta_a: this.props.item.precio_venta_a,
+                precio_venta_b: this.props.item.precio_venta_b,
+                precio_venta_c: this.props.item.precio_venta_c,
+
+                descripcion_producto: this.props.item.descripcion_producto,
+                categoria_producto: this.props.item.categoria_producto,
+                proveedor: this.props.item.proveedor,
+                marca_producto: this.props.item.marca_producto,
+                porcentaje_iva: this.props.item.porcentaje_iva,
+                localizacion_producto: this.props.item.localizacion_producto,
+                numero_ventas: this.props.item.numero_ventas,
+
+                unidad_medida: this.props.item.unidad_medida,
+                producto_fraccionado: this.props.item.producto_fraccionado,
+
+                stock_actual: this.props.item.stock_actual,
+                //cantidad actual para actualizar
+                cantidad_actual_temporal: this.props.item.stock_actual,
+                stock_minimo: this.props.item.stock_minimo,
+                stock_maximo: this.props.item.stock_maximo,
+
+                fecha_vencimiento: this.props.item.fecha_vencimiento,
+                fecha_registro: this.props.item.fecha_registro,
+                hora_registro: this.props.item.hora_registro,
+
+                tiene_iva: this.props.item.tiene_iva,
+                estado: this.props.item.estado,
+                usuario: this.props.item.usuario,
+                order: this.props.item.order
+            })
+        } else {
+            this.setState({
+                usuario: this.props.usuario.code,
+                codigo: funtions.guidGenerator()
+            })
+        }
+    }
+
+    setUpdateProducto = (producto) => {
+        var db = firebase.database();
+        var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + producto.codigo);
+        productosRef.update({
+            ...producto
+        });
+
+        if (producto.stock_actual != this.state.cantidad_actual_temporal) {
+            var order = new Date()
+            var codigoStock = funtions.guidGenerator()
+            var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
+            operacionStockRef.set({
+                codigo: codigoStock,
+                tipo_operacion: 'edicion-producto',
+                fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+                cliente_proveedor: producto.proveedor,
+                productos: [
+                    {
+                        codigo: producto.codigo,
+                        cantidad: producto.stock_actual - this.state.cantidad_actual_temporal
+                    }
+                ],
+                total_final: '',
+                empleado: producto.usuario,
+                observacion: '',
+                subtotal: '',
+                descuento: '',
+                otros_gastos: '',
+                flete: '',
+                valor_pagado: '',
+                medio_pago: '',
+                saldo_favor: '',
+                en_deuda: '',
+                vuelto: '',
+                acreditado: '',
+                order: order + ''
+            });
+        }
+    }
+
+    setNewProducto = (producto) => {
+        var db = firebase.database();
+        var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + producto.codigo);
+        productosRef.set({
+            ...producto
+        });
+
+        var order = new Date()
+        var codigoStock = funtions.guidGenerator()
+        var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
+        operacionStockRef.set({
+            codigo: codigoStock,
+            tipo_operacion: 'registro-producto',
+            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+            cliente_proveedor: producto.proveedor,
+            productos: [
+                {
+                    codigo: producto.codigo,
+                    cantidad: producto.stock_actual
+                }
+            ],
+            total_final: '',
+            empleado: producto.usuario,
+            observacion: '',
+            subtotal: '',
+            descuento: '',
+            otros_gastos: '',
+            flete: '',
+            valor_pagado: '',
+            medio_pago: '',
+            saldo_favor: '',
+            en_deuda: '',
+            vuelto: '',
+            acreditado: '',
+            order: order + ''
+        });
     }
 
 
 
     checkFormProduc = () => {
         if (
-            this.state.codigo_automatico.length > 0 &&
+            this.state.codigo.length > 0 &&
+            this.state.proveedor.length > 0 &&
+            this.state.precio_costo.length > 0 &&
+            this.state.precio_venta_a.length > 0 &&
             this.state.descripcion_producto.length > 0 &&
-            this.state.categoriaProducto.length > 0 &&
-            this.state.proveedorProducto.length > 0 &&
-            this.state.numeroMayor.length > 0 &&
-            this.state.numeroMenor.length > 0 &&
-            this.state.numeroIva.length > 0 &&
-            this.state.cantidadProductos.length > 0
+            this.state.categoria_producto.length > 0 &&
+            this.state.marca_producto.length > 0 &&
+            this.state.unidad_medida.length > 0 &&
+            this.state.stock_actual.length > 0 &&
+            this.state.stock_minimo.length > 0 &&
+            this.state.stock_maximo.length > 0
         ) {
+            var order = new Date()
             const item = {
-                cantidad: this.state.cantidadProductos.replace(' productos', ''),
-                categoria: this.state.categoriaProducto,
-                proveedor: this.state.proveedorProducto,
-                codigo: this.state.codigo_automatico,
-                iva: this.state.numeroIva.replace('% ', ''),
-                nombre: this.state.descripcion_producto,
-                precio_mayor: this.state.numeroMayor,
-                precio_menor: this.state.numeroMenor
+                //como remplazar un valor dentro de un string
+                //cantidad: this.state.cantidadProductos.replace(' productos', ''),
+                codigo: this.state.codigo,
+                codigo_barras: this.state.codigo_barras,
+                codigo_referencia: this.state.codigo_referencia,
+
+                precio_costo: this.state.precio_costo,
+                precio_venta_a: this.state.precio_venta_a,
+                precio_venta_b: this.state.precio_venta_b,
+                precio_venta_c: this.state.precio_venta_c,
+
+                descripcion_producto: this.state.descripcion_producto,
+                categoria_producto: this.state.categoria_producto,
+                proveedor: this.state.proveedor,
+                marca_producto: this.state.marca_producto,
+                porcentaje_iva: this.state.porcentaje_iva,
+                localizacion_producto: this.state.localizacion_producto,
+                numero_ventas: this.state.numero_ventas,
+
+                unidad_medida: this.state.unidad_medida,
+                producto_fraccionado: this.state.producto_fraccionado,
+
+                stock_actual: this.state.stock_actual,
+                stock_minimo: this.state.stock_minimo,
+                stock_maximo: this.state.stock_maximo,
+
+                fecha_vencimiento: this.state.fecha_vencimiento,
+                fecha_registro: this.props.item ? this.state.fecha_registro : `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                hora_registro: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+
+                tiene_iva: this.state.tiene_iva,
+                estado: this.props.item? this.state.estado : true,
+                usuario: this.props.usuario.code,
+                order: this.props.item? this.state.order : order + "",
             }
             if (this.props.item) {
-                this.props.setUpdateProducto(item)
+                this.setUpdateProducto(item)
                 setSnackBars.openSnack('success', 'rootSnackBar', 'Producto actualizado correctamente', 2000)
                 this.props.handleClose()
 
             } else {
-                this.props.setNewProducto(item)
+                this.setNewProducto(item)
                 setSnackBars.openSnack('success', 'rootSnackBar', 'Producto creado correctamente', 2000)
                 this.props.handleClose()
 
@@ -175,10 +312,11 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-automatico"
                                     label="Codigo automático"
-                                    error={this.state.codigo_automatico.length > 0 ? false : true}
+                                    error={this.state.codigo.length > 0 ? false : true}
                                     required
-                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
-                                    value={this.state.codigo_automatico}
+                                    disabled
+                                    onChange={(event) => this.setState({ codigo: event.target.value })}
+                                    value={this.state.codigo}
                                     margin="normal"
                                     variant="filled"
                                 />
@@ -187,7 +325,8 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-barras"
                                     label="Codigo de barras"
-                                    error={this.state.codigo_barras.length > 0 ? false : true}
+                                    autoFocus
+                                    //error={this.state.codigo_barras.length > 0 ? false : true}
                                     required
                                     onChange={(event) => this.setState({ codigo_barras: event.target.value })}
                                     value={this.state.codigo_barras}
@@ -199,7 +338,7 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-referencia"
                                     label="Codigo de referencia"
-                                    error={this.state.codigo_referencia.length > 0 ? false : true}
+                                    //error={this.state.codigo_referencia.length > 0 ? false : true}
                                     required
                                     onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
                                     value={this.state.codigo_referencia}
@@ -207,28 +346,48 @@ class ModalNewProducto extends Component {
                                     variant="filled" />
                             </Grid>
                             <Grid item xs={6}>
-                                <TextField
-                                    style={styles.styleText}
-                                    id="standard-precio-costo"
-                                    label="Precio costo"
-                                    error={this.state.codigo_automatico.length > 0 ? false : true}
-                                    required
-                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
-                                    value={this.state.codigo_automatico}
-                                    margin="normal"
-                                    variant="filled"
-                                />
-                                <TextField
-                                    style={styles.styleText}
-                                    id="standard-precio-a"
-                                    label="Precio A"
-                                    error={this.state.codigo_automatico.length > 0 ? false : true}
-                                    required
-                                    onChange={(event) => this.setState({ codigo_automatico: event.target.value })}
-                                    value={this.state.codigo_automatico}
-                                    margin="normal"
-                                    variant="filled"
-                                />
+                                <AutoCompleteProveedor
+                                    id="standard-proveedores-select"
+                                    styleText={styles.styleText}
+                                    nameTextFiel="Proveedor"
+                                    dataRef="proveedores"
+                                    dataRefObject="proveedor"
+                                    itemCategoria={this.state.proveedor}
+                                    changueText={itemCode => this.setState({ proveedor: itemCode })}
+                                    textItemVacio='Proveedores vacios'
+                                    usuario={this.props.usuario}
+                                >
+                                </AutoCompleteProveedor>
+
+                                <Grid container spacing={24}>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-precio-costo-item"
+                                            label="Precio costo"
+                                            error={this.state.precio_costo.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ precio_costo: event.target.value })}
+                                            value={this.state.precio_costo}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-precio-a"
+                                            label="Precio A"
+                                            error={this.state.precio_venta_a.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ precio_venta_a: event.target.value })}
+                                            value={this.state.precio_venta_a}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                </Grid>
+
 
                                 <Grid container spacing={24}>
                                     <Grid item xs={6}>
@@ -236,10 +395,10 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-precio-b"
                                             label="Precio B"
-                                            error={this.state.codigo_barras.length > 0 ? false : true}
+                                            //error={this.state.precio_venta_b.length > 0 ? false : true}
                                             required
-                                            onChange={(event) => this.setState({ codigo_barras: event.target.value })}
-                                            value={this.state.codigo_barras}
+                                            onChange={(event) => this.setState({ precio_venta_b: event.target.value })}
+                                            value={this.state.precio_venta_b}
                                             margin="normal"
                                             variant="filled"
                                         />
@@ -249,10 +408,10 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-precio-c"
                                             label="Precio C"
-                                            error={this.state.codigo_referencia.length > 0 ? false : true}
+                                            //error={this.state.precio_venta_c.length > 0 ? false : true}
                                             required
-                                            onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
-                                            value={this.state.codigo_referencia}
+                                            onChange={(event) => this.setState({ precio_venta_c: event.target.value })}
+                                            value={this.state.precio_venta_c}
                                             margin="normal"
                                             variant="filled" />
                                     </Grid>
@@ -283,7 +442,7 @@ class ModalNewProducto extends Component {
                                     dataRef="categorias"
                                     dataRefObject="categoria"
                                     itemCategoria={this.state.categoria_producto}
-                                    changueText={item => this.setState({ categoria_producto: item })}
+                                    changueText={itemCodigo => this.setState({ categoria_producto: itemCodigo })}
                                     textItemVacio='Categorias vacias'
                                 />
 
@@ -294,43 +453,72 @@ class ModalNewProducto extends Component {
                                     dataRef="marcas"
                                     dataRefObject="marca"
                                     itemCategoria={this.state.marca_producto}
-                                    changueText={item => this.setState({ marca_producto: item })}
+                                    changueText={itemCodigo => this.setState({ marca_producto: itemCodigo })}
                                     textItemVacio='Marcas vacias'
                                 />
                             </Grid>
                             <Grid item xs={6}>
+
                                 <TextField
-                                    style={styles.styleText}
-                                    id="standard-localizacion-producto"
-                                    label="Localización"
-                                    error={this.state.descripcion_producto.length > 0 ? false : true}
-                                    required
-                                    onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                    value={this.state.descripcion_producto}
+                                    id="filled-unidad-medida"
+                                    select
+                                    label="Tipo de medida"
+                                    error={this.state.unidad_medida.length > 0 ? false : true}
+                                    value={this.state.unidad_medida}
+                                    onChange={event => this.setState({ unidad_medida: event.target.value })}
                                     margin="normal"
-                                    variant="filled"
-                                />
-                                <TextField
+                                    variant="outlined"
                                     style={styles.styleText}
-                                    id="standard-stock-actual"
-                                    label="Stock actual"
-                                    error={this.state.descripcion_producto.length > 0 ? false : true}
-                                    required
-                                    onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                    value={this.state.descripcion_producto}
-                                    margin="normal"
-                                    variant="filled"
-                                />
+                                >
+                                    <MenuItem value={'unidades'}>Unidades</MenuItem>
+                                    <MenuItem value={'litros'}>Litros</MenuItem>
+                                    <MenuItem value={'metros'}>Metros</MenuItem>
+                                    <MenuItem value={'cajas'}>Cajas</MenuItem>
+                                    <MenuItem value={'piezas'}>Piezas</MenuItem>
+                                    <MenuItem value={'kilos'}>Kilos</MenuItem>
+                                    <MenuItem value={'libras'}>Libras</MenuItem>
+                                </TextField>
+
+                                <Grid container spacing={24}>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-stock-actual-item"
+                                            label="Stock actual"
+                                            error={this.state.stock_actual.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ stock_actual: event.target.value })}
+                                            value={this.state.stock_actual}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6}>
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-localizacion-producto"
+                                            label="Localización"
+                                            //error={this.state.localizacion_producto.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ localizacion_producto: event.target.value })}
+                                            value={this.state.localizacion_producto}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+
+                                    </Grid>
+                                </Grid>
+
                                 <Grid container spacing={24}>
                                     <Grid item xs={6}>
                                         <TextField
                                             style={styles.styleText}
                                             id="standard-stock-minimo"
                                             label="Stock minimo"
-                                            error={this.state.descripcion_producto.length > 0 ? false : true}
+                                            error={this.state.stock_minimo.length > 0 ? false : true}
                                             required
-                                            onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                            value={this.state.descripcion_producto}
+                                            onChange={(event) => this.setState({ stock_minimo: event.target.value })}
+                                            value={this.state.stock_minimo}
                                             margin="normal"
                                             variant="filled"
                                         />
@@ -340,10 +528,10 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-stock-maximo"
                                             label="Stock máximo"
-                                            error={this.state.descripcion_producto.length > 0 ? false : true}
+                                            error={this.state.stock_maximo.length > 0 ? false : true}
                                             required
-                                            onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                            value={this.state.descripcion_producto}
+                                            onChange={(event) => this.setState({ stock_maximo: event.target.value })}
+                                            value={this.state.stock_maximo}
                                             margin="normal"
                                             variant="filled"
                                         />
@@ -357,58 +545,27 @@ class ModalNewProducto extends Component {
                     <Divider />
 
                     <Grid container spacing={24} style={{ width: '100vw' }}>
-                        <Grid item xs={4}>
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={this.state.tiene_iva}
-                                        onChange={() => this.setState({ tiene_iva: !this.state.tiene_iva })}
-                                    />}
-                                label="Tiene iva"
-                            />
-                            <TextField
-                                style={styles.styleText}
-                                id="standard-porcentaje-iva"
-                                label="Porcentaje Iva"
-                                disabled={!this.state.tiene_iva}
-                                //error={this.state.descripcion_producto.length > 0 ? false : true}
-                                required
-                                onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                value={this.state.descripcion_producto}
-                                margin="normal"
-                                variant="filled"
-                            />
-                            <FormControlLabel
-                                control={
-                                    <Switch
-                                        checked={this.state.producto_fraccionado}
-                                        onChange={() => this.setState({ producto_fraccionado: !this.state.producto_fraccionado })}
-                                    />}
-                                label="Venta fraccionada"
-                            />
-                        </Grid>
-                        <Grid item xs={4}>
-                            <FormControl style={{ width: '100%' }}>
-                                <InputLabel htmlFor="unidad-medida">Unidad de medida</InputLabel>
-                                <Select
-                                    value={this.state.unidad_medida}
-                                    onChange={event => this.setState({ unidad_medida: event.target.value })}
-                                    inputProps={{
-                                        name: 'unidad-medidad-de',
-                                        id: 'unid-medida',
-                                    }}
-                                >
-                                    <MenuItem value={'unidades'}>Unidades</MenuItem>
-                                    <MenuItem value={'litros'}>Litros</MenuItem>
-                                    <MenuItem value={'metros'}>Metros</MenuItem>
-                                    <MenuItem value={'cajas'}>Cajas</MenuItem>
-                                    <MenuItem value={'piezas'}>Piezas</MenuItem>
-                                    <MenuItem value={'kilos'}>Kilos</MenuItem>
-                                    <MenuItem value={'libras'}>Libras</MenuItem>
-                                </Select>
-                            </FormControl>
+                        <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                            <Grid item xs={6}>
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.tiene_iva}
+                                            onChange={() => this.setState({ tiene_iva: !this.state.tiene_iva })}
+                                        />}
+                                    label="Tiene iva"
+                                />
+                                <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.producto_fraccionado}
+                                            onChange={() => this.setState({ producto_fraccionado: !this.state.producto_fraccionado })}
+                                        />}
+                                    label="Venta fraccionada"
+                                />
+                            </Grid>
 
-                            <form noValidate>
+                            <Grid item xs={6}>
                                 <TextField
                                     id="date-fecha-vencimiento"
                                     label="Fecha de vencimiento"
@@ -417,111 +574,32 @@ class ModalNewProducto extends Component {
                                     InputLabelProps={{
                                         shrink: true,
                                     }}
+                                    onChange={(event) => this.setState({ fecha_vencimiento: event.target.value })}
+                                    value={this.state.fecha_vencimiento}
+                                    margin="normal"
+                                    variant="filled"
+                                    style={styles.styleText}
                                 />
-                            </form>
-                        </Grid>
-                        <Grid item xs={4}>
-                        {
-                            console.log(`${new Date().getFullYear()+'-'+new Date().getMonth()+'-'+new Date().getDate()}`)
-                            
-                        }
-                        {`${new Date().getFullYear()+'-'+new Date().getMonth()+'-'+new Date().getDate()}`}
 
+                                {
+                                    this.state.tiene_iva &&
+                                    <TextField
+                                        style={styles.styleText}
+                                        id="standard-porcentaje-iva"
+                                        label="Porcentaje Iva"
+                                        error={this.state.porcentaje_iva.length > 0 ? false : true}
+                                        required
+                                        onChange={(event) => this.setState({ porcentaje_iva: event.target.value })}
+                                        value={this.state.porcentaje_iva}
+                                        margin="normal"
+                                        variant="filled"
+                                    />
+                                }
+                            </Grid>
+                        </Grid>
+                        <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
                         </Grid>
                     </Grid>
-
-                    {/* <TextField
-                                error={this.state.descripcion_producto.length > 0 ? false : true}
-                                value={`${this.state.descripcion_producto}`}
-                                onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
-                                style={styles.styleText}
-                                required
-                                id="standard-descripcion-producto"
-                                label="Descripción del producto"
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <AutoCompleteTextField
-                                id="standard-categoria"
-                                styleText={styles.styleAutoComplete}
-                                nameTextFiel="Categoria"
-                                dataAutoComplete={this.props.dataAutoCompleteCategorias}
-                                value={this.state.categoriaProducto}
-                                changueText={this.changueTextCategorias}
-                                textItemVacio='Esta categoria no existe, pero será creada'
-                            />
-
-                            <AutoCompleteTextField
-                                id="standard-proveedor"
-                                styleText={styles.styleAutoComplete}
-                                nameTextFiel="Proveedor"
-                                value={this.state.proveedorProducto}
-                                dataAutoComplete={this.props.dataAutoCompleteProveedores}
-                                changueText={this.changueTextProveedores}
-                                textItemVacio='Este proveedor no existe, pero será creado'
-                            />
-
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Precio por mayor"
-                                required
-                                id="standard-precio-mayor"
-                                error={this.state.numeroMayor.length > 0 ? false : true}
-                                value={`${this.state.numeroMayor}`}
-                                onChange={(event) => this.setState({ numeroMayor: event.target.value })}
-                                InputProps={{
-                                    inputComponent: NumberFormatCustom,
-                                }}
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Precio por menor"
-                                required
-                                id="precio-menor"
-                                error={this.state.numeroMenor.length > 0 ? false : true}
-                                value={`${this.state.numeroMenor}`}
-                                onChange={(event) => this.setState({ numeroMenor: event.target.value })}
-                                InputProps={{
-                                    inputComponent: NumberFormatCustom,
-                                }}
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Iva %"
-                                error={this.state.numeroIva.length > 0 ? false : true}
-                                value={`${this.state.numeroIva}`}
-                                required
-                                id="standard-iva"
-                                onChange={(event) => this.setState({ numeroIva: event.target.value })}
-                                InputProps={{
-                                    inputComponent: NumberFormatIva,
-                                }}
-                                margin="normal"
-                                variant="outlined"
-                            />
-
-                            <TextField
-                                style={styles.styleText}
-                                label="Cantidad de productos"
-                                required
-                                id="standard-cantidad"
-                                error={this.state.cantidadProductos.length > 0 ? false : true}
-                                value={`${this.state.cantidadProductos}`}
-                                onChange={(event) => this.setState({ cantidadProductos: event.target.value })}
-                                InputProps={{
-                                    inputComponent: NumberFormatCantidad,
-                                }}
-                                margin="normal"
-                                variant="outlined"
-                            /> */}
 
                 </form>
 

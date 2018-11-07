@@ -50,17 +50,13 @@ class Search extends Component {
 
 
         return (
-            <Toolbar style={{
-                backgroundColor: '#E1F5FE',
-                paddingTop: 20,
-
-            }}>
+            <div>
 
                 {
-                    this.state.loading==='cargando'&&
+                    this.state.loading === 'cargando' &&
                     <CircularProgress size={25} style={{ marginLeft: '40%', position: 'absolute' }} />
                 }
-                
+
 
                 <Tooltip title={`${this.props.textoTooltip}`} >
                     <TextField
@@ -69,12 +65,13 @@ class Search extends Component {
                             width: '100%',
                         }}
                         disabled={this.state.loading === 'cargando' ? true : false}
-                        variant="filled"
+                        variant="standard"
                         type='text'
                         label={`${this.props.textoSearch}`}
                         value={this.state.buscar}
                         onChange={this.handleChange('buscar')}
                         onKeyPress={this._onKeyPress}
+                        margin='none'
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment variant="filled" position="end">
@@ -110,7 +107,7 @@ class Search extends Component {
 
 
 
-            </Toolbar>
+            </div>
         )
     }
 }
