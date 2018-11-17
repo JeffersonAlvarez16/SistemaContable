@@ -113,7 +113,7 @@ class Stock extends Component {
         }
 
         if (item.id === 'cliente_proveedor') {
-            return <>
+            return n.cliente_proveedor==='Consumidor Final'?n.cliente_proveedor:<>
              <ReturnTextTable
                 referencia="proveedores"
                 codigo={n.cliente_proveedor}

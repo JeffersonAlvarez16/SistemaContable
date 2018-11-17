@@ -8,7 +8,13 @@ import Search from '../components/components/Search';
 import TablaNormal from '../components/components/tables/TableNormal';
 import Divider from '@material-ui/core/Divider';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 
+import IconButton from '@material-ui/core/IconButton';
+import InputIcon from '@material-ui/icons/Input';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
+import DoneIcon from '@material-ui/icons/Done';
 
 //firebase 
 import firebase from 'firebase/app';
@@ -19,6 +25,10 @@ import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 import FullScreenDialog from '../components/components/FullScreenDialog';
 import NuevaVenta from '../components/plugins/nueva_venta';
 import funtions from '../utils/funtions';
+import ModalCompraProductos from '../components/modals_container/ModalCompraProductos';
+import setSnackBars from '../components/plugins/setSnackBars';
+import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
+import EmitirFacturaModal from '../components/plugins/EmitirFacturaModal';
 
 
 
@@ -33,6 +43,7 @@ class Ventas extends Component {
 
         rowslistaVentas: [
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
+            { id: 'factura_emitida', numeric: false, disablePadding: true, label: 'Estado Factura' },
             { id: 'cliente', numeric: true, disablePadding: false, label: 'Cliente' },
             { id: 'productos', numeric: true, disablePadding: false, label: 'Productos' },
             { id: 'subtotal', numeric: true, disablePadding: false, label: 'SubTotal' },
@@ -48,8 +59,10 @@ class Ventas extends Component {
         ],
         //usuario
         usuario: '',
-// modals
-openModalNewVenta:false,
+        // modals
+        openModalNewVenta: false,
+        estadoModalSimpleCompraProductos: false,
+        estadoModalEmitirFactura: false,
     }
 
     componentDidMount() {
@@ -93,7 +106,7 @@ openModalNewVenta:false,
         }
 
         if (item.id === 'cliente') {
-            return <>
+            return n.cliente === 'Consumidor Final' ? n.cliente : <>
                 <ReturnTextTable
                     referencia="clientes"
                     codigo={n.cliente}
@@ -123,6 +136,40 @@ openModalNewVenta:false,
 
         if (item.id === 'subtotal') {
             return <div style={{ width: 'max-content' }}>{n.subtotal}</div>
+        }
+
+        if (item.id === 'factura_emitida') {
+            return n.cliente === 'Consumidor Final' ?
+                <div style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}>
+                    <IconButton disabled>
+                        <DoneIcon />
+                    </IconButton>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>Consumidor Final</div>
+                </div>
+                :
+                <div style={{ width: 'max-content' }}>{
+                    Boolean(n.factura_emitida) ?
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <IconButton disabled>
+                                <DoneAllIcon style={{ color: '#42A5F5' }} />
+                            </IconButton>
+                            <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Emitida</div>
+                        </div>
+                        :
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <Tooltip title="Emitir Factura">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        codigoEmitirFactura: n.codigo,
+                                        estadoModalEmitirFactura: true,
+                                    })
+                                }}>
+                                    <InputIcon style={{ color: '#EF5350' }} />
+                                </IconButton>
+                            </Tooltip>
+                            <div style={{ color: '#EF5350', display: 'flex', alignItems: 'center' }}>No emitida</div>
+                        </div>
+                }</div >
         }
 
         if (item.id === 'total') {
@@ -168,6 +215,39 @@ openModalNewVenta:false,
 
     }
 
+    recuperarJsonFactura = codigo => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/facturas_ventas/' + codigo);
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.postSet(user.uid, snapshot.val())
+                        var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
+                        venteRef.update({
+                            factura_emitida: true
+                        })
+                        setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
+                    }
+                })
+            }
+        })
+    }
+
+    postSet = async (uidUser, jsonData) => {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'id': uidUser,
+            },
+            body: JSON.stringify(jsonData)
+        })
+
+        const content = await rawResponse.json();
+        //console.log(content)
+    }
+
     render() {
 
         return (
@@ -188,14 +268,14 @@ openModalNewVenta:false,
                             this.setState({ openModalNewVenta: true })
                         }}
                     />
-                    <ItemMenuHerramienta
+                    {/* <ItemMenuHerramienta
                         titleButton="Editar Venta"
                         color="primary"
                         visible={true}
                         disabled={this.state.itemsSeleccionados.length === 1 ? false : true}
                         onClick={() => this.setState({ openModalNewVenta: true })}
-                    />
-                    <ItemMenuHerramienta
+                    /> */}
+                    {/* <ItemMenuHerramienta
                         titleButton="Cancelar Venta"
                         color="primary"
                         visible={true}
@@ -205,23 +285,20 @@ openModalNewVenta:false,
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
                             }
                         }}
-                    />
+                    /> */}
                     <ItemMenuHerramienta
                         titleButton="Devolución de venta"
                         color="primary"
                         visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
                         onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
-                            }
+                            this.setState({ estadoModalSimpleCompraProductos: true })
                         }}
                     />
                     <ItemMenuHerramienta
-                        titleButton="Imprimir Venta"
+                        titleButton="Imprimir resivo"
                         color="primary"
                         visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
+                        disabled={this.state.botonImprimirResivo}
                         onClick={() => {
                             if (this.state.itemsSeleccionados.length > 0) {
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
@@ -244,22 +321,47 @@ openModalNewVenta:false,
                 <TablaNormal
                     textoTitleP="Ventas"
                     textoTitleS="Venta"
-                    selectedItems={false}
+                    selectedItems={true}
                     toolbar={false}
                     notTab={true}
                     data={this.state.listaVentas}
                     rows={this.state.rowslistaVentas}
                     handleGetData={this.handleGetData}
                     estadoTabla={this.state.estadoTabla}
-                    itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
+                    itemsSeleccionados={items => {
+                        this.setState({ itemsSeleccionados: items })
+                    }}
                 />
 
                 <FullScreenDialog openModal={this.state.openModalNewVenta}>
-                    <NuevaVenta usuario={this.state.usuario}>
+                    <NuevaVenta usuario={this.state.usuario} handleClose={() => this.setState({ openModalNewVenta: false })}>
 
                     </NuevaVenta>
 
                 </FullScreenDialog>
+
+                <FullScreenDialog openModal={this.state.estadoModalSimpleCompraProductos}>
+                    <ModalCompraProductos
+                        handleClose={() => this.setState({
+                            estadoModalSimpleCompraProductos: false,
+                        })}
+                        usuario={this.props.usuario}
+                        tipoAjuste='devolucion_cliente'
+                    />
+                </FullScreenDialog>
+
+                <ModalContainerNormal
+                    open={this.state.estadoModalEmitirFactura}
+                    handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                >
+                    <EmitirFacturaModal
+                        handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                        handleEmitir={() => {
+                            this.recuperarJsonFactura(this.state.codigoEmitirFactura)
+                            this.setState({ estadoModalEmitirFactura: false })
+                        }}
+                    />
+                </ModalContainerNormal>
 
             </Layout>
         );

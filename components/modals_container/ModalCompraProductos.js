@@ -46,6 +46,16 @@ class ModalCompraProductos extends Component {
         observacionCompra: '',
     }
 
+    componentDidMount(){
+        document.addEventListener("keydown", this.escFunction, false);   
+    }
+
+    escFunction=(event)=> {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
+        }
+    }
+
     getNumeroStockActual = (item) => {
         var sumaStock = Number(this.state.listaSeleccionadosValoresEditados.filter(item2 => item2.codigo === item.codigo)[0].stock_nuevo) + Number(item.stock_actual)
         var restaStock = Number(item.stock_actual) - Number(this.state.listaSeleccionadosValoresEditados.filter(item2 => item2.codigo === item.codigo)[0].stock_nuevo)

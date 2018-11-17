@@ -14,6 +14,7 @@ import TextField from '@material-ui/core/TextField';
 import Switch from '@material-ui/core/Switch';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Divider from '@material-ui/core/Divider';
+import MenuItem from '@material-ui/core/MenuItem';
 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -98,16 +99,16 @@ class SectionContentFactura extends Component {
             var precioIva = 0
             if (item.tiene_iva === true) {
                 precioIva = (precio * Number(item.porcentaje_iva)) / 100
-                sumatotalProductosConIva += Number(precio)
+                sumatotalProductosConIva += Number(precio) * Number(item.cantidad)
             } else {
                 precioIva = 0
-                sumatotalProductosSinIva+=Number(precio)
+                sumatotalProductosSinIva += Number(precio) * Number(item.cantidad)
             }
 
             sumatotalConIVA = sumatotalConIVA + (Number(stock) * Number(precioIva))
             sumatotal = sumatotal + (Number(stock) * Number(precio))
         })
-        this.props.handleSumaTotal((sumatotal+sumatotalConIVA).toFixed(2))
+        this.props.handleSumaTotal((sumatotal + sumatotalConIVA).toFixed(2))
         this.props.handleSumaTotalIva(sumatotalConIVA.toFixed(2))
         this.props.handleSubTotal(sumatotal.toFixed(2))
         this.props.handlePrecioPrductosSinIva(sumatotalProductosSinIva.toFixed(2))
@@ -128,7 +129,7 @@ class SectionContentFactura extends Component {
         this.props.handleSumaTotalIva(0.00)
         this.props.handleSubTotal(0.00)
         this.props.productosSeleccionados([])
-    } 
+    }
 
     getNumeroStockActual = (item) => {
         var restaStock = Number(item.stock_actual) - Number(this.state.listaSeleccionadosValoresEditados.filter(item2 => item2.codigo === item.codigo)[0].cantidad)
@@ -285,6 +286,21 @@ class SectionContentFactura extends Component {
             <div>
                 <Grid container >
                     <Grid item xs={6} style={{ background: 'rgba(222, 239, 255)', paddingLeft: 16, paddingRight: 16 }}>
+                        <TextField
+                            id="filled-tipo-venta"
+                            select
+                            label="Tipo de venta"
+                            error={this.props.tipo_venta.length > 0 ? false : true}
+                            value={this.props.tipo_venta}
+                            onChange={event => this.props.handleTipoVenta(event.target.value)}
+                            margin="normal"
+                            variant="outlined"
+                            style={styles.styleText}
+                        >
+                            <MenuItem value={'factura'}>Factura</MenuItem>
+                            <MenuItem value={'final'}>Consumidor Final</MenuItem>
+                        </TextField>
+                        
                         <AutoCompleteSelectedProducto
                             styleText={styles.styleText}
                             onChangue={this.onChangueSelectedProducto}

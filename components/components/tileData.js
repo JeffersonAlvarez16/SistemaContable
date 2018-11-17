@@ -73,14 +73,14 @@ export const mailFolderListItems = (
                 <ListItemText primary="Usuarios" />
             </ListItem>
         </Link>
-        <Link prefetch href="/factura_electronica">
+        <Link prefetch href="/caja">
             <ListItem button>
-                <Tooltip title="Factura electrónica" placement="right">
+                <Tooltip title="Caja" placement="right">
                     <ListItemIcon>
                         <MarkunreadMailbox />
                     </ListItemIcon>
                 </Tooltip>
-                <ListItemText primary="Factura electrónica" />
+                <ListItemText primary="Caja" />
             </ListItem>
         </Link>
     </div>

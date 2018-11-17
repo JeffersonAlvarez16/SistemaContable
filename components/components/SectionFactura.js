@@ -71,40 +71,41 @@ class SectionFactura extends Component {
             }
         }
 
-        const { sumaSubTotal, sumaTotal, sumaIva } = this.props
-
-
         return (
             <Paper style={{ height: '100%', position: 'fixed' }}>
-                <Typography variant="title" style={{ paddingTop: 16, paddingLeft: 16 }}>
-                    {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.nombre : 'Nombre del cliente'}
-                </Typography>
-                <Typography variant="subheading" style={{ paddingTop: 5, paddingLeft: 16 }}>
-                    {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.numero_identificacion : 'Identificación'}
-                </Typography>
-                <Typography variant="caption" style={{ paddingTop: 15, paddingLeft: 16 }}>
-                    {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.email : 'Email'}
-                </Typography>
-                <Typography variant="caption" style={{ paddingTop: 2, paddingLeft: 16 }}>
-                    {this.state.clienteSeleccionado ? `${this.state.clienteSeleccionado.telefono} / ${this.state.clienteSeleccionado.celular}` : 'Teléfono/Celular'}
-                </Typography>
+                <div style={{ display: this.props.tipo_venta === 'final' ? 'none' : 'block' }}>
 
-                <div style={{ paddingLeft: 16, paddingRight: 16 }}>
-                    <AutoCompleteClientes
-                        id="standard-clientes-select"
-                        styleText={styles.styleClientes}
-                        nameTextFiel="Cliente"
-                        dataRef="clientes"
-                        dataRefObject="cliente"
-                        itemCategoria={this.state.clienteFacturacion}
-                        changueText={itemCode => {
-                            this.setState({ clienteFacturacion: itemCode })
-                            this.getClienteDataBase(itemCode)
-                            this.props.handleCliente(itemCode)
-                        }}
-                        textItemVacio='Clientes vacios'
-                        usuario={this.props.usuario}
-                    />
+                    <Typography variant="title" style={{ paddingTop: 16, paddingLeft: 16 }}>
+                        {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.nombre : 'Nombre del cliente'}
+                    </Typography>
+                    <Typography variant="subheading" style={{ paddingTop: 5, paddingLeft: 16 }}>
+                        {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.numero_identificacion : 'Identificación'}
+                    </Typography>
+                    <Typography variant="caption" style={{ paddingTop: 15, paddingLeft: 16 }}>
+                        {this.state.clienteSeleccionado ? this.state.clienteSeleccionado.email : 'Email'}
+                    </Typography>
+                    <Typography variant="caption" style={{ paddingTop: 2, paddingLeft: 16 }}>
+                        {this.state.clienteSeleccionado ? `${this.state.clienteSeleccionado.telefono} / ${this.state.clienteSeleccionado.celular}` : 'Teléfono/Celular'}
+                    </Typography>
+
+                    <div style={{ paddingLeft: 16, paddingRight: 16 }}>
+                        <AutoCompleteClientes
+                            id="standard-clientes-select"
+                            styleText={styles.styleClientes}
+                            nameTextFiel="Cliente"
+                            dataRef="clientes"
+                            dataRefObject="cliente"
+                            itemCategoria={this.state.clienteFacturacion}
+                            changueText={itemCode => {
+                                this.setState({ clienteFacturacion: itemCode })
+                                this.getClienteDataBase(itemCode)
+                                this.props.handleCliente(itemCode)
+                            }}
+                            textItemVacio='Clientes vacios'
+                            usuario={this.props.usuario}
+                        />
+                    </div>
+
                 </div>
 
                 <Divider style={{ marginTop: 15, marginBottom: 15 }} />
@@ -205,7 +206,8 @@ class SectionFactura extends Component {
                     </Grid>
                 </Grid>
 
-                <Grid container variant="permanent" spacing={20} style={{ width: '95%', paddingLeft:16 }}>
+                <Grid container variant="permanent" spacing={20} style={{ width: '95%', paddingLeft: 16 }}>
+                    <div style={{ display: this.props.tipo_venta === 'final' ? 'none' : 'block' }}>
                         <FormControlLabel
                             control={
                                 <Switch
@@ -214,6 +216,7 @@ class SectionFactura extends Component {
                                 />}
                             label="Factura Electrónica"
                         />
+                    </div>
                 </Grid>
 
                 <Divider style={{ marginTop: 15, marginBottom: 15 }} />

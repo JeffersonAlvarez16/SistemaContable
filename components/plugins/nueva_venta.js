@@ -10,6 +10,7 @@ import 'firebase/database';
 import 'firebase/auth'
 import setSnackBars from './setSnackBars';
 import ModalContainerNormal from '../modals_container/ModalContainerNormal';
+import DeleteActivarDesactivar from './deleteActivarDesactivar';
 
 class NuevaVenta extends Component {
 
@@ -32,6 +33,7 @@ class NuevaVenta extends Component {
         dinero_resibido: 0,
         cambio: 0,
 
+
         //valores adicionales para la factura
         precioProductosSinIva: 0,
         precioProductosConIva: 0,
@@ -45,14 +47,24 @@ class NuevaVenta extends Component {
         //id del usuario
         uidUser: '',
 
+        //tipo de venta
+        tipo_venta: 'factura'
+
     }
 
     componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
         firebase.auth().onAuthStateChanged((user) => {
             this.setState({
                 uidUser: user.uid
             })
         })
+    }
+
+    escFunction=(event)=> {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
+        }
     }
 
     getClienteDataBase = cliente => {
@@ -126,58 +138,56 @@ class NuevaVenta extends Component {
 
     //finalizar venta
     handleFinalizarVenta = () => {
-        const { productosSeleccionados, facturaElectronica, uidUser } = this.state
+        const { productosSeleccionados, facturaElectronica, uidUser, tipo_venta } = this.state
         if (this.comprobarCamposLlenos()) {
             this.setState({ estadoModalGuardarVenta: true })
             this.updateDataProductos()
-            this.setSaveRegistroVenta()
             this.setOperacionStock(productosSeleccionados)
+            var codigoRegistroVenta = funtions.guidGenerator()
+            this.setSaveRegistroVenta(codigoRegistroVenta)
             setTimeout(() => {
                 this.contentFactura.nuevaVenta()
                 this.sectionFactura.nuevaVenta()
                 this.setState({ estadoModalGuardarVenta: false })
             }, 1000)
-            if (Boolean(facturaElectronica)) {
+            if (tipo_venta === 'factura') {
                 var jsonData = this.createJsonFacturaElectronica()
-                console.log(jsonData)
-                this.postSet(uidUser, jsonData)
-                /* (async () => {
-                        const rawResponse = await fetch('https://tranquil-shelf-98582.herokuapp.com/generarfactura', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'uid': uidUser
-                            },
-                            body: jsonData
-                        });
-                        const content = await rawResponse.json();
-                        console.log(content);
-                    })(); */
+                this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                if (Boolean(facturaElectronica)) {
+                    this.postSet(uidUser, jsonData)
+                }
             }
+            setSnackBars.openSnack('success', 'rootSnackBar', 'Venta exitosa', 2000)
         } else {
             setSnackBars.openSnack('error', 'rootSnackBar', 'LLenar todos los campos', 2000)
         }
     }
 
+    saveFacturasJson = (jsonData, codigoRegistroVenta) => {
+        var db = firebase.database();
+        var operacionFacturaJson = db.ref('users/' + firebase.auth().currentUser.uid + '/facturas_ventas/' + codigoRegistroVenta);
+        operacionFacturaJson.set(jsonData)
+    }
+
     postSet = async (uidUser, jsonData) => {
-        const rawResponse = await fetch('https://tranquil-shelf-98582.herokuapp.com/generarfactura', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
-            json: true,
             headers: {
                 'Content-Type': 'application/json',
-                'id': uidUser
+                'id': uidUser,
             },
-            body:  JSON.stringify(jsonData) 
-        });
+            body: JSON.stringify(jsonData)
+        })
+
         const content = await rawResponse.json();
-        console.log(content);
+        //console.log(content)
     }
 
     //comprobar campos llenos 
     comprobarCamposLlenos = () => {
         const { cliente, productosSeleccionados, dinero_resibido } = this.state
         if (
-            cliente.length > 0 &&
+            this.comprobarTipoVenta() > 0 &&
             productosSeleccionados.length > 0 &&
             dinero_resibido.length > 0
         ) {
@@ -187,18 +197,43 @@ class NuevaVenta extends Component {
         }
     }
 
+    comprobarTipoVenta = () => {
+        const { tipo_venta, cliente } = this.state
+        if (tipo_venta === 'final') {
+            return true
+        } else {
+            if (cliente.length > 0) {
+                return true
+            } else {
+                return false
+            }
+        }
+    }
+
     //Registra la venta 
-    setSaveRegistroVenta = () => {
-        const { cliente, descuento, observacion, dinero_resibido, cambio, sumaSubTotal, sumaIva, sumaTotal } = this.state
-        var codigoVenta = funtions.guidGenerator()
+    setSaveRegistroVenta = codigoVenta => {
+        const { cliente,
+            descuento,
+            observacion,
+            dinero_resibido,
+            cambio,
+            sumaSubTotal,
+            sumaIva,
+            sumaTotal,
+            tipo_venta,
+            facturaElectronica
+        } = this.state
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
         operacionVentaRef.set({
             codigo: codigoVenta,
-            cliente: cliente,
+            cliente: tipo_venta === 'final' ? 'Consumidor Final' : cliente,
             descuento: descuento,
+            tipo_venta,
+            factura_emitida: facturaElectronica,
             observacion: observacion,
             dinero_resibido: dinero_resibido,
             cambio: cambio,
@@ -228,7 +263,7 @@ class NuevaVenta extends Component {
 
     //opercacion stock
     setOperacionStock = (listaProductos) => {
-        const { cliente, observacion, dinero_resibido, sumaTotal, sumaIva, sumaSubTotal, descuento, cambio } = this.state
+        const { cliente, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio } = this.state
         var codigoStock = funtions.guidGenerator()
         var arrayProductos = []
         listaProductos.forEach(item => {
@@ -246,7 +281,7 @@ class NuevaVenta extends Component {
             tipo_operacion: 'venta-producto',
             fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
-            cliente_proveedor: cliente,
+            cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : cliente,
             productos: arrayProductos,
             total_final: sumaTotal,
             empleado: this.props.usuario.code,
@@ -278,42 +313,42 @@ class NuevaVenta extends Component {
             productosSeleccionados,
         } = this.state
 
-        var date = new Date('05 October 2011 14:48 UTC')
+        var date = new Date()
         var json = {
             "ambiente": 1,
             "tipo_emision": 1,
             "fecha_emision": date.toISOString(),
             "emisor": {
-                "ruc": "1900504893001",
-                "obligado_contabilidad": true,
-                "contribuyente_especial": "12345",
-                "nombre_comercial": "AUTO REPUESTOS THIAGO",
-                "razon_social": "SOTO VEGA JHOVANNI REMIGIO",
-                "direccion": "A CINCUENTA METROS DEL PARQUE SAN JOSE",
+                "ruc": "",
+                "obligado_contabilidad": false,
+                "contribuyente_especial": "",
+                "nombre_comercial": "",
+                "razon_social": "",
+                "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "002",
-                    "codigo": "001",
-                    "direccion": "A CINCUENTA METROS DEL PARQUE SAN JOSE"
+                    "punto_emision": "",
+                    "codigo": "",
+                    "direccion": ""
                 }
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": sumaSubTotal,
+                "total_sin_impuestos": Number(sumaSubTotal),
                 "impuestos": [
                     {
-                        "base_imponible": precioProductosSinIva,
+                        "base_imponible": Number(precioProductosSinIva),
                         "valor": 0.0,
                         "codigo": "2",
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": precioProductosConIva,
-                        "valor": sumaIva,
+                        "base_imponible": Number(precioProductosConIva),
+                        "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": sumaTotal,
+                "importe_total": Number(sumaTotal),
                 "propina": 0.0,
                 "descuento": descuento
             },
@@ -325,33 +360,33 @@ class NuevaVenta extends Component {
                 "direccion": clienteCargadoDB.direccion,
                 "telefono": clienteCargadoDB.celular
             },
-            "items": this.state.productosSeleccionados.map(item => {
+            "items": productosSeleccionados.map(item => {
                 return {
-                    cantidad: item.cantidad,
-                    codigo_principal: item.codigo_barras,
+                    cantidad: Number(item.cantidad),
+                    codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: item.precio_venta_a,
-                    descripcion: item.descripcion_producto,
-                    precio_total_sin_impuestos: item.precio_venta_a,
+                    precio_unitario: Number(item.precio_venta_a),
+                    descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
+                    precio_total_sin_impuestos: Number(item.precio_venta_a) * Number(item.cantidad),
                     impuestos: [
                         {
-                            base_imponible: item.precio_venta_a,
-                            valor: ((Number(item.precio_venta_a) * Number(item.porcentaje_iva)) / 100).toFixed(2),
-                            tarifa: Number(item.porcentaje_iva),
-                            codigo: "2",
-                            codigo_porcentaje: "2"
+                            base_imponible: Number(item.precio_venta_a) * Number(item.cantidad),
+                            valor: Boolean(item.tiene_iva) ? Number(((Number(item.precio_venta_a) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
+                            codigo: '2',
+                            codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
                         }
                     ],
                     descuento: 0.0
                 }
             })
             ,
-            "valor_retenido_iva": sumaIva,
+            "valor_retenido_iva": Number(sumaIva),
             "valor_retenido_renta": 0.00,
             "pagos": [
                 {
                     "medio": "efectivo",
-                    "total": sumaTotal
+                    "total": Number(sumaTotal)
                 }
             ]
         }
@@ -360,7 +395,6 @@ class NuevaVenta extends Component {
     }
 
     render() {
-
 
         return <>
             <div style={{
@@ -411,6 +445,12 @@ class NuevaVenta extends Component {
                                 this.handleDescontar(this.state.descuento)
                             }}
 
+                            tipo_venta={this.state.tipo_venta}
+                            handleTipoVenta={tipo_venta => {
+                                this.setState({ tipo_venta })
+                                this.setState({ facturaElectronica: false })
+                            }}
+
                             usuario={this.props.usuario}
                         />
                     </Grid>
@@ -425,6 +465,8 @@ class NuevaVenta extends Component {
                             sumaTotal={this.state.sumaTotal}
                             sumaIva={this.state.sumaIva}
                             sumaSubTotal={this.state.sumaSubTotal}
+
+                            tipo_venta={this.state.tipo_venta}
 
                             handleCliente={cliente => {
                                 this.getClienteDataBase(cliente)
