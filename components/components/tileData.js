@@ -63,48 +63,11 @@ export const mailFolderListItems = (
                 <ListItemText primary="Ventas" />
             </ListItem>
         </Link>
-        <Link prefetch href="/usuarios">
-            <ListItem button>
-                <Tooltip title="Usuarios" placement="right">
-                    <ListItemIcon>
-                        <AccountCircle />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Usuarios" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/caja">
-            <ListItem button>
-                <Tooltip title="Caja" placement="right">
-                    <ListItemIcon>
-                        <MarkunreadMailbox />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Caja" />
-            </ListItem>
-        </Link>
     </div>
 );
 
 export const otherMailFolderListItems = (
     <div>
-        <ListItem button>
-            <ListItemIcon>
-                <MailIcon />
-            </ListItemIcon>
-            <ListItemText primary="All mail" />
-        </ListItem>
-        <ListItem button>
-            <ListItemIcon>
-                <DeleteIcon />
-            </ListItemIcon>
-            <ListItemText primary="Trash" />
-        </ListItem>
-        <ListItem button>
-            <ListItemIcon>
-                <ReportIcon />
-            </ListItemIcon>
-            <ListItemText primary="Spam" />
-        </ListItem>
+        
     </div>
 );
