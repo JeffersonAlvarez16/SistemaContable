@@ -239,7 +239,6 @@ class Productos extends Component {
                     <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
                         <Tab label="Lista de productos" />
                         <Tab label="Stock" />
-                        <Tab label="Control de vencimiento" />
                         <Tab label="Proveedores" />
                     </Tabs>
                 </AppBar>
@@ -247,8 +246,7 @@ class Productos extends Component {
                 <div>
                     {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario}/>}
                     {this.state.valueTab === 1 && <Stock usuario={this.state.usuario}/>}
-                    {this.state.valueTab === 2 && <ControlVencimiento usuario={this.state.usuario}/>}
-                    {this.state.valueTab === 3 && <Proveedores usuario={this.state.usuario}/>}
+                    {this.state.valueTab === 2 && <Proveedores usuario={this.state.usuario}/>}
                 </div>
 
             </Layout>

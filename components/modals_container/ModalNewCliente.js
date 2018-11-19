@@ -90,8 +90,186 @@ class ModalNewCliente extends Component {
             var ce2 = this.state.telefono.length > 0
             return ce1 && ce2 ? true : false
         } else {
-            return true
+            var ce1 = this.state.celular.length > 0
+            return ce1 ? true : false
         }
+    }
+
+    comprobarEmail = email => {
+        if (this.validar_email(email)) {
+            this.setState({ comprobacion_texto_email: 'El email es correcto' })
+            this.setState({ comprobacion_email: true })
+        } else {
+            this.setState({ comprobacion_texto_email: 'El email es incorrecto' })
+            this.setState({ comprobacion_email: false })
+        }
+    }
+
+    validar_email = (email) => {
+        var regex = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+        return regex.test(email) ? true : false;
+    }
+
+    comprobarCedula = (cedula) => {
+        if (this.state.tipo_identificacion === '05') {
+            //Preguntamos si la cedula consta de 10 digitos
+            if (cedula.length == 10) {
+
+                //Obtenemos el digito de la region que sonlos dos primeros digitos
+                var digito_region = cedula.substring(0, 2);
+
+                //Pregunto si la region existe ecuador se divide en 24 regiones
+                if (digito_region >= 1 && digito_region <= 24) {
+
+                    // Extraigo el ultimo digito
+                    var ultimo_digito = cedula.substring(9, 10);
+
+                    //Agrupo todos los pares y los sumo
+                    var pares = parseInt(cedula.substring(1, 2)) + parseInt(cedula.substring(3, 4)) + parseInt(cedula.substring(5, 6)) + parseInt(cedula.substring(7, 8));
+
+                    //Agrupo los impares, los multiplico por un factor de 2, si la resultante es > que 9 le restamos el 9 a la resultante
+                    var numero1 = cedula.substring(0, 1);
+                    var numero1 = (numero1 * 2);
+                    if (numero1 > 9) { var numero1 = (numero1 - 9); }
+
+                    var numero3 = cedula.substring(2, 3);
+                    var numero3 = (numero3 * 2);
+                    if (numero3 > 9) { var numero3 = (numero3 - 9); }
+
+                    var numero5 = cedula.substring(4, 5);
+                    var numero5 = (numero5 * 2);
+                    if (numero5 > 9) { var numero5 = (numero5 - 9); }
+
+                    var numero7 = cedula.substring(6, 7);
+                    var numero7 = (numero7 * 2);
+                    if (numero7 > 9) { var numero7 = (numero7 - 9); }
+
+                    var numero9 = cedula.substring(8, 9);
+                    var numero9 = (numero9 * 2);
+                    if (numero9 > 9) { var numero9 = (numero9 - 9); }
+
+                    var impares = numero1 + numero3 + numero5 + numero7 + numero9;
+
+                    //Suma total
+                    var suma_total = (pares + impares);
+
+                    //extraemos el primero digito
+                    var primer_digito_suma = String(suma_total).substring(0, 1);
+
+                    //Obtenemos la decena inmediata
+                    var decena = (parseInt(primer_digito_suma) + 1) * 10;
+
+                    //Obtenemos la resta de la decena inmediata - la suma_total esto nos da el digito validador
+                    var digito_validador = decena - suma_total;
+
+                    //Si el digito validador es = a 10 toma el valor de 0
+                    if (digito_validador == 10)
+                        var digito_validador = 0;
+
+                    //Validamos que el digito validador sea igual al de la cedula
+                    if (digito_validador == ultimo_digito) {
+                        this.setState({ texto_numero_cedula: 'la cedula:' + cedula + ' es correcta' })
+                        this.setState({ comprobacion_numero_cedula: true })
+                    } else {
+                        this.setState({ texto_numero_cedula: 'la cedula:' + cedula + ' es incorrecta' })
+                        this.setState({ comprobacion_numero_cedula: false })
+                    }
+
+                } else {
+                    // imprimimos en consola si la region no pertenece
+                    this.setState({ texto_numero_cedula: 'Esta cedula no pertenece a ninguna region' })
+                    this.setState({ comprobacion_numero_cedula: false })
+                }
+            } else {
+                //imprimimos en consola si la cedula tiene mas o menos de 10 digitos
+                this.setState({ texto_numero_cedula: 'Esta cedula tiene menos de 10 Digitos' })
+                this.setState({ comprobacion_numero_cedula: false })
+            }
+        }
+
+        if (this.state.tipo_identificacion === '04') {
+            //Preguntamos si la ruc consta de 13 digitos
+            if (cedula.length == 13) {
+
+                //Obtenemos el digito de la region que sonlos dos primeros digitos
+                var digito_region = cedula.substring(0, 2);
+
+                //Pregunto si la region existe ecuador se divide en 24 regiones
+                if (digito_region >= 1 && digito_region <= 24) {
+
+                    // Extraigo el ultimo digito
+                    var ultimo_digito = cedula.substring(9, 10);
+
+                    var tres_ultimos_digitos = cedula.substring(10, 13)
+
+                    //Agrupo todos los pares y los sumo
+                    var pares = parseInt(cedula.substring(1, 2)) + parseInt(cedula.substring(3, 4)) + parseInt(cedula.substring(5, 6)) + parseInt(cedula.substring(7, 8));
+
+                    //Agrupo los impares, los multiplico por un factor de 2, si la resultante es > que 9 le restamos el 9 a la resultante
+                    var numero1 = cedula.substring(0, 1);
+                    var numero1 = (numero1 * 2);
+                    if (numero1 > 9) { var numero1 = (numero1 - 9); }
+
+                    var numero3 = cedula.substring(2, 3);
+                    var numero3 = (numero3 * 2);
+                    if (numero3 > 9) { var numero3 = (numero3 - 9); }
+
+                    var numero5 = cedula.substring(4, 5);
+                    var numero5 = (numero5 * 2);
+                    if (numero5 > 9) { var numero5 = (numero5 - 9); }
+
+                    var numero7 = cedula.substring(6, 7);
+                    var numero7 = (numero7 * 2);
+                    if (numero7 > 9) { var numero7 = (numero7 - 9); }
+
+                    var numero9 = cedula.substring(8, 9);
+                    var numero9 = (numero9 * 2);
+                    if (numero9 > 9) { var numero9 = (numero9 - 9); }
+
+                    var impares = numero1 + numero3 + numero5 + numero7 + numero9;
+
+                    //Suma total
+                    var suma_total = (pares + impares);
+
+                    //extraemos el primero digito
+                    var primer_digito_suma = String(suma_total).substring(0, 1);
+
+                    //Obtenemos la decena inmediata
+                    var decena = (parseInt(primer_digito_suma) + 1) * 10;
+
+                    //Obtenemos la resta de la decena inmediata - la suma_total esto nos da el digito validador
+                    var digito_validador = decena - suma_total;
+
+                    //Si el digito validador es = a 10 toma el valor de 0
+                    if (digito_validador == 10)
+                        var digito_validador = 0;
+
+                    //Validamos que el digito validador sea igual al de la cedula
+                    if (digito_validador == ultimo_digito) {
+                        if (tres_ultimos_digitos === '001') {
+                            this.setState({ texto_numero_cedula: 'El ruc:' + cedula + ' es correcto' })
+                            this.setState({ comprobacion_numero_cedula: true })
+                        } else {
+                            this.setState({ texto_numero_cedula: 'El ruc:' + cedula + ' es incorrecto' })
+                            this.setState({ comprobacion_numero_cedula: false })
+                        }
+                    } else {
+                        this.setState({ texto_numero_cedula: 'El ruc:' + cedula + ' es incorrecto' })
+                        this.setState({ comprobacion_numero_cedula: false })
+                    }
+
+                } else {
+                    // imprimimos en consola si la region no pertenece
+                    this.setState({ texto_numero_cedula: 'Este ruc no pertenece a ninguna region' })
+                    this.setState({ comprobacion_numero_cedula: false })
+                }
+            } else {
+                //imprimimos en consola si la cedula tiene mas o menos de 13 digitos
+                this.setState({ texto_numero_cedula: 'Esta ruc tiene menos de 13 Digitos' })
+                this.setState({ comprobacion_numero_cedula: false })
+            }
+        }
+
     }
 
     checkFormProduc = () => {
@@ -274,9 +452,13 @@ class ModalNewCliente extends Component {
                                             id="filled-email-cliente"
                                             label="Email"
                                             required
-                                            error={this.state.email.length > 0 ? false : true}
+                                            error={this.state.email.length > 0 ? !Boolean(this.state.comprobacion_email) : true}
                                             value={this.state.email}
-                                            onChange={event => this.setState({ email: event.target.value })}
+                                            helperText={this.state.comprobacion_texto_email}
+                                            onChange={event => {
+                                                this.setState({ email: event.target.value })
+                                                setTimeout(() => { this.comprobarEmail(this.state.email) }, 100)
+                                            }}
                                             margin="normal"
                                             variant="filled"
                                             style={styles.styleText}
@@ -289,24 +471,30 @@ class ModalNewCliente extends Component {
                                             label="Tipo de indentificación"
                                             //error={this.state.sexo.length > 0 ? false : true}
                                             value={this.state.tipo_identificacion}
-                                            onChange={event => this.setState({ tipo_identificacion: event.target.value })}
+                                            onChange={event => {
+                                                this.setState({ tipo_identificacion: event.target.value })
+                                                setTimeout(() => { this.comprobarCedula(this.state.numero_identificacion) }, 100)
+                                            }}
                                             margin="normal"
                                             variant="outlined"
                                             style={styles.styleText}
                                         >
                                             <MenuItem value={'04'}>RUC</MenuItem>
                                             <MenuItem value={'05'}>Cedula</MenuItem>
-                                            <MenuItem value={'06'}>Pasaporte</MenuItem>
-                                            <MenuItem value={'07'}>Consumidor Final</MenuItem>
                                         </TextField>
 
                                         <TextField
                                             id="filled-numero-identificacion-cliente"
                                             label="Número de identificación"
                                             required
-                                            error={this.state.numero_identificacion.length > 0 ? false : true}
+                                            helperText={this.state.texto_numero_cedula}
+                                            error={this.state.numero_identificacion.length > 0 ? !Boolean(this.state.comprobacion_numero_cedula) : true}
                                             value={this.state.numero_identificacion}
-                                            onChange={event => this.setState({ numero_identificacion: event.target.value })}
+                                            onChange={event => {
+                                                this.setState({ numero_identificacion: event.target.value })
+                                                setTimeout(() => { this.comprobarCedula(this.state.numero_identificacion) }, 100)
+
+                                            }}
                                             margin="normal"
                                             variant="filled"
                                             style={styles.styleText}
@@ -378,21 +566,22 @@ class ModalNewCliente extends Component {
                                     </Grid>
                                     <Grid item xs={6}>
 
+                                        <TextField
+                                            style={styles.styleText}
+                                            id="standard-celular-cliente"
+                                            label="Celular"
+                                            error={this.state.celular.length > 0 ? false : true}
+                                            required
+                                            onChange={(event) => this.setState({ celular: event.target.value })}
+                                            value={this.state.celular}
+                                            margin="normal"
+                                            variant="filled"
+                                        />
+
+
                                         {
                                             this.state.empresa === true &&
                                             <>
-                                                <TextField
-                                                    style={styles.styleText}
-                                                    id="standard-celular-cliente"
-                                                    label="Celular"
-                                                    error={this.state.celular.length > 0 ? false : true}
-                                                    required
-                                                    onChange={(event) => this.setState({ celular: event.target.value })}
-                                                    value={this.state.celular}
-                                                    margin="normal"
-                                                    variant="filled"
-                                                />
-
                                                 <TextField
                                                     id="filled-telefono-cliente"
                                                     label="Telefono"
@@ -411,18 +600,6 @@ class ModalNewCliente extends Component {
                                         {
                                             this.state.empresa === false &&
                                             <>
-                                                <TextField
-                                                    style={styles.styleText}
-                                                    id="standard-celular-cliente"
-                                                    label="Celular"
-                                                    //error={this.state.celular.length > 0 ? false : true}
-                                                    required
-                                                    onChange={(event) => this.setState({ celular: event.target.value })}
-                                                    value={this.state.celular}
-                                                    margin="normal"
-                                                    variant="filled"
-                                                />
-
                                                 <TextField
                                                     id="filled-telefono-cliente"
                                                     label="Telefono"
