@@ -86,6 +86,37 @@ class SectionContentFactura extends Component {
             }
         });
     }
+    /* 
+        componentWillReceiveProps(props) {
+            if (props.productosSeleccionadosData.length > 0) {
+                //console.log(props.productosSeleccionadosData)
+                this.setProductosDesdeEditar(props.productosSeleccionadosData)
+            }
+        }
+    
+        setProductosDesdeEditar = array => {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    var db = firebase.database();
+                    this.setState({
+                        cargaAutomatica:true
+                    })
+                    array.forEach(item => {
+                        var productosRef = db.ref('users/' + user.uid + "/productos/" + item.codigo);
+                        productosRef.on('value', (snapshot) => {
+                            if (snapshot.val()) {
+                                //console.log(funtions.snapshotToArray(snapshot))
+                                var it=snapshot.val()
+                                var itKey=snapshot.key
+                                it.id=itKey
+                                console.log(it)
+                                this.onChangueSelectedProducto(it)
+                            }
+                        })
+                    })
+                }
+            })
+        } */
 
     calcularValorTotal = () => {
         var sumatotalConIVA = 0
@@ -218,20 +249,24 @@ class SectionContentFactura extends Component {
             })
         } else {
             if (array2.length === 0) {
-                array.push(item)
-                arrayValoresSelecionados.push({
-                    codigo: item.codigo,
-                    cantidad: '1',
-                    precio_venta_a: item.precio_venta_a,
-                    tiene_iva: item.tiene_iva,
-                    porcentaje_iva: item.porcentaje_iva,
-                    stock_actual: item.stock_actual,
-                    codigo_barras: item.codigo_barras,
-                    descripcion_producto: item.descripcion_producto,
-                })
-                this.setState({
-                    itemProductoCargado: null
-                })
+                if (Number(item.stock_actual) === 0) {
+                    setSnackBars.openSnack('error', 'rootSnackBar', 'Producto vacío', 2000)
+                } else {
+                    array.push(item)
+                    arrayValoresSelecionados.push({
+                        codigo: item.codigo,
+                        cantidad: '1',
+                        precio_venta_a: item.precio_venta_a,
+                        tiene_iva: item.tiene_iva,
+                        porcentaje_iva: item.porcentaje_iva,
+                        stock_actual: item.stock_actual,
+                        codigo_barras: item.codigo_barras,
+                        descripcion_producto: item.descripcion_producto,
+                    })
+                    this.setState({
+                        itemProductoCargado: null
+                    })
+                }
                 this.calcularValorTotal()
             }
         }
@@ -250,25 +285,29 @@ class SectionContentFactura extends Component {
             var arrayValoresSelecionados = this.state.listaSeleccionadosValoresEditados
             var array2 = array.filter(item2 => item2.codigo === item.codigo)
             if (array2.length === 0) {
-                array.push(item)
-                arrayValoresSelecionados.push({
-                    codigo: item.codigo,
-                    cantidad: '1',
-                    precio_venta_a: item.precio_venta_a,
-                    tiene_iva: item.tiene_iva,
-                    porcentaje_iva: item.porcentaje_iva,
-                    stock_actual: item.stock_actual,
-                    codigo_barras: item.codigo_barras,
-                    descripcion_producto: item.descripcion_producto,
-                })
-                this.setState({
-                    listaSeleccionados: array,
-                    listaSeleccionadosValoresEditados: arrayValoresSelecionados,
-                })
+                if (Number(item.stock_actual) === 0) {
+                    setSnackBars.openSnack('error', 'rootSnackBar', 'Producto vacío', 2000)
+                } else {
+                    array.push(item)
+                    arrayValoresSelecionados.push({
+                        codigo: item.codigo,
+                        cantidad: '1',
+                        precio_venta_a: item.precio_venta_a,
+                        tiene_iva: item.tiene_iva,
+                        porcentaje_iva: item.porcentaje_iva,
+                        stock_actual: item.stock_actual,
+                        codigo_barras: item.codigo_barras,
+                        descripcion_producto: item.descripcion_producto,
+                    })
+                    this.setState({
+                        listaSeleccionados: array,
+                        listaSeleccionadosValoresEditados: arrayValoresSelecionados,
+                    })
 
-                this.setState({
-                    itemProductoCargado: null
-                })
+                    this.setState({
+                        itemProductoCargado: null
+                    })
+                }
             }
             this.calcularValorTotal()
         }
@@ -300,12 +339,13 @@ class SectionContentFactura extends Component {
                             <MenuItem value={'factura'}>Factura</MenuItem>
                             <MenuItem value={'final'}>Consumidor Final</MenuItem>
                         </TextField>
-                        
+
                         <AutoCompleteSelectedProducto
                             styleText={styles.styleText}
                             onChangue={this.onChangueSelectedProducto}
                         >
                         </AutoCompleteSelectedProducto>
+
                     </Grid>
                     <Grid item xs={6} style={{ background: '#a0ffbe' }}>
                         <div style={{

@@ -24,7 +24,6 @@ import 'firebase/database';
 import 'firebase/auth'
 import funtions from '../../utils/funtions';
 import FullScreenDialog from '../components/FullScreenDialog';
-import ModalNewEditProveedor from '../modals_container/ModalNewEditProveedor';
 import ModalNewCliente from '../modals_container/ModalNewCliente';
 
 

@@ -3,6 +3,13 @@ import Layout from '../components/containers/Layout';
 import funtions from '../utils/funtions';
 import SimpleTable from '../components/components/TableList';
 
+import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+
+
 import firebase, { functions } from 'firebase/app';
 import 'firebase/database';
 import Search from '../components/components/Search';
@@ -30,8 +37,10 @@ class Clientes extends Component {
         itemCliente: null,
         itemsSeleccionados: [],
         rowslistaClientes: [
+            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
+            { id: 'identificacion', numeric: true, disablePadding: false, label: 'Numero de identificación' },
             { id: 'tipo_cliente', numeric: true, disablePadding: false, label: 'Tipo Cliente' },
             { id: 'fecha_nacimiento', numeric: true, disablePadding: false, label: 'Fecha Nacimiento' },
             { id: 'sexo', numeric: true, disablePadding: false, label: 'Sexo' },
@@ -93,8 +102,46 @@ class Clientes extends Component {
             return this.getColorActivadoDesactivado(n.estado, n.codigo)
         }
 
+        if (item.id === 'acciones') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Tooltip title="Editar"  placement="left">
+                    <IconButton aria-label="Editar" onClick={()=>{
+                        this.setState({ itemSeleccionado: n })
+                        this.setState({ openModalNewCliente: true })
+                    }}>
+                        <EditIcon color='primary' />
+                    </IconButton>
+                </Tooltip>
+                {
+                    Boolean(n.estado) ?
+                        <Tooltip title="Desactivar" placement="right">
+                            <IconButton aria-label="Desactivar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                            }}>
+                                <VisibilityOffIcon />
+                            </IconButton>
+                        </Tooltip>
+                        :
+                        <Tooltip title="Activar">
+                            <IconButton aria-label="Activar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                            }}>
+                                <VisibilityIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+                }
+
+
+            </div>
+        }
+
         if (item.id === 'nombre') {
             return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.nombre)}</div>
+        }
+        if (item.id === 'identificacion') {
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.numero_identificacion)}</div>
         }
 
         if (item.id === 'tipo_cliente') {
@@ -246,51 +293,12 @@ class Clientes extends Component {
 
                 <MenuHerramientas>
                     <ItemMenuHerramienta
-                        titleButton="Nuevo"
+                        titleButton="Nuevo Cliente"
                         color="primary"
                         visible={true}
-                        onClick={() => this.setState({ openModalNewCliente: true })}
+                        onClick={() => this.setState({  itemSeleccionado:null, openModalNewCliente: true })}
                     />
-                    <ItemMenuHerramienta
-                        titleButton="Editar"
-                        color="primary"
-                        visible={true}
-                        disabled={this.state.itemsSeleccionados.length === 1 ? false : true}
-                        onClick={() => this.setState({ openModalNewCliente: true })}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Eliminar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Activar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Desactivar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
-                            }
-                        }}
-                    />
+                  
 
                     <div style={{ flex: 0.9 }}></div>
 
@@ -307,7 +315,7 @@ class Clientes extends Component {
                 <TablaNormal
                     textoTitleP="Clientes"
                     textoTitleS="Cliente"
-                    selectedItems={false}
+                    selectedItems={true}
                     toolbar={false}
                     notTab={true}
                     data={this.state.listaClientes}
@@ -319,7 +327,7 @@ class Clientes extends Component {
 
                 <FullScreenDialog openModal={this.state.openModalNewCliente}>
                     <ModalNewCliente
-                        item={this.state.itemsSeleccionados[0]}
+                        item={this.state.itemSeleccionado}
                         handleClose={() => this.setState({ openModalNewCliente: false })}
                         usuario={this.state.usuario}
                     >
@@ -333,9 +341,9 @@ class Clientes extends Component {
                     <DeleteActivarDesactivar
                         tipo={this.state.estadoModalDeleteActivarDesactivar}
                         handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminarItems={() => this.handleEliminarItems(this.state.itemsSeleccionados)}
-                        handleActivarItems={() => this.handleActivarItems(this.state.itemsSeleccionados)}
-                        handleDesactivarItems={() => this.handleDesactivarItems(this.state.itemsSeleccionados)}
+                        handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
+                        handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
+                        handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
                     />
                 </ModalContainerNormal>
             </Layout>

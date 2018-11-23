@@ -24,6 +24,7 @@ import 'firebase/auth'
 import NumberFormat from 'react-number-format';
 import setSnackBars from '../plugins/setSnackBars';
 import AutoCompleteProveedor from '../plugins/AutoCompleteProveedores';
+import AutoCompleteProveedores from '../plugins/AutoCompleteRetenciones';
 
 
 class ModalNewProducto extends Component {
@@ -35,7 +36,7 @@ class ModalNewProducto extends Component {
 
         descripcion_producto: '',
         categoria_producto: 'null',
-        proveedor: 'null',
+        proveedor: '',
         marca_producto: 'null',
         porcentaje_iva: '',
         localizacion_producto: '',
@@ -60,7 +61,7 @@ class ModalNewProducto extends Component {
 
         estado_producto: '',
         usuario: '',
-        order:'',
+        order: '',
 
         //estados
         tiene_iva: false,
@@ -73,6 +74,7 @@ class ModalNewProducto extends Component {
     }
 
     componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
         //pregutnando si biene un item por los props para saber si esditar y crear
         if (this.props.item) {
             this.setState({
@@ -116,6 +118,12 @@ class ModalNewProducto extends Component {
                 usuario: this.props.usuario.code,
                 codigo: funtions.guidGenerator()
             })
+        }
+    }
+
+    escFunction = (event) => {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
         }
     }
 
@@ -248,9 +256,9 @@ class ModalNewProducto extends Component {
                 hora_registro: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
 
                 tiene_iva: this.state.tiene_iva,
-                estado: this.props.item? this.state.estado : true,
+                estado: this.props.item ? this.state.estado : true,
                 usuario: this.props.usuario.code,
-                order: this.props.item? this.state.order : order + "",
+                order: this.props.item ? this.state.order : order + "",
             }
             if (this.props.item) {
                 this.setUpdateProducto(item)
@@ -312,7 +320,7 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-automatico"
                                     label="Codigo automático"
-                                    error={this.state.codigo.length > 0 ? false : true}
+                                    error={this.state.codigo.length === 0}
                                     required
                                     disabled
                                     onChange={(event) => this.setState({ codigo: event.target.value })}
@@ -326,7 +334,6 @@ class ModalNewProducto extends Component {
                                     id="standard-codigo-barras"
                                     label="Codigo de barras"
                                     autoFocus
-                                    //error={this.state.codigo_barras.length > 0 ? false : true}
                                     required
                                     onChange={(event) => this.setState({ codigo_barras: event.target.value })}
                                     value={this.state.codigo_barras}
@@ -338,7 +345,6 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-referencia"
                                     label="Codigo de referencia"
-                                    //error={this.state.codigo_referencia.length > 0 ? false : true}
                                     required
                                     onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
                                     value={this.state.codigo_referencia}
@@ -346,18 +352,15 @@ class ModalNewProducto extends Component {
                                     variant="filled" />
                             </Grid>
                             <Grid item xs={6}>
-                                <AutoCompleteProveedor
-                                    id="standard-proveedores-select"
+                                <AutoCompleteProveedores
                                     styleText={styles.styleText}
-                                    nameTextFiel="Proveedor"
                                     dataRef="proveedores"
                                     dataRefObject="proveedor"
-                                    itemCategoria={this.state.proveedor}
-                                    changueText={itemCode => this.setState({ proveedor: itemCode })}
-                                    textItemVacio='Proveedores vacios'
+                                    error={this.state.proveedor.length === 0}
+                                    onChangue={(item) => this.setState({ proveedor: item.codigo })}
                                     usuario={this.props.usuario}
-                                >
-                                </AutoCompleteProveedor>
+                                    codigoProveedor={this.state.proveedor}
+                                />
 
                                 <Grid container spacing={24}>
                                     <Grid item xs={6}>
@@ -365,7 +368,7 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-precio-costo-item"
                                             label="Precio costo"
-                                            error={this.state.precio_costo.length > 0 ? false : true}
+                                            error={this.state.precio_costo.length === 0}
                                             required
                                             onChange={(event) => this.setState({ precio_costo: event.target.value })}
                                             value={this.state.precio_costo}
@@ -378,7 +381,7 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-precio-a"
                                             label="Precio A"
-                                            error={this.state.precio_venta_a.length > 0 ? false : true}
+                                            error={this.state.precio_venta_a.length === 0}
                                             required
                                             onChange={(event) => this.setState({ precio_venta_a: event.target.value })}
                                             value={this.state.precio_venta_a}
@@ -388,14 +391,12 @@ class ModalNewProducto extends Component {
                                     </Grid>
                                 </Grid>
 
-
                                 <Grid container spacing={24}>
                                     <Grid item xs={6}>
                                         <TextField
                                             style={styles.styleText}
                                             id="standard-precio-b"
                                             label="Precio B"
-                                            //error={this.state.precio_venta_b.length > 0 ? false : true}
                                             required
                                             onChange={(event) => this.setState({ precio_venta_b: event.target.value })}
                                             value={this.state.precio_venta_b}
@@ -408,7 +409,6 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-precio-c"
                                             label="Precio C"
-                                            //error={this.state.precio_venta_c.length > 0 ? false : true}
                                             required
                                             onChange={(event) => this.setState({ precio_venta_c: event.target.value })}
                                             value={this.state.precio_venta_c}
@@ -428,7 +428,7 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-descripcion-producto"
                                     label="Descripcion del producto"
-                                    error={this.state.descripcion_producto.length > 0 ? false : true}
+                                    error={this.state.descripcion_producto.length === 0}
                                     required
                                     onChange={(event) => this.setState({ descripcion_producto: event.target.value })}
                                     value={this.state.descripcion_producto}
@@ -463,7 +463,7 @@ class ModalNewProducto extends Component {
                                     id="filled-unidad-medida"
                                     select
                                     label="Tipo de medida"
-                                    error={this.state.unidad_medida.length > 0 ? false : true}
+                                    error={this.state.unidad_medida.length === 0}
                                     value={this.state.unidad_medida}
                                     onChange={event => this.setState({ unidad_medida: event.target.value })}
                                     margin="normal"
@@ -485,8 +485,9 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-stock-actual-item"
                                             label="Stock actual"
-                                            error={this.state.stock_actual.length > 0 ? false : true}
+                                            error={this.state.stock_actual.length === 0 }
                                             required
+                                            disabled={this.props.item}
                                             onChange={(event) => this.setState({ stock_actual: event.target.value })}
                                             value={this.state.stock_actual}
                                             margin="normal"
@@ -498,7 +499,6 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-localizacion-producto"
                                             label="Localización"
-                                            //error={this.state.localizacion_producto.length > 0 ? false : true}
                                             required
                                             onChange={(event) => this.setState({ localizacion_producto: event.target.value })}
                                             value={this.state.localizacion_producto}
@@ -515,7 +515,7 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-stock-minimo"
                                             label="Stock minimo"
-                                            error={this.state.stock_minimo.length > 0 ? false : true}
+                                            error={this.state.stock_minimo.length === 0}
                                             required
                                             onChange={(event) => this.setState({ stock_minimo: event.target.value })}
                                             value={this.state.stock_minimo}
@@ -528,7 +528,7 @@ class ModalNewProducto extends Component {
                                             style={styles.styleText}
                                             id="standard-stock-maximo"
                                             label="Stock máximo"
-                                            error={this.state.stock_maximo.length > 0 ? false : true}
+                                            error={this.state.stock_maximo.length === 0}
                                             required
                                             onChange={(event) => this.setState({ stock_maximo: event.target.value })}
                                             value={this.state.stock_maximo}
@@ -587,7 +587,7 @@ class ModalNewProducto extends Component {
                                         style={styles.styleText}
                                         id="standard-porcentaje-iva"
                                         label="Porcentaje Iva"
-                                        error={this.state.porcentaje_iva.length > 0 ? false : true}
+                                        error={this.state.porcentaje_iva.length === 0}
                                         required
                                         onChange={(event) => this.setState({ porcentaje_iva: event.target.value })}
                                         value={this.state.porcentaje_iva}

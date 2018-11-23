@@ -4,6 +4,12 @@ import ItemMenuHerramienta from '../../../../components/components/menus/ItemMen
 import TablaNormal from '../../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
 
+import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -33,10 +39,11 @@ class ListaProductos extends Component {
         listaProductosTemporal: [],
         //columnas de la tabla de productos
         rowsListaProductos: [
-            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
+            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
             { id: 'descripcion_producto', numeric: true, disablePadding: false, label: 'Descripcion' },
             { id: 'codigo_barras', numeric: true, disablePadding: false, label: 'C. Barras' },
             { id: 'codigo_referencia', numeric: true, disablePadding: false, label: 'C. Referencia' },
+            { id: 'stock_actual', numeric: true, disablePadding: false, label: 'Stock Actual' },
 
             { id: 'precio_costo', numeric: true, disablePadding: false, label: 'Precio Costo' },
             { id: 'precio_venta_a', numeric: true, disablePadding: false, label: 'P. venta A' },
@@ -52,13 +59,14 @@ class ListaProductos extends Component {
             { id: 'unidad_medida', numeric: true, disablePadding: false, label: 'Unidad de medida' },
             { id: 'producto_fraccionado', numeric: true, disablePadding: false, label: 'Fraccionado' },
 
-            { id: 'stock_actual', numeric: true, disablePadding: false, label: 'Stock Actual' },
             { id: 'stock_minimo', numeric: true, disablePadding: false, label: 'Stock Minimo' },
             { id: 'stock_maximo', numeric: true, disablePadding: false, label: 'Stock Maximo' },
 
             { id: 'fecha_vencimiento', numeric: true, disablePadding: false, label: 'Fecha vencimiento' },
             { id: 'fecha_registro', numeric: true, disablePadding: false, label: 'Fecha registro' },
             { id: 'hora_registro', numeric: true, disablePadding: false, label: 'Hora registro' },
+
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
 
             { id: 'tiene_iva', numeric: true, disablePadding: false, label: 'Tiene Iva' },
             { id: 'estado', numeric: true, disablePadding: false, label: 'Estado' },
@@ -123,6 +131,41 @@ class ListaProductos extends Component {
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return this.getColorActivadoDesactivado(n.estado, n.codigo)
+        }
+
+        if (item.id === 'acciones') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Tooltip title="Editar"  placement="left">
+                    <IconButton aria-label="Editar" onClick={()=>{
+                        this.setState({ itemSeleccionado: n })
+                        this.setState({ openModalFullScreen: true })
+                    }}>
+                        <EditIcon color='primary' />
+                    </IconButton>
+                </Tooltip>
+                {
+                    Boolean(n.estado) ?
+                        <Tooltip title="Desactivar" placement="right">
+                            <IconButton aria-label="Desactivar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                            }}>
+                                <VisibilityOffIcon />
+                            </IconButton>
+                        </Tooltip>
+                        :
+                        <Tooltip title="Activar">
+                            <IconButton aria-label="Activar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                            }}>
+                                <VisibilityIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+                }
+
+
+            </div>
         }
 
         if (item.id === 'descripcion_producto') {
@@ -328,65 +371,13 @@ class ListaProductos extends Component {
                 <MenuHerramientas>
 
                     <ItemMenuHerramienta
-                        titleButton="Nuevo"
+                        titleButton="Nuevo Producto"
                         color="primary"
                         visible={true}
-                        disabled={this.state.itemsSeleccionados.length > 0}
-                        onClick={() => this.setState({ openModalFullScreen: true })}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Editar"
-                        color="primary"
-                        visible={true}
-                        disabled={this.state.itemsSeleccionados.length === 1 ? false : true}
+                        //disabled={this.state.itemsSeleccionados.length > 0}
                         onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ openModalFullScreen: true })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Eliminar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Añadir vencimiento"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimpleFechaNacimiento: true })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Activar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
-                            }
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Desactivar"
-                        color="primary"
-                        visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
-                        onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
-                            }
+                            this.setState({ itemSeleccionado: null })
+                            this.setState({ openModalFullScreen: true })
                         }}
                     />
 
@@ -402,16 +393,12 @@ class ListaProductos extends Component {
 
                 </MenuHerramientas>
 
-
-
-
-
                 <Divider />
 
                 <TablaNormal
                     textoTitleP="Productos"
                     textoTitleS="Producto"
-                    selectedItems={false}
+                    selectedItems={true}
                     toolbar={false}
                     data={this.state.listaProductos}
                     rows={this.state.rowsListaProductos}
@@ -422,7 +409,7 @@ class ListaProductos extends Component {
 
                 <FullScreenDialog openModal={this.state.openModalFullScreen}>
                     <ModalNewProducto
-                        item={this.state.itemsSeleccionados[0]}
+                        item={this.state.itemSeleccionado}
                         handleClose={() => this.setState({ openModalFullScreen: false })}
                         setNewProducto={this.setNewProducto}
                         setUpdateProducto={this.setUpdateProducto}
@@ -438,9 +425,9 @@ class ListaProductos extends Component {
                     <DeleteActivarDesactivar
                         tipo={this.state.estadoModalDeleteActivarDesactivar}
                         handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminarItems={() => this.handleEliminarItems(this.state.itemsSeleccionados)}
-                        handleActivarItems={() => this.handleActivarItems(this.state.itemsSeleccionados)}
-                        handleDesactivarItems={() => this.handleDesactivarItems(this.state.itemsSeleccionados)}
+                        handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
+                        handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
+                        handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
                     />
                 </ModalContainerNormal>
 

@@ -4,6 +4,13 @@ import ItemMenuHerramienta from '../../menus/ItemMenuHerramienta'
 import TablaNormal from '../../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
 
+import EditIcon from '@material-ui/icons/Edit';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
+import IconButton from '@material-ui/core/IconButton';
+import Tooltip from '@material-ui/core/Tooltip';
+
+
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -25,9 +32,13 @@ class Proveedores extends Component {
     state = {
         listaProveedores: [],
         rowslistaStock: [
+            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
             { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
+            { id: 'tipo_identificacion', numeric: true, disablePadding: false, label: 'Tipo de Identificacion' },
+            { id: 'identificacion', numeric: true, disablePadding: false, label: 'identificacion' },
+            { id: 'tipo_persona', numeric: true, disablePadding: false, label: 'Tipo Persona' },
             { id: 'tipo', numeric: true, disablePadding: false, label: 'Tipo' },
             { id: 'celular', numeric: true, disablePadding: false, label: 'celular' },
             { id: 'telefono', numeric: true, disablePadding: false, label: 'Telefono' },
@@ -97,6 +108,40 @@ class Proveedores extends Component {
         if (item.id === 'codigo') {
             return n.codigo
         }
+        if (item.id === 'acciones') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <Tooltip title="Editar"  placement="left">
+                    <IconButton aria-label="Editar" onClick={()=>{
+                        this.setState({ itemSeleccionado: n })
+                        this.setState({ openModalFullScreen: true })
+                    }}>
+                        <EditIcon color='primary' />
+                    </IconButton>
+                </Tooltip>
+                {
+                    Boolean(n.estado) ?
+                        <Tooltip title="Desactivar" placement="right">
+                            <IconButton aria-label="Desactivar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                            }}>
+                                <VisibilityOffIcon />
+                            </IconButton>
+                        </Tooltip>
+                        :
+                        <Tooltip title="Activar">
+                            <IconButton aria-label="Activar" onClick={() => {
+                                this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                            }}>
+                                <VisibilityIcon color='primary' />
+                            </IconButton>
+                        </Tooltip>
+                }
+
+
+            </div>
+        }
         if (item.id === 'nombre') {
             return <div style={{ width: 'max-content' }}>
                 {this.getColorActivadoDesactivado(n.estado, n.nombre)}
@@ -107,6 +152,27 @@ class Proveedores extends Component {
         }
         if (item.id === 'tipo') {
             return this.getColorActivadoDesactivado(n.estado, n.tipo)
+        }
+        if (item.id === 'tipo_identificacion') {
+           
+            if(n.tipo_identificacion==='05'){                
+                return this.getColorActivadoDesactivado(n.estado, "Cedula")
+            }else{
+                return this.getColorActivadoDesactivado(n.estado, "RUC")
+            }
+            
+        }
+        if (item.id === 'identificacion') {
+            return this.getColorActivadoDesactivado(n.estado, n.identificacion)
+        }
+
+        if (item.id === 'tipo_persona') {
+            if(n.tipo_persona===true){
+                return this.getColorActivadoDesactivado(n.estado, "NO OBLIGADO A LLEVAR CONTABILIDAD")
+            }else{
+                return this.getColorActivadoDesactivado(n.estado, "OBLIGADO A LLEVAR CONTABILIDAD")  
+            }
+           
         }
         if (item.id === 'celular') {
             return this.getColorActivadoDesactivado(n.estado, n.celular)
@@ -234,15 +300,16 @@ class Proveedores extends Component {
                         color="primary"
                         visible={true}
                         disabled={this.state.itemsSeleccionados.length > 0}
-                        onClick={() => this.setState({ openModalFullScreen: true })}
+                        onClick={() => this.setState({ itemSeleccionado: null, openModalFullScreen: true })}
                     />
-                    <ItemMenuHerramienta
+                    {/* <ItemMenuHerramienta
                         titleButton="Editar"
                         color="primary"
                         visible={true}
                         disabled={this.state.itemsSeleccionados.length === 1 ? false : true}
                         onClick={() => {
                             if (this.state.itemsSeleccionados.length > 0) {
+                                console.log(this.state.itemsSeleccionados)
                                 this.setState({ openModalFullScreen: true })
                             }
                         }}
@@ -275,11 +342,13 @@ class Proveedores extends Component {
                         visible={true}
                         disabled={!this.state.itemsSeleccionados.length > 0}
                         onClick={() => {
+
                             if (this.state.itemsSeleccionados.length > 0) {
+                              
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
                             }
                         }}
-                    />
+                    /> */}
 
                     <div style={{ flex: 0.8 }}></div>
 
@@ -296,7 +365,7 @@ class Proveedores extends Component {
                 <TablaNormal
                     textoTitleP="Proveedores"
                     textoTitleS="Proveedor"
-                    selectedItems={false}
+                    selectedItems={true}
                     toolbar={false}
                     data={this.state.listaProveedores}
                     rows={this.state.rowslistaStock}
@@ -307,7 +376,7 @@ class Proveedores extends Component {
 
                 <FullScreenDialog openModal={this.state.openModalFullScreen}>
                     <ModalNewEditProveedor
-                        item={this.state.itemsSeleccionados[0]}
+                        item={this.state.itemSeleccionado}
                         handleClose={() => this.setState({ openModalFullScreen: false })}
                         usuario={this.props.usuario}
                     />
@@ -320,9 +389,9 @@ class Proveedores extends Component {
                     <DeleteActivarDesactivar
                         tipo={this.state.estadoModalDeleteActivarDesactivar}
                         handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminarItems={() => this.handleEliminarItems(this.state.itemsSeleccionados)}
-                        handleActivarItems={() => this.handleActivarItems(this.state.itemsSeleccionados)}
-                        handleDesactivarItems={() => this.handleDesactivarItems(this.state.itemsSeleccionados)}
+                        handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
+                        handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
+                        handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
                     />
                 </ModalContainerNormal>
             </div>

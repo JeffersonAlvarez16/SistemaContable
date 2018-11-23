@@ -74,7 +74,7 @@ class Ventas extends Component {
         estadoModalCancelarVenta: false,
         estadoModalEditarVenta: false,
         //item para editar
-        itemEditar:null,
+        itemEditar: null,
         //fecha actual
         fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
     }
@@ -174,6 +174,16 @@ class Ventas extends Component {
         if (item.id === 'factura_emitida') {
             return n.cliente === 'Consumidor Final' ?
                 <div style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}>
+                    <Tooltip title="Devolver Venta">
+                        <IconButton onClick={() => {
+                            this.setState({
+                                codigoEmitirFactura: n.codigo,
+                                estadoModalCancelarVenta: true,
+                            })
+                        }}>
+                            <CloseIcon style={{ color: '#EF5350' }} />
+                        </IconButton>
+                    </Tooltip>
                     <IconButton disabled>
                         <DoneIcon />
                     </IconButton>
@@ -200,7 +210,7 @@ class Ventas extends Component {
                                     <CloseIcon style={{ color: '#EF5350' }} />
                                 </IconButton>
                             </Tooltip>
-                            <Tooltip title="Editar Venta">
+                            {/* <Tooltip title="Editar Venta">
                                 <IconButton onClick={() => {
                                     this.setState({
                                         itemEditar: n,
@@ -209,7 +219,7 @@ class Ventas extends Component {
                                 }}>
                                     <EditIcon color='primary' />
                                 </IconButton>
-                            </Tooltip>
+                            </Tooltip> */}
                             <Tooltip title="Emitir Factura">
                                 <IconButton onClick={() => {
                                     this.setState({
@@ -315,8 +325,12 @@ class Ventas extends Component {
             if (snapshot.val()) {
                 snapshot.val().productos.forEach(element => {
                     var productoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + element.codigo)
-                    productoRef.update({
-                        stock_actual: element.stock_actual
+                    productoRef.once('value', (snapshot) => {
+                        if (snapshot.val()) {
+                            productoRef.update({
+                                stock_actual: Number(snapshot.val().stock_actual) + Number(element.cantidad)
+                            })
+                        }
                     })
                 })
                 this.setOperacionStock(
@@ -391,14 +405,6 @@ class Ventas extends Component {
                         onClick={() => {
                             this.setState({ itemEditar: null })
                             this.setState({ openModalNewVenta: true })
-                        }}
-                    />
-                    <ItemMenuHerramienta
-                        titleButton="Devolución de venta"
-                        color="primary"
-                        visible={true}
-                        onClick={() => {
-                            this.setState({ estadoModalSimpleCompraProductos: true })
                         }}
                     />
 

@@ -23,6 +23,8 @@ import TablaNormal from '../components/tables/TableNormal';
 import funtions from '../../utils/funtions';
 import AutoCompleteProveedor from '../plugins/AutoCompleteProveedores';
 import AutoCompleteClientes from '../plugins/AutoCompleteClientes';
+import AutoCompleteCliente from '../plugins/AutoCompleteClientes-New';
+import AutoCompleteProveedores from '../plugins/AutoCompleteRetenciones';
 
 
 class ModalCompraProductos extends Component {
@@ -46,11 +48,11 @@ class ModalCompraProductos extends Component {
         observacionCompra: '',
     }
 
-    componentDidMount(){
-        document.addEventListener("keydown", this.escFunction, false);   
+    componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
     }
 
-    escFunction=(event)=> {
+    escFunction = (event) => {
         if (event.keyCode === 27) {
             this.props.handleClose()
         }
@@ -65,7 +67,7 @@ class ModalCompraProductos extends Component {
         }
 
         if (this.props.tipoAjuste === 'devolucion_cliente') {
-            return restaStock
+            return sumaStock
         }
 
         if (this.props.tipoAjuste === 'ajuste-stock-entrada') {
@@ -328,7 +330,7 @@ class ModalCompraProductos extends Component {
             }
 
             if (this.props.tipoAjuste === 'devolucion_cliente') {
-                return restaRetorno
+                return sumaRetorno
             }
 
             if (this.props.tipoAjuste === 'ajuste-stock-entrada') {
@@ -348,8 +350,8 @@ class ModalCompraProductos extends Component {
             return <Button variant="fab" mini color="secondary" aria-label="quit" onClick={() => {
                 const arraySeleccionados = this.state.listaSeleccionados
                 const arraySeleccionadosEditados = this.state.listaSeleccionadosValoresEditados
-                var contador1=0
-                var contador2=0
+                var contador1 = 0
+                var contador2 = 0
                 arraySeleccionados.forEach(item => {
                     if (item.codigo === n.codigo) {
                         arraySeleccionados.splice(contador1, 1);
@@ -479,47 +481,38 @@ class ModalCompraProductos extends Component {
                     <Grid item xs={3}>
                         {
                             tipoAjuste === 'compra_producto' &&
-                            <AutoCompleteProveedor
-                                id="standard-proveedores-select"
-                                styleText={styles.styleSearch}
-                                nameTextFiel="Proveedor"
-                                dataRef="proveedores"
-                                dataRefObject="proveedor"
-                                itemCategoria={this.state.proveedorCompra}
-                                changueText={itemCode => this.setState({ proveedorCompra: itemCode })}
-                                textItemVacio='Proveedores vacios'
-                                usuario={this.props.usuario}
-                            >
-                            </AutoCompleteProveedor>
+                            <AutoCompleteProveedores
+                            styleText={styles.styleSearch}
+                            dataRef="proveedores"
+                            dataRefObject="proveedor"
+                            error={this.state.proveedorCompra.length>0?false:true}
+                            onChangue={(item) => this.setState({ proveedorCompra: item.codigo })}
+                            usuario={this.props.usuario}
+                            codigoProveedor=''
+                        />
                         }
                         {
                             tipoAjuste === 'devolucion_cliente' &&
-                            <AutoCompleteClientes
-                                id="standard-clientes-select"
+                            <AutoCompleteCliente
                                 styleText={styles.styleSearch}
-                                nameTextFiel="Cliente"
                                 dataRef="clientes"
                                 dataRefObject="cliente"
-                                itemCategoria={this.state.clienteDevolucion}
-                                changueText={itemCode => this.setState({ clienteDevolucion: itemCode })}
-                                textItemVacio='Clientes vacios'
+                                error={this.state.clienteDevolucion.length > 0 ? false : true}
+                                onChangue={(item) => this.setState({ clienteDevolucion: item.codigo })}
                                 usuario={this.props.usuario}
                             />
                         }
                         {
                             tipoAjuste === 'devolucion-proveedor' &&
-                            <AutoCompleteProveedor
-                                id="standard-proveedores-select"
+                            <AutoCompleteProveedores
                                 styleText={styles.styleSearch}
-                                nameTextFiel="Proveedor"
                                 dataRef="proveedores"
                                 dataRefObject="proveedor"
-                                itemCategoria={this.state.proveedorCompra}
-                                changueText={itemCode => this.setState({ proveedorCompra: itemCode })}
-                                textItemVacio='Proveedores vacios'
+                                error={this.state.proveedorCompra.length>0?false:true}
+                                onChangue={(item) => this.setState({ proveedorCompra: item.codigo })}
                                 usuario={this.props.usuario}
-                            >
-                            </AutoCompleteProveedor>
+                                codigoProveedor=''
+                            />
                         }
                     </Grid>
                     <Grid item xs={3}>

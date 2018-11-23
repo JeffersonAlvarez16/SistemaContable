@@ -14,6 +14,7 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
+import AutoCompleteCliente from '../plugins/AutoCompleteClientes-New';
 
 
 class SectionFactura extends Component {
@@ -26,7 +27,7 @@ class SectionFactura extends Component {
 
     nuevaVenta = () => {
         this.setState({
-            clienteFacturacion: 'h',
+            clienteFacturacion: '',
             clienteSeleccionado: null,
         })
         this.props.handleDescontar(0)
@@ -55,6 +56,12 @@ class SectionFactura extends Component {
                 }
             })
         }
+    }
+
+    onChangueSelectedCliente = (item) => {
+        this.setState({ clienteFacturacion: item.codigo })
+        this.getClienteDataBase(item.codigo)
+        this.props.handleCliente(item.codigo)
     }
 
 
@@ -89,19 +96,12 @@ class SectionFactura extends Component {
                     </Typography>
 
                     <div style={{ paddingLeft: 16, paddingRight: 16 }}>
-                        <AutoCompleteClientes
-                            id="standard-clientes-select"
+                        <AutoCompleteCliente
                             styleText={styles.styleClientes}
-                            nameTextFiel="Cliente"
                             dataRef="clientes"
                             dataRefObject="cliente"
-                            itemCategoria={this.state.clienteFacturacion}
-                            changueText={itemCode => {
-                                this.setState({ clienteFacturacion: itemCode })
-                                this.getClienteDataBase(itemCode)
-                                this.props.handleCliente(itemCode)
-                            }}
-                            textItemVacio='Clientes vacios'
+                            error={this.state.clienteFacturacion.length>0?false:true}
+                            onChangue={(item) => this.onChangueSelectedCliente(item)}
                             usuario={this.props.usuario}
                         />
                     </div>
@@ -229,7 +229,9 @@ class SectionFactura extends Component {
                         </Button>
                     </Grid>
                     <Grid item xs={6} style={{ padding: 5 }}>
-                        <Button variant="contained" size="small" color="secondary" style={{ width: '100%' }}>
+                        <Button variant="contained" size="small" color="secondary" style={{ width: '100%' }} onClick={()=>{
+                            this.props.handleClose()
+                        }}>
                             Cancelar
                         </Button>
                     </Grid>

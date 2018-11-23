@@ -59,9 +59,30 @@ class NuevaVenta extends Component {
                 uidUser: user.uid
             })
         })
+        if (this.props.item) {
+            this.setState({
+                cambio: this.props.item.cambio,
+                cliente: this.props.item.cliente,
+                codigo: this.props.item.codigo,
+                descuento: this.props.item.descuento,
+                dinero_resibido: this.props.item.dinero_resibido,
+                empleado: this.props.item.empleado,
+                estado: this.props.item.estado,
+                factura_emitida: this.props.item.factura_emitida,
+                fecha_venta: this.props.item.fecha_venta,
+                hora_venta: this.props.item.hora_venta,
+                iva: this.props.item.iva,
+                observacion: this.props.item.observacion,
+                order: this.props.item.order,
+                productosSeleccionados: this.props.item.productos,
+                subtotal: this.props.item.subtotal,
+                tipo_venta: this.props.item.tipo_venta,
+                total: this.props.item.total
+            })
+        }
     }
 
-    escFunction=(event)=> {
+    escFunction = (event) => {
         if (event.keyCode === 27) {
             this.props.handleClose()
         }
@@ -140,24 +161,28 @@ class NuevaVenta extends Component {
     handleFinalizarVenta = () => {
         const { productosSeleccionados, facturaElectronica, uidUser, tipo_venta } = this.state
         if (this.comprobarCamposLlenos()) {
-            this.setState({ estadoModalGuardarVenta: true })
+
             this.updateDataProductos()
             this.setOperacionStock(productosSeleccionados)
             var codigoRegistroVenta = funtions.guidGenerator()
             this.setSaveRegistroVenta(codigoRegistroVenta)
-            setTimeout(() => {
+           /*  setTimeout(() => {
                 this.contentFactura.nuevaVenta()
                 this.sectionFactura.nuevaVenta()
-                this.setState({ estadoModalGuardarVenta: false })
-            }, 1000)
+            }, 1000) */
             if (tipo_venta === 'factura') {
+                this.setState({ estadoModalGuardarVenta: true })
                 var jsonData = this.createJsonFacturaElectronica()
                 this.saveFacturasJson(jsonData, codigoRegistroVenta)
                 if (Boolean(facturaElectronica)) {
                     this.postSet(uidUser, jsonData)
+                    this.setState({ estadoModalGuardarVenta: false })
+                } else {
+                    this.setState({ estadoModalGuardarVenta: false })
                 }
             }
-            setSnackBars.openSnack('success', 'rootSnackBar', 'Venta exitosa', 2000)
+            this.props.handleClose()
+            setSnackBars.openSnack('success', 'rootSnackBar', 'Venta guardada', 2000)
         } else {
             setSnackBars.openSnack('error', 'rootSnackBar', 'LLenar todos los campos', 2000)
         }
@@ -180,7 +205,10 @@ class NuevaVenta extends Component {
         })
 
         const content = await rawResponse.json();
-        //console.log(content)
+        setSnackBars.openSnack('success', 'rootSnackBar', `Factura emitida con exito ${content.estado}`, 2000)
+        /* if (content != null) {
+            this.setState({ estadoModalGuardarVenta: false })
+        } */
     }
 
     //comprobar campos llenos 
@@ -439,6 +467,7 @@ class NuevaVenta extends Component {
                                 this.setState({ precioProductosConIva })
                             }}
 
+                            productosSeleccionadosData={this.state.productosSeleccionados}
                             productosSeleccionados={productosSeleccionados => {
                                 this.setState({ productosSeleccionados })
                                 this.handleDineroResibido(this.state.dinero_resibido)
@@ -498,6 +527,8 @@ class NuevaVenta extends Component {
 
                             facturaElectronica={this.state.facturaElectronica}
                             handleFinalizarVenta={this.handleFinalizarVenta}
+
+                            handleClose={this.props.handleClose}
 
                         />
                     </Grid>

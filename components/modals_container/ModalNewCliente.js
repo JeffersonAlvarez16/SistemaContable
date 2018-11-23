@@ -50,6 +50,7 @@ class ModalNewCliente extends Component {
     }
 
     componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
         if (this.props.item) {
             this.setState({
                 codigo: this.props.item.codigo,
@@ -74,6 +75,13 @@ class ModalNewCliente extends Component {
                 usuario: this.props.item.usuario,
                 order: this.props.item.order,
             })
+            setTimeout(() => {
+                this.comprobarCedula(this.props.item.numero_identificacion)
+                if (!this.props.item) {
+                    this.comprobarCedulaRegistrada(this.state.numero_identificacion)
+                }
+                this.comprobarEmail(this.props.item.email)
+            }, 100)
         } else {
             this.setState({
                 usuario: this.props.usuario.code,
@@ -81,6 +89,12 @@ class ModalNewCliente extends Component {
                 codigo: funtions.guidGenerator(),
                 tipo_identificacion: '05',
             })
+        }
+    }
+
+    escFunction = (event) => {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
         }
     }
 
@@ -280,7 +294,9 @@ class ModalNewCliente extends Component {
             this.state.email.length > 0 &&
             this.state.numero_identificacion.length > 0 &&
             this.state.direccion.length > 0 &&
-            this.getCheckFormEmpresa(this.state.empresa)
+            this.getCheckFormEmpresa(this.state.empresa) &&
+            this.state.comprobacion_numero_cedula &&
+            !this.state.identificacionRegistrada
         ) {
             var order = new Date()
             const item = {
@@ -338,6 +354,55 @@ class ModalNewCliente extends Component {
         });
     }
 
+    comprobarCedulaRegistrada = cedula => {
+        if (cedula.length === 10) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    var db = firebase.database();
+                    var productosRef = db.ref('users/' + user.uid + '/clientes').orderByChild('numero_identificacion').equalTo(cedula)
+                    var productosRefRuc = db.ref('users/' + user.uid + '/clientes').orderByChild('numero_identificacion').equalTo(cedula + '001')
+                    productosRef.on('value', (snapshot) => {
+                        if (snapshot.val()) {
+                            this.setState({ identificacionRegistrada: true, texto_numero_cedula: 'Numero de idetificación registrado' })
+                        } else {
+                            productosRefRuc.on('value', (snapshot) => {
+                                if (snapshot.val()) {
+                                    this.setState({ identificacionRegistrada: true, texto_numero_cedula: 'Numero de idetificación registrado' })
+                                } else {
+                                    this.setState({ identificacionRegistrada: false })
+                                }
+                            })
+                        }
+                    })
+
+                }
+            })
+        }
+        if (cedula.length === 13) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    var db = firebase.database();
+                    var productosRef = db.ref('users/' + user.uid + '/clientes').orderByChild('numero_identificacion').equalTo(cedula)
+                    var productosRefRuc = db.ref('users/' + user.uid + '/clientes').orderByChild('numero_identificacion').equalTo(cedula.slice(0, -3))
+                    productosRefRuc.on('value', (snapshot) => {
+                        if (snapshot.val()) {
+                            this.setState({ identificacionRegistrada: true, texto_numero_cedula: 'Numero de idetificación registrado' })
+                        } else {
+                            productosRef.on('value', (snapshot) => {
+                                if (snapshot.val()) {
+                                    this.setState({ identificacionRegistrada: true, texto_numero_cedula: 'Numero de idetificación registrado' })
+                                } else {
+                                    this.setState({ identificacionRegistrada: false })
+                                }
+                            })
+                        }
+                    })
+
+                }
+            })
+        }
+    }
+
     render() {
 
         const styles = {
@@ -384,10 +449,8 @@ class ModalNewCliente extends Component {
                                             style={styles.styleText}
                                             id="standard-codigo-automatico"
                                             label="Codigo automático"
-                                            //error={this.state.codigo.length > 0 ? false : true}
                                             required
                                             disabled
-                                            //onChange={(event) => this.setState({ codigo: event.target.value })}
                                             value={this.state.codigo}
                                             margin="normal"
                                             variant="filled"
@@ -400,7 +463,6 @@ class ModalNewCliente extends Component {
                                                     id="filled-sexo-cliente"
                                                     select
                                                     label="Sexo"
-                                                    //error={this.state.sexo.length > 0 ? false : true}
                                                     value={this.state.sexo}
                                                     onChange={event => this.setState({ sexo: event.target.value })}
                                                     margin="normal"
@@ -416,7 +478,6 @@ class ModalNewCliente extends Component {
                                                     id="date-fecha-nacimiento-cliente"
                                                     label="Fecha Nacimiento"
                                                     type="date"
-                                                    //defaultValue={`${new Date().getDate()+'-'+new Date().getMonth()+'-'+new Date().getFullYear()}`}
                                                     InputLabelProps={{
                                                         shrink: true,
                                                     }}
@@ -440,7 +501,7 @@ class ModalNewCliente extends Component {
                                             style={styles.styleText}
                                             id="standard-nombre-cliente"
                                             label="Nombre"
-                                            error={this.state.nombre.length > 0 ? false : true}
+                                            error={this.state.nombre.length === 0}
                                             required
                                             onChange={(event) => this.setState({ nombre: event.target.value })}
                                             value={this.state.nombre}
@@ -452,7 +513,7 @@ class ModalNewCliente extends Component {
                                             id="filled-email-cliente"
                                             label="Email"
                                             required
-                                            error={this.state.email.length > 0 ? !Boolean(this.state.comprobacion_email) : true}
+                                            error={this.state.email.length === 0 ? true : !Boolean(this.state.comprobacion_email)}
                                             value={this.state.email}
                                             helperText={this.state.comprobacion_texto_email}
                                             onChange={event => {
@@ -469,11 +530,21 @@ class ModalNewCliente extends Component {
                                             id="filled-tipo-identificacion"
                                             select
                                             label="Tipo de indentificación"
-                                            //error={this.state.sexo.length > 0 ? false : true}
                                             value={this.state.tipo_identificacion}
+                                            disabled={this.props.item}
                                             onChange={event => {
                                                 this.setState({ tipo_identificacion: event.target.value })
-                                                setTimeout(() => { this.comprobarCedula(this.state.numero_identificacion) }, 100)
+                                                setTimeout(() => {
+                                                    if (this.state.tipo_identificacion === '05') {
+                                                        if (this.state.numero_identificacion.length === 13) {
+                                                            this.setState({ numero_identificacion: this.state.numero_identificacion.slice(0, -3) })
+                                                        }
+                                                    }
+                                                    this.comprobarCedula(this.state.numero_identificacion)
+                                                    if (!this.props.item) {
+                                                        this.comprobarCedulaRegistrada(this.state.numero_identificacion)
+                                                    }
+                                                }, 100)
                                             }}
                                             margin="normal"
                                             variant="outlined"
@@ -488,11 +559,26 @@ class ModalNewCliente extends Component {
                                             label="Número de identificación"
                                             required
                                             helperText={this.state.texto_numero_cedula}
-                                            error={this.state.numero_identificacion.length > 0 ? !Boolean(this.state.comprobacion_numero_cedula) : true}
+                                            error={this.state.numero_identificacion.length === 0 ? true : !Boolean(this.state.comprobacion_numero_cedula) ? true : this.state.identificacionRegistrada}
                                             value={this.state.numero_identificacion}
+                                            disabled={this.props.item}
                                             onChange={event => {
-                                                this.setState({ numero_identificacion: event.target.value })
-                                                setTimeout(() => { this.comprobarCedula(this.state.numero_identificacion) }, 100)
+                                                if (this.state.tipo_identificacion === '04') {
+                                                    if (event.target.value.length <= 13) {
+                                                        this.setState({ numero_identificacion: event.target.value })
+                                                    }
+                                                }
+                                                if (this.state.tipo_identificacion === '05') {
+                                                    if (event.target.value.length <= 10) {
+                                                        this.setState({ numero_identificacion: event.target.value })
+                                                    }
+                                                }
+                                                setTimeout(() => {
+                                                    this.comprobarCedula(this.state.numero_identificacion)
+                                                    if (!this.props.item) {
+                                                        this.comprobarCedulaRegistrada(this.state.numero_identificacion)
+                                                    }
+                                                }, 100)
 
                                             }}
                                             margin="normal"
@@ -523,7 +609,7 @@ class ModalNewCliente extends Component {
                                             id="filled-tipo-direccion-cliente"
                                             label="Dirección"
                                             required
-                                            error={this.state.direccion.length > 0 ? false : true}
+                                            error={this.state.direccion.length === 0}
                                             value={this.state.direccion}
                                             onChange={event => this.setState({ direccion: event.target.value })}
                                             margin="normal"
@@ -537,7 +623,6 @@ class ModalNewCliente extends Component {
                                                 <TextField
                                                     id="filled-barrio-cliente"
                                                     label="Barrio"
-                                                    //error={this.state.barrio.length > 0 ? false : true}
                                                     value={this.state.barrio}
                                                     onChange={event => this.setState({ barrio: event.target.value })}
                                                     margin="normal"
@@ -550,7 +635,6 @@ class ModalNewCliente extends Component {
                                                 <TextField
                                                     id="filled-ciudad-cliente"
                                                     label="Ciudad"
-                                                    //error={this.state.ciudad.length > 0 ? false : true}
                                                     value={this.state.ciudad}
                                                     onChange={event => this.setState({ ciudad: event.target.value })}
                                                     margin="normal"
@@ -570,9 +654,13 @@ class ModalNewCliente extends Component {
                                             style={styles.styleText}
                                             id="standard-celular-cliente"
                                             label="Celular"
-                                            error={this.state.celular.length > 0 ? false : true}
+                                            error={this.state.celular.length === 0}
                                             required
-                                            onChange={(event) => this.setState({ celular: event.target.value })}
+                                            onChange={(event) => {
+                                                if (event.target.value.length <= 10) {
+                                                    this.setState({ celular: event.target.value })
+                                                }
+                                            }}
                                             value={this.state.celular}
                                             margin="normal"
                                             variant="filled"
@@ -586,7 +674,7 @@ class ModalNewCliente extends Component {
                                                     id="filled-telefono-cliente"
                                                     label="Telefono"
                                                     required
-                                                    error={this.state.telefono.length > 0 ? false : true}
+                                                    error={this.state.telefono.length === 0}
                                                     value={this.state.telefono}
                                                     onChange={event => this.setState({ telefono: event.target.value })}
                                                     margin="normal"
@@ -604,7 +692,6 @@ class ModalNewCliente extends Component {
                                                     id="filled-telefono-cliente"
                                                     label="Telefono"
                                                     required
-                                                    //error={this.state.telefono.length > 0 ? false : true}
                                                     value={this.state.telefono}
                                                     onChange={event => this.setState({ telefono: event.target.value })}
                                                     margin="normal"
@@ -620,7 +707,6 @@ class ModalNewCliente extends Component {
                                         <TextField
                                             id="filled-observacion-cliente"
                                             label="Observación"
-                                            //error={this.state.observacion.length > 0 ? false : true}
                                             value={this.state.observacion}
                                             onChange={event => this.setState({ observacion: event.target.value })}
                                             margin="normal"
@@ -632,7 +718,6 @@ class ModalNewCliente extends Component {
                                         <TextField
                                             id="filled-limite-cliente"
                                             label="Límite de deuda"
-                                            //error={this.state.limite_deuda.length > 0 ? false : true}
                                             value={this.state.limite_deuda}
                                             onChange={event => this.setState({ limite_deuda: event.target.value })}
                                             margin="normal"
@@ -644,7 +729,6 @@ class ModalNewCliente extends Component {
                                         <TextField
                                             id="filled-credito-cliente"
                                             label="Crédito"
-                                            //error={this.state.credito.length > 0 ? false : true}
                                             value={this.state.credito}
                                             onChange={event => this.setState({ credito: event.target.value })}
                                             margin="normal"
