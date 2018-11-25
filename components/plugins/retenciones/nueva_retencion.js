@@ -119,7 +119,7 @@ class NuevaRetencion extends Component {
 
     postSet = async (uidUser, jsonData, codigo) => {
         //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
-        const rawResponse = await fetch('http://192.168.1.97:5000/retensincontabilidad', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

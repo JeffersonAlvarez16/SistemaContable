@@ -18,6 +18,8 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
+//impresiones
+import Print from 'print-js'
 
 //firebase 
 import firebase from 'firebase/app';
@@ -115,13 +117,34 @@ class Retenciones extends Component {
         setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
     }
 
+    PrintElem = (elem) => {
+        var mywindow = window.open('', 'PRINT', 'height=700,width=900');
+
+        mywindow.document.write('<html><head><title>' + document.title + '</title>');
+        mywindow.document.write('</head><body >');
+        mywindow.document.write('<h1>' + document.title + '</h1>');
+        mywindow.document.write(document.getElementById(elem).innerHTML);
+        mywindow.document.write('</body></html>');
+
+        mywindow.document.close(); // necessary for IE >= 10
+        mywindow.focus(); // necessary for IE >= 10*/
+
+        mywindow.print();
+        mywindow.close();
+
+        return true;
+    }
+
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
         }
         if (item.id === 'accions') {
             return <>
-                <IconButton >
+                <IconButton onClick={() => {
+                    Print({ printable: 'printJS-form', type: 'html', header: 'Retención', maxWidth: 10 })
+                    //this.PrintElem('printJS-form')
+                }}>
                     <LocalPrintshopIcon />
                 </IconButton>
             </>
@@ -141,14 +164,14 @@ class Retenciones extends Component {
                 {
                     n.estado === 'error' &&
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <IconButton disabled onClick={()=>{
+                        <IconButton disabled onClick={() => {
 
                         }}>
                             <CloseIcon style={{ color: 'red' }} />
                         </IconButton>
-                        <div style={{ display: 'flex', flexDirection: 'column',  justifyContent:'center' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                             <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error al emitir</div>
-                            <div style={{ color: 'red', display: 'flex', alignItems: 'center', fontSize:10, fontStyle:'italic' }}>{n.error_emision}</div>
+                            <div style={{ color: 'red', display: 'flex', alignItems: 'center', fontSize: 10, fontStyle: 'italic' }}>{n.error_emision}</div>
                         </div>
                     </div>
                 }
@@ -240,6 +263,20 @@ class Retenciones extends Component {
         return (
             <Layout title="Retenciones" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
+                <div id="printJS-form" style={{ width: 400, display: 'none' }}>
+                    prueba de impresion
+                   {/*  <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        Rertencion
+                        <div style={{ background: 'red', width: 20, margin: 100 }}>
+                            retencion
+                        </div>
+                        <div style={{flex:1}}></div>
+                        <div style={{ background: 'blue', width: 10, margin: 100 }}>
+                            retnerke
+                        </div>
+                    </div> */}
+                </div>
+
                 <MenuHerramientas>
                     <ItemMenuHerramienta
                         titleButton="Nueva Retencion"
@@ -296,6 +333,9 @@ class Retenciones extends Component {
                     >
                     </NuevaRetencion>
                 </FullScreenDialog>
+
+
+
 
             </Layout>
         );

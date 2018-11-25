@@ -55,7 +55,7 @@ class LoginUsuarios extends Component {
             sessionStorage.setItem("code-status-ser-section", this.state.userSelecionado.code);
             setSnackBars.openSnack('success', 'rootSnackBar', `Bienvenido ${this.state.userSelecionado.nombre}`, 2000)
             this.handleClose()
-            funtions.setTime(500,()=>{
+            funtions.setTime(500, () => {
                 this.props.onChangueStatusSession(this.state.userSelecionado.code)
             })
         } else {
@@ -99,9 +99,12 @@ class LoginUsuarios extends Component {
                     </DialogActions>
                 </Dialog>
 
-                <Button onClick={() => firebase.auth().signOut()} color="primary" autoFocus>
-                    Cerrar Sesion
-                </Button>
+                <div style={{ display: 'flex', width: '100%' }}>
+                    <div style={{flex:1}}></div>
+                    <Button onClick={() => firebase.auth().signOut()} color="primary" autoFocus>
+                        Cerrar Sesion
+                    </Button>
+                </div>
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
                     <div>
                         <Typography component="h1" variant="display2" gutterBottom>

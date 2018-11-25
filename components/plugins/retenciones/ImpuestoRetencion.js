@@ -101,7 +101,8 @@ class ImpuestoRetencion extends Component {
                             >
                                 <MenuItem value={'343'}>0.1%</MenuItem>
                                 <MenuItem value={'327'}>0.2%</MenuItem>
-                                <MenuItem value={'328'}>0.3%</MenuItem>
+                                <MenuItem value={'304'}>0.8%</MenuItem>
+                                <MenuItem value={'308'}>0.10%</MenuItem>
                             </TextField>
                         }
 

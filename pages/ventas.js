@@ -36,6 +36,7 @@ import ModalContainerNormal from '../components/modals_container/ModalContainerN
 import EmitirFacturaModal from '../components/plugins/EmitirFacturaModal';
 import ModalCancelarVenta from '../components/modals_container/ventas/ModalCancelarVenta';
 import ModalEditarVenta from '../components/modals_container/ventas/ModalEditarVenta';
+import { CircularProgress } from '@material-ui/core';
 
 
 
@@ -190,15 +191,18 @@ class Ventas extends Component {
                     <div style={{ display: 'flex', alignItems: 'center' }}>Consumidor Final</div>
                 </div>
                 :
-                <div style={{ width: 'max-content' }}>{
-                    Boolean(n.factura_emitida) ?
+                <div style={{ width: 'max-content' }}>
+                    {
+                        n.factura_emitida === 'emitida' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <IconButton disabled>
-                                <DoneAllIcon style={{ color: '#42A5F5' }} />
+                                <DoneAllIcon style={{ color: '#00c853' }} />
                             </IconButton>
-                            <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Emitida</div>
+                            <div style={{ color: '#00c853', display: 'flex', alignItems: 'center' }}>Emitida</div>
                         </div>
-                        :
+                    }
+                    {
+                        n.factura_emitida === 'no_emitida' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <Tooltip title="Devolver Venta">
                                 <IconButton onClick={() => {
@@ -210,16 +214,6 @@ class Ventas extends Component {
                                     <CloseIcon style={{ color: '#EF5350' }} />
                                 </IconButton>
                             </Tooltip>
-                            {/* <Tooltip title="Editar Venta">
-                                <IconButton onClick={() => {
-                                    this.setState({
-                                        itemEditar: n,
-                                        estadoModalEditarVenta: true,
-                                    })
-                                }}>
-                                    <EditIcon color='primary' />
-                                </IconButton>
-                            </Tooltip> */}
                             <Tooltip title="Emitir Factura">
                                 <IconButton onClick={() => {
                                     this.setState({
@@ -230,10 +224,27 @@ class Ventas extends Component {
                                     <InputIcon color='primary' />
                                 </IconButton>
                             </Tooltip>
-                            {/* <div style={{ color: '#EF5350', display: 'flex', alignItems: 'center', paddingLeft:10 }}>No emitida</div>
-                        */}
                         </div>
-                }</div >
+                    }
+                    {
+                        n.factura_emitida === 'pendiente' &&
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <IconButton disabled>
+                                <CircularProgress size={20} thickness={5} style={{ color: '#42A5F5' }} />
+                            </IconButton>
+                            <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pendiente</div>
+                        </div>
+                    }
+                    {
+                        n.factura_emitida === 'error' &&
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <IconButton disabled>
+                                <CloseIcon style={{ color: 'red' }} />
+                            </IconButton>
+                            <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error de emisión</div>
+                        </div>
+                    }
+                </div >
         }
 
         if (item.id === 'total') {
@@ -286,30 +297,31 @@ class Ventas extends Component {
                 var productosRef = db.ref('users/' + user.uid + '/facturas_ventas/' + codigo);
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
-                        this.postSet(user.uid, snapshot.val())
+                        this.postSet(user.uid, snapshot.val(),codigo)
                         var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
                         venteRef.update({
-                            factura_emitida: true
+                            factura_emitida: 'pendiente'
                         })
-                        setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
+                        //setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
                     }
                 })
             }
         })
     }
 
-    postSet = async (uidUser, jsonData) => {
+    postSet = async (uidUser, jsonData, codigo) => {
         const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'id': uidUser,
+                'codigo': codigo,
             },
             body: JSON.stringify(jsonData)
         })
 
         const content = await rawResponse.json();
-        //console.log(content)
+        console.log(content)
     }
 
     cambiarListaPorFecha = fecha => {

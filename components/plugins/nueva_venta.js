@@ -175,7 +175,7 @@ class NuevaVenta extends Component {
                 var jsonData = this.createJsonFacturaElectronica()
                 this.saveFacturasJson(jsonData, codigoRegistroVenta)
                 if (Boolean(facturaElectronica)) {
-                    this.postSet(uidUser, jsonData)
+                    this.postSet(uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ estadoModalGuardarVenta: false })
                 } else {
                     this.setState({ estadoModalGuardarVenta: false })
@@ -194,12 +194,13 @@ class NuevaVenta extends Component {
         operacionFacturaJson.set(jsonData)
     }
 
-    postSet = async (uidUser, jsonData) => {
+    postSet = async (uidUser, jsonData, codigoRegistroVenta) => {
         const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
                 'id': uidUser,
+                'codigo': codigoRegistroVenta,
             },
             body: JSON.stringify(jsonData)
         })
@@ -261,7 +262,7 @@ class NuevaVenta extends Component {
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : cliente,
             descuento: descuento,
             tipo_venta,
-            factura_emitida: facturaElectronica,
+            factura_emitida: Boolean(facturaElectronica)?'pendiente':'no_emitida',
             observacion: observacion,
             dinero_resibido: dinero_resibido,
             cambio: cambio,
