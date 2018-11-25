@@ -19,7 +19,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
 //impresiones
-import Print from 'print-js'
+//import Print from 'print-js'
 
 //firebase 
 import firebase from 'firebase/app';
@@ -142,7 +142,7 @@ class Retenciones extends Component {
         if (item.id === 'accions') {
             return <>
                 <IconButton onClick={() => {
-                    Print({ printable: 'printJS-form', type: 'html', header: 'Retención', maxWidth: 10 })
+                    //Print({ printable: 'printJS-form', type: 'html', header: 'Retención', maxWidth: 10 })
                     //this.PrintElem('printJS-form')
                 }}>
                     <LocalPrintshopIcon />
