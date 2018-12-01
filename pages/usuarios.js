@@ -292,12 +292,15 @@ class Usuarios extends Component {
                     <div>
                         joder carajop
                     </div>
+<<<<<<< HEAD
                     <div>
                         joder carajop
                     </div>
                     <div>
                         joder carajop
                     </div>
+=======
+>>>>>>> 72aa59a76a80d4c510e6cf00e4154bd04eb4ab82
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search
