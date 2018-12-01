@@ -286,24 +286,6 @@ class Usuarios extends Component {
                     <div>
                         joder carajop 00
                     </div>
-                    <div>
-                        joder carajop 01
-                    </div>
-                    <div>
-                        joder carajop 1
-                    </div>
-                    <div>
-                        joder carajop 2 
-                    </div>
-                    <div>
-                        joder carajop 3 
-                    </div>
-                    <div>
-                        joder carajop 4
-                    </div>
-                    <div>
-                        joder carajop 5
-                    </div>
                     
                     <div style={{ flex: 0.9 }}></div>
 
