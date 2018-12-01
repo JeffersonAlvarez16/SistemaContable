@@ -283,6 +283,9 @@ class Usuarios extends Component {
                             this.setState({ openModalNewUsuario: true })
                         }}
                     />
+                    <div>
+                        joder carajop
+                    </div>
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search
