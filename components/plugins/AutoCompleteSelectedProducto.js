@@ -161,7 +161,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                     }}
                 />
 
-                <Popper open={this.state.listaProductosTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, minWidth: 350 }} >
+                <Popper open={this.state.listaProductosTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, minWidth:450 }} >
                     {({ TransitionProps }) => (
                         <Fade {...TransitionProps} timeout={350}>
                             <Paper elevation={6}>
@@ -176,11 +176,6 @@ class AutoCompleteSelectedProducto extends React.Component {
                                     <div style={{ width: 300, paddingRight: 32 }}>
                                         <Typography variant="subheading" gutterBottom>
                                             Descripción
-                                        </Typography>
-                                    </div>
-                                    <div style={{ width: 90, paddingRight: 32 }}>
-                                        <Typography variant="subheading" gutterBottom>
-                                            Precio A
                                         </Typography>
                                     </div>
                                     <div style={{ width: 110 }}>
@@ -200,7 +195,6 @@ class AutoCompleteSelectedProducto extends React.Component {
                                                     }
                                                     >
                                                         <ListItemText style={{ width: 300 }} primary={`${item.descripcion_producto}`} />
-                                                        <ListItemText style={{ width: 90 }} primary={`${item.precio_venta_a}`} />
                                                         <ListItemText style={{ width: 110 }} primary={`${item.stock_actual}`} />
                                                     </ListItem>
                                                 )

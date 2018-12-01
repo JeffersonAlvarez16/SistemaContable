@@ -58,38 +58,40 @@ if (!firebase.apps.length) {
 class Layout extends Component {
 
     state = {
-        sesionState: 'cargando'
+        sesionState: 'cargando',
+        online: true,
     }
 
     componentDidMount() {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                // User is signed in.
-                //var displayName = user.displayName;
-                var email = user.email;
-                //var emailVerified = user.emailVerified;
-                //var photoURL = user.photoURL;
-                //var isAnonymous = user.isAnonymous;
-                var uid = user.uid;
-                //var providerData = user.providerData;  
-                //setSnackBars.openSnack('success', 'rootSnackBar', 'Bienvenido a FactBtaApps', 2000)
-                /*setTimeout(() => { */
                 this.setState({
                     sesionState: 'iniciada'
                 })
-                /*  }, 1000); */
 
             } else {
-                // User is signed out.
                 this.setState({ sesionState: 'cerrada' })
             }
         });
-
+        if (navigator.onLine) {
+            this.setState({
+                online: true
+            })
+        } else {
+            this.setState({
+                online: false
+            })
+        }
+        window.addEventListener('offline', () => this.setState({
+            online: false
+        }));
+        window.addEventListener('online', () => this.setState({
+            online: true
+        }));
     }
 
     render() {
         const { children, title } = this.props
-
         return (
             <div>
                 <Head>
@@ -102,23 +104,43 @@ class Layout extends Component {
                     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
 
                 </Head>
-                <MuiThemeProvider theme={themeCont}>
-                    <div id='rootSnackBar'></div>
+                {
+                    this.state.online === true ?
+                        <MuiThemeProvider theme={themeCont}>
+                            <div id='rootSnackBar'></div>
 
-                    {
-                        this.state.sesionState === 'iniciada' &&
-                        <LoginContenedor title={title} onChangueUserState={usuario=>this.props.onChangueUserState(usuario)}>
                             {
-                                children
+                                this.state.sesionState === 'iniciada' &&
+                                <LoginContenedor title={title} onChangueUserState={usuario => this.props.onChangueUserState(usuario)}>
+                                    {
+                                        children
+                                    }
+                                </LoginContenedor>
                             }
-                        </LoginContenedor>
-                    }
 
-                    {
-                        this.state.sesionState === 'cerrada' &&
-                        <Login />
-                    }
-                </MuiThemeProvider>
+                            {
+                                this.state.sesionState === 'cerrada' &&
+                                <Login />
+                            }
+                        </MuiThemeProvider>
+                        :
+                        <div style={{
+                            display: 'flex',
+                            width: '100vw',
+                            height: '100vh',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                        }}>
+                            <div style={{
+                                background: 'red',
+                                padding: 20,
+                                color: 'white',
+                                borderRadius:50
+                            }}>
+                                Por favor revise su conexión a internet!
+                            </div>
+                        </div>
+                }
                 <style jsx global>{`
                     body { 
                         margin:0

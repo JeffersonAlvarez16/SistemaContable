@@ -160,8 +160,8 @@ class ClippedDrawer extends React.Component {
               open={Boolean(anchorEl)}
               onClose={this.handleClose}
             >
-              <MenuItem onClick={this.handleClose}>Perfil</MenuItem>
-              <MenuItem onClick={this.handleClose}>Configuración</MenuItem>
+              {/* <MenuItem onClick={this.handleClose}>Perfil</MenuItem>
+              <MenuItem onClick={this.handleClose}>Configuración</MenuItem> */}
               <MenuItem onClick={() => {
                 sessionStorage.removeItem("code-status-ser-section");
                 this.props.closeSesion()

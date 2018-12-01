@@ -29,7 +29,13 @@ import NuevaRetencion from '../components/plugins/retenciones/nueva_retencion';
 import funtions from '../utils/funtions';
 import setSnackBars from '../components/plugins/setSnackBars';
 
-class Retenciones extends Component {
+import ReactToPrint from "react-to-print";
+import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
+import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
+import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
+import ModalEliminarRetencion from '../components/modals_container/retenciones/ModalEliminarRetencion';
+
+class Retencion extends Component {
 
 
     state = {
@@ -61,6 +67,7 @@ class Retenciones extends Component {
         estadoModalEmitirFactura: false,
         estadoModalCancelarVenta: false,
         estadoModalEditarVenta: false,
+        estadoModalSimple: false,
         //item para editar
         itemEditar: null,
         //fecha actual
@@ -117,22 +124,17 @@ class Retenciones extends Component {
         setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
     }
 
-    PrintElem = (elem) => {
-        var mywindow = window.open('', 'PRINT', 'height=700,width=900');
+    eliminarRetencionDB = codigo => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                db.ref('users/' + user.uid + '/retenciones/' + codigo).remove()
+            }
+        })
+    }
 
-        mywindow.document.write('<html><head><title>' + document.title + '</title>');
-        mywindow.document.write('</head><body >');
-        mywindow.document.write('<h1>' + document.title + '</h1>');
-        mywindow.document.write(document.getElementById(elem).innerHTML);
-        mywindow.document.write('</body></html>');
+    enviarToPlantillaData = () => {
 
-        mywindow.document.close(); // necessary for IE >= 10
-        mywindow.focus(); // necessary for IE >= 10*/
-
-        mywindow.print();
-        mywindow.close();
-
-        return true;
     }
 
     handleGetData = (n, item) => {
@@ -141,9 +143,15 @@ class Retenciones extends Component {
         }
         if (item.id === 'accions') {
             return <>
+                {/* <ReactToPrint
+                    ref={el => (this.componentImp = el)}
+                    trigger={() => <></>}
+                    content={() => this.refImprimirResivo}
+                /> */}
                 <IconButton onClick={() => {
-                    //Print({ printable: 'printJS-form', type: 'html', header: 'Retención', maxWidth: 10 })
-                    //this.PrintElem('printJS-form')
+                    /* this.enviarToPlantillaData(n.codigo)
+                    this.componentImp.handlePrint() */
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'En desarrollo', 2000)
                 }}>
                     <LocalPrintshopIcon />
                 </IconButton>
@@ -164,8 +172,11 @@ class Retenciones extends Component {
                 {
                     n.estado === 'error' &&
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        <IconButton disabled onClick={() => {
-
+                        <IconButton onClick={() => {
+                            this.setState({
+                                itemEliminar: n.codigo,
+                                estadoModalSimple: true,
+                            })
                         }}>
                             <CloseIcon style={{ color: 'red' }} />
                         </IconButton>
@@ -263,20 +274,6 @@ class Retenciones extends Component {
         return (
             <Layout title="Retenciones" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
-                <div id="printJS-form" style={{ width: 400, display: 'none' }}>
-                    prueba de impresion
-                   {/*  <div style={{ display: 'flex', flexDirection: 'row' }}>
-                        Rertencion
-                        <div style={{ background: 'red', width: 20, margin: 100 }}>
-                            retencion
-                        </div>
-                        <div style={{flex:1}}></div>
-                        <div style={{ background: 'blue', width: 10, margin: 100 }}>
-                            retnerke
-                        </div>
-                    </div> */}
-                </div>
-
                 <MenuHerramientas>
                     <ItemMenuHerramienta
                         titleButton="Nueva Retencion"
@@ -306,9 +303,20 @@ class Retenciones extends Component {
                         textoTooltip="Buscar Retencion"
                         handleSearch={this.handleSearch}
                     />
+
+
                 </MenuHerramientas>
 
                 <Divider />
+
+                <ContainerPlantillas>
+                    <ResivoVenta
+                        item={this.state.itemFormateadoImprimir}
+                        ref={el => (this.refImprimirResivo = el)}
+                    />
+                </ContainerPlantillas>
+
+
 
                 <TablaNormal
                     textoTitleP="Retenciones"
@@ -334,12 +342,21 @@ class Retenciones extends Component {
                     </NuevaRetencion>
                 </FullScreenDialog>
 
-
-
-
+                <ModalContainerNormal
+                    open={this.state.estadoModalSimple}
+                    handleClose={() => this.setState({ estadoModalSimple: false })}
+                >
+                    <ModalEliminarRetencion
+                        handleClose={() => this.setState({ estadoModalSimple: false })}
+                        handleEliminar={() => {
+                            this.eliminarRetencionDB(this.state.itemEliminar)
+                            this.setState({ estadoModalSimple: false })
+                        }}
+                    />
+                </ModalContainerNormal>
             </Layout>
         );
     }
 }
 
-export default Retenciones;
+export default Retencion;

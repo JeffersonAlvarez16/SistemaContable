@@ -120,10 +120,21 @@ class Login extends Component {
                         flexDirection: 'column',
                     }}
                 >
-                    <Typography variant="headline" component="h3" style={{
-                        marginTop: 20
+                    <Typography variant="display2" component="h1" style={{
+                        marginTop: 20,
+                        textAlign:'center',
+                        color:'black'
                     }}>
-                        Iniciar sesión en FacBtaApps
+                        RapiFac
+                    </Typography>
+                    <Typography variant="headline" component="h1" style={{
+                        textAlign:'center',
+                        color:'gray',
+                        fontSize:15,
+                        marginBottom:20,
+                        marginTop:18
+                    }}>
+                        Ingresa al sistema
                     </Typography>
                     <form
                         noValidate
@@ -139,7 +150,7 @@ class Login extends Component {
                             type='text'
                             value={this.state.usuario}
                             onChange={this.handleChangeUsuario}
-                            label="Nombre de usuario"
+                            label="Correo Electronico"
                             margin="normal"
                             onFocus={() => {
                                 this.state.usuario.length === 0 &&

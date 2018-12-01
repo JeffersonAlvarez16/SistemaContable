@@ -19,6 +19,7 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
+import { TextField } from '@material-ui/core';
 
 class Stock extends Component {
 
@@ -56,6 +57,15 @@ class Stock extends Component {
         estadoModalSimpleCompraProductos: false,
         //tipo de ajuste para productos
         tipoAjuste: '',
+        //fecha actual del sistem
+        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+    }
+
+    obtenerFechFormateada = () => {
+        const { fechaActual } = this.state
+        var fecha = fechaActual.split('-')
+        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
+        return nueva
     }
 
     componentDidMount() {
@@ -66,7 +76,7 @@ class Stock extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock');
+                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(this.obtenerFechFormateada())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -115,19 +125,25 @@ class Stock extends Component {
         }
 
         if (item.id === 'cliente_proveedor') {
-            return n.cliente_proveedor==='Consumidor Final'?n.cliente_proveedor:<>
-             <ReturnTextTable
-                referencia="proveedores"
-                codigo={n.cliente_proveedor}
-                datoTraido="nombre"
-                estado={true}
-            />
-             <ReturnTextTable
-                referencia="clientes"
-                codigo={n.cliente_proveedor}
-                datoTraido="nombre"
-                estado={true}
-            />
+            return n.cliente_proveedor === 'Consumidor Final' ? n.cliente_proveedor : <>
+                <ReturnTextTable
+                    referencia="proveedores"
+                    codigo={n.cliente_proveedor.codigo}
+                    datoTraido="nombre"
+                    estado={true}
+                />
+                <ReturnTextTable
+                    referencia="proveedores"
+                    codigo={n.cliente_proveedor}
+                    datoTraido="nombre"
+                    estado={true}
+                />
+                <ReturnTextTable
+                    referencia="clientes"
+                    codigo={n.cliente_proveedor.codigo}
+                    datoTraido="nombre"
+                    estado={true}
+                />
             </>
         }
 
@@ -229,6 +245,11 @@ class Stock extends Component {
         })
     }
 
+    cambiarListaPorFecha = fecha => {
+        this.setState({ fechaActual: fecha })
+        setTimeout(() => { this.cargarData() }, 100)
+    }
+
     render() {
         return (
             <Layout title="Stock" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
@@ -292,6 +313,16 @@ class Stock extends Component {
                             Ajuste de Stock
                         </MenuItem>
                     </Menu>
+
+                    <TextField
+                        id="datetime-local"
+                        type="date"
+                        defaultValue={this.state.fechaActual}
+                        InputLabelProps={{
+                            shrink: true,
+                        }}
+                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                    />
 
                     <div style={{ flex: 0.9 }}></div>
 

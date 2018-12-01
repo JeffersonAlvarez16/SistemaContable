@@ -28,11 +28,22 @@ class LoginContenedor extends Component {
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         let array = funtions.snapshotToArray(snapshot)
+                        let arraytem=[]
+                        array.forEach((item)=>{
+                            if(item.estado){
+                                
+                                arraytem.push(item)
+                                
+                            }
+                        })                    
                         this.setState({
                             stateUsers: 'llena',
-                            users: array
+                            users: arraytem
                         })
-                        this.checkStatusSession(array)
+                        console.log(arraytem)
+                        this.checkStatusSession(arraytem)
+                    
+                        
                     }
                 })
             }

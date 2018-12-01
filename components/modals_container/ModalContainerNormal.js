@@ -8,7 +8,7 @@ const ModalContainerNormal = (props) => {
             onClose={props.handleClose}
             aria-labelledby="simple-dialog"
             open={props.open}
-            style={{ zIndex: 99999 }}
+            style={{ zIndex: 99980 }}
         >
             {props.children}
         </Dialog>

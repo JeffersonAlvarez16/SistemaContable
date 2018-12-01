@@ -89,6 +89,7 @@ class ImpuestoRetencion extends Component {
                                 id="standard-tipo-porcentaje-renta"
                                 select
                                 label="Tipo Porcentaje"
+                                disabled
                                 error={this.state.tipo_porcentaje.length > 0 ? false : true}
                                 value={this.state.tipo_porcentaje}
                                 onChange={event => {

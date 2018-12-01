@@ -8,7 +8,7 @@ import 'firebase/auth'
 class ReturnTextTable extends Component {
 
     state = {
-        texto: 'cargando...'
+        texto: ''
     }
 
     componentDidMount() {

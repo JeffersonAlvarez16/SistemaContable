@@ -48,8 +48,9 @@ class NuevaVenta extends Component {
         uidUser: '',
 
         //tipo de venta
-        tipo_venta: 'factura'
-
+        tipo_venta: 'factura',
+        // ambiente
+        ambienteFacturacion: 0,
     }
 
     componentDidMount() {
@@ -58,6 +59,17 @@ class NuevaVenta extends Component {
             this.setState({
                 uidUser: user.uid
             })
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('auth_admins/' + user.uid + "/ambiente")
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({ ambienteFacturacion: snap.val() })
+                    } 
+                })
+            }
         })
         if (this.props.item) {
             this.setState({
@@ -166,10 +178,10 @@ class NuevaVenta extends Component {
             this.setOperacionStock(productosSeleccionados)
             var codigoRegistroVenta = funtions.guidGenerator()
             this.setSaveRegistroVenta(codigoRegistroVenta)
-           /*  setTimeout(() => {
-                this.contentFactura.nuevaVenta()
-                this.sectionFactura.nuevaVenta()
-            }, 1000) */
+            /*  setTimeout(() => {
+                 this.contentFactura.nuevaVenta()
+                 this.sectionFactura.nuevaVenta()
+             }, 1000) */
             if (tipo_venta === 'factura') {
                 this.setState({ estadoModalGuardarVenta: true })
                 var jsonData = this.createJsonFacturaElectronica()
@@ -262,7 +274,7 @@ class NuevaVenta extends Component {
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : cliente,
             descuento: descuento,
             tipo_venta,
-            factura_emitida: Boolean(facturaElectronica)?'pendiente':'no_emitida',
+            factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
             dinero_resibido: dinero_resibido,
             cambio: cambio,
@@ -344,7 +356,7 @@ class NuevaVenta extends Component {
 
         var date = new Date()
         var json = {
-            "ambiente": 1,
+            "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
             "fecha_emision": date.toISOString(),
             "emisor": {

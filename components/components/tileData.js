@@ -8,6 +8,7 @@ import Home from '@material-ui/icons/Home';
 import DraftsIcon from '@material-ui/icons/Drafts';
 import Assignment from '@material-ui/icons/Assignment';
 import History from '@material-ui/icons/History';
+import Usuarios from '@material-ui/icons/Group';
 import DriveEta from '@material-ui/icons/DriveEta';
 import ShoppingBasket from '@material-ui/icons/ShoppingBasket';
 import SupervisedUserCircle from '@material-ui/icons/SupervisedUserCircle';
@@ -23,11 +24,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 
 import Link from 'next/link'
+import setSnackBars from '../plugins/setSnackBars';
 
 
 export const mailFolderListItems = (
     <div>
-        <Link prefetch href="/inicio">
+        <Link prefetch href="/">
             <ListItem button>
                 <Tooltip title="Inicio" placement="right">
                     <ListItemIcon>
@@ -87,16 +89,26 @@ export const mailFolderListItems = (
                 <ListItemText primary="Ventas" />
             </ListItem>
         </Link>
-        <Link prefetch href="/retenciones">
+        <Link prefetch href="/retencion">
             <ListItem button>
                 <Tooltip title="Retenciones" placement="right">
                     <ListItemIcon>
                         <DonutSmall/>
                     </ListItemIcon>
                 </Tooltip>
-                <ListItemText primary="Ventas" />
+                <ListItemText primary="Retenciones" />
             </ListItem>
         </Link>
+   <Link prefetch href="/usuarios"> 
+            <ListItem button>
+                <Tooltip title="Usuarios" placement="right">
+                    <ListItemIcon>
+                        <Usuarios/>
+                    </ListItemIcon>
+                </Tooltip>
+                <ListItemText primary="Usuarios" />
+            </ListItem>
+       </Link> 
     </div>
 );
 

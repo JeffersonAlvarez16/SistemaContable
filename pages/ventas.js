@@ -13,6 +13,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 
 import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
+import FileCopy from '@material-ui/icons/FileCopy';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
@@ -38,12 +39,15 @@ import ModalCancelarVenta from '../components/modals_container/ventas/ModalCance
 import ModalEditarVenta from '../components/modals_container/ventas/ModalEditarVenta';
 import { CircularProgress } from '@material-ui/core';
 
-
+import ReactToPrint from "react-to-print";
+import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
+import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
+import ModalNewVenta from '../components/plugins/ModalNewVenta';
 
 class Ventas extends Component {
 
     state = {
-        usuario: {},
+       
         itemsSeleccionados: [],
         listaVentas: [],
         estadoTabla: 'cargando',
@@ -51,29 +55,31 @@ class Ventas extends Component {
 
         rowslistaVentas: [
             { id: 'accions', numeric: false, disablePadding: true, label: 'Resivo' },
-            /* { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' }, */
             { id: 'factura_emitida', numeric: false, disablePadding: true, label: 'Estado Factura' },
             { id: 'cliente', numeric: true, disablePadding: false, label: 'Cliente' },
             { id: 'productos', numeric: true, disablePadding: false, label: 'Productos' },
+            { id: 'tipo_pago', numeric: true, disablePadding: false, label: 'Tipo de pago' },
             { id: 'subtotal', numeric: true, disablePadding: false, label: 'SubTotal' },
             { id: 'total', numeric: true, disablePadding: false, label: 'Total' },
             { id: 'iva', numeric: true, disablePadding: false, label: 'Precio Iva' },
             { id: 'descuento', numeric: true, disablePadding: false, label: 'Descuento' },
             { id: 'dinero_resibido', numeric: true, disablePadding: false, label: 'Dinero recibido' },
             { id: 'cambio', numeric: true, disablePadding: false, label: 'Cambio/Vuelto' },
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' }, 
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'fecha_venta', numeric: true, disablePadding: false, label: 'Fecha de venta' },
             { id: 'hora_venta', numeric: true, disablePadding: false, label: 'Hora de venta' },
         ],
         //usuario
-        usuario: '',
+        usuario: {},
         // modals
         openModalNewVenta: false,
         estadoModalSimpleCompraProductos: false,
         estadoModalEmitirFactura: false,
         estadoModalCancelarVenta: false,
         estadoModalEditarVenta: false,
+        openModalNewVentaFinal:false,
         //item para editar
         itemEditar: null,
         //fecha actual
@@ -127,14 +133,22 @@ class Ventas extends Component {
     }
 
     handleGetData = (n, item) => {
-        /* if (item.id === 'codigo') {
+        if (item.id === 'codigo') {
             return n.codigo
-        } */
+        } 
 
         if (item.id === 'accions') {
             return <>
-                <IconButton >
-                    <LocalPrintshopIcon />
+                <ReactToPrint
+                    ref={el => (this.refEventoImprimir = el)}
+                    trigger={() => <></>}
+                    content={() => this.refImprimirResivo}
+                />
+                <IconButton onClick={() => {
+                    this.enviarToPlantillaData(n)
+                }}
+                >
+                    <LocalPrintshopIcon/>
                 </IconButton>
             </>
         }
@@ -143,7 +157,7 @@ class Ventas extends Component {
             return n.cliente === 'Consumidor Final' ? n.cliente : <>
                 <ReturnTextTable
                     referencia="clientes"
-                    codigo={n.cliente}
+                    codigo={n.cliente.codigo}
                     datoTraido="nombre"
                     estado={true}
                 />
@@ -165,11 +179,20 @@ class Ventas extends Component {
                         estado={true}
                     />
                 </div>
-            })
+            }) 
+            {/* <div style={{ width: 'max-content' }}>
+                    <IconButton>
+                        <FileCopy />
+                    </IconButton>
+            </div> */}
         }
 
         if (item.id === 'subtotal') {
             return <div style={{ width: 'max-content' }}>{n.subtotal}</div>
+        }
+
+        if (item.id === 'tipo_pago') {
+            return <div style={{ width: 'max-content' }}>{n.tipo_pago}</div>
         }
 
         if (item.id === 'factura_emitida') {
@@ -297,7 +320,7 @@ class Ventas extends Component {
                 var productosRef = db.ref('users/' + user.uid + '/facturas_ventas/' + codigo);
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
-                        this.postSet(user.uid, snapshot.val(),codigo)
+                        this.postSet(user.uid, snapshot.val(), codigo)
                         var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
                         venteRef.update({
                             factura_emitida: 'pendiente'
@@ -320,8 +343,8 @@ class Ventas extends Component {
             body: JSON.stringify(jsonData)
         })
 
-        const content = await rawResponse.json();
-        console.log(content)
+        /* const content = await rawResponse.json();
+        console.log(content) */
     }
 
     cambiarListaPorFecha = fecha => {
@@ -404,6 +427,64 @@ class Ventas extends Component {
         setSnackBars.openSnack('success', 'rootSnackBar', 'Venta eliminada con exito', 2000)
     }
 
+    enviarToPlantillaData = item => {
+        const itemFormat = {
+            numero_venta: item.codigo,
+            tipo_venta: item.tipo_venta,
+            productos: item.productos,
+            subtotal: item.subtotal,
+            iva: item.iva,
+            total: item.total,
+            descuento: item.descuento,
+            fecha_venta: item.fecha_venta,
+            hora_venta: item.hora_venta,
+            tipo_pago:item.tipo_pago,
+            valor_acreditado:item.valor_acreditado,
+            fecha_a_pagar:item.fecha_a_pagar,
+            numero_tarjeta:item.numero_tarjeta,
+            nombre_banco:item.nombre_banco,
+        }
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                if(item.tipo_venta==='factura'){
+                    var clienteRef = db.ref('users/' + user.uid + '/clientes/' + item.cliente.codigo);
+                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                    clienteRef.once('value', (snapshot) => {
+                        if (snapshot.val()) {
+                            itemFormat.nombreCliente = snapshot.val().nombre
+                            itemFormat.emailCliente = snapshot.val().email
+                            itemFormat.identificacionCliente = snapshot.val().numero_identificacion
+                            itemFormat.direccionCliente = snapshot.val().direccion
+                            
+                            empresaRef.once('value', (snap) => {
+                                if (snap.val()) {                                
+                                    itemFormat.nombreEmpresa = snap.val()
+                                    this.setState({
+                                        itemFormateadoImprimir: itemFormat
+                                    })
+                                    this.refEventoImprimir.handlePrint()
+                                }
+                            })
+                        }
+                    })
+                }else{
+                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                    empresaRef.once('value', (snap) => {
+                        if (snap.val()) {                                
+                            itemFormat.nombreEmpresa = snap.val()
+                            this.setState({
+                                itemFormateadoImprimir: itemFormat
+                            })
+                            this.refEventoImprimir.handlePrint()
+                        }
+                    })
+                }
+            }
+        })
+
+    }
+
     render() {
 
         return (
@@ -417,6 +498,15 @@ class Ventas extends Component {
                         onClick={() => {
                             this.setState({ itemEditar: null })
                             this.setState({ openModalNewVenta: true })
+                        }}
+                    />
+                    <ItemMenuHerramienta
+                        titleButton="Nueva Venta"
+                        color="primary"
+                        visible={true}
+                        onClick={() => {
+                            this.setState({ itemEditar: null })
+                            this.setState({ openModalNewVentaFinal: true })
                         }}
                     />
 
@@ -464,7 +554,15 @@ class Ventas extends Component {
                         item={this.state.itemEditar}
                     >
                     </NuevaVenta>
+                </FullScreenDialog>
 
+                <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
+                    <ModalNewVenta
+                        usuario={this.state.usuario}
+                        handleClose={() => this.setState({ openModalNewVentaFinal: false })}
+                        item={this.state.itemEditar}
+                    >
+                    </ModalNewVenta>
                 </FullScreenDialog>
 
                 <FullScreenDialog openModal={this.state.estadoModalSimpleCompraProductos}>
@@ -517,6 +615,13 @@ class Ventas extends Component {
                         }}
                     />
                 </ModalContainerNormal>
+
+                <ContainerPlantillas>
+                    <ResivoVenta
+                        item={this.state.itemFormateadoImprimir}
+                        ref={el => (this.refImprimirResivo = el)}
+                    />
+                </ContainerPlantillas>
 
             </Layout>
         );

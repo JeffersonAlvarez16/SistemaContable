@@ -41,12 +41,26 @@ class NuevaRetencion extends Component {
         valorRenta: '',
         //modals
         estadoModalEmitirRetencion: false,
+        //ambientes
+        ambienteFacturacion: 0,
     }
 
     componentDidMount() {
         const fecha = new Date().toISOString().toString().split(':')
         var fechas = fecha[0] + ':' + fecha[1]
         this.setState({ fecha_emision_documento_sustento: fechas })
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('auth_admins/' + user.uid + "/ambiente")
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({ ambienteFacturacion: snap.val() })
+                    } 
+                })
+            }
+        })
 
     }
 
@@ -68,7 +82,6 @@ class NuevaRetencion extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var codigo = funtions.guidGenerator()
-                console.log(codigo)
                 var retencion = this.generarRetencionIvaRenta()
                 this.postSet(user.uid, retencion, codigo)
                 this.guardarRetencionBaseDatos(retencion, codigo)
@@ -84,7 +97,6 @@ class NuevaRetencion extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var codigo = funtions.guidGenerator()
-                console.log(codigo)
                 var retencion = this.generarRetencionRenta()
                 this.postSet(user.uid, retencion, codigo)
                 this.guardarRetencionBaseDatos(retencion, codigo)
@@ -192,7 +204,7 @@ class NuevaRetencion extends Component {
 
     generarRetencionRenta = () => {
         var retencionIvaRenta = {
-            "ambiente": 1,
+            "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
@@ -291,10 +303,6 @@ class NuevaRetencion extends Component {
         }
         return retencionIvaRenta
     }
-
-
-
-
 
     setValor = () => {
         var multiplia = 0

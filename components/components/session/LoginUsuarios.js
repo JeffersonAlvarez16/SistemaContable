@@ -63,6 +63,8 @@ class LoginUsuarios extends Component {
         }
     }
 
+    
+
     render() {
         const { opendialog, stateUsers, users } = this.state;
 
@@ -125,7 +127,8 @@ class LoginUsuarios extends Component {
                                 stateUsers === 'llena' &&
                                 <div>
                                     {
-                                        users.map((item) => <ItemUser key={item.id} onClick={() => this.handleClickOpen(item)} title={item.nombre} />)
+                                        users.map((item) =>
+                                         <ItemUser key={item.id} onClick={() => this.handleClickOpen(item)} title={item.nombre} />)
                                     }
                                 </div>
                             }
