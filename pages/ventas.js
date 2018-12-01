@@ -10,6 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
@@ -47,7 +48,7 @@ import ModalNewVenta from '../components/plugins/ModalNewVenta';
 class Ventas extends Component {
 
     state = {
-       
+
         itemsSeleccionados: [],
         listaVentas: [],
         estadoTabla: 'cargando',
@@ -65,7 +66,7 @@ class Ventas extends Component {
             { id: 'descuento', numeric: true, disablePadding: false, label: 'Descuento' },
             { id: 'dinero_resibido', numeric: true, disablePadding: false, label: 'Dinero recibido' },
             { id: 'cambio', numeric: true, disablePadding: false, label: 'Cambio/Vuelto' },
-            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' }, 
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'fecha_venta', numeric: true, disablePadding: false, label: 'Fecha de venta' },
@@ -79,11 +80,13 @@ class Ventas extends Component {
         estadoModalEmitirFactura: false,
         estadoModalCancelarVenta: false,
         estadoModalEditarVenta: false,
-        openModalNewVentaFinal:false,
+        openModalNewVentaFinal: false,
         //item para editar
         itemEditar: null,
         //fecha actual
         fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        //estado decaja,
+        estadoCaja: false
     }
 
     obtenerFechFormateada = () => {
@@ -95,6 +98,21 @@ class Ventas extends Component {
 
     componentDidMount() {
         this.obtenerDataBaseDatos()
+        var db = firebase.database();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var caja = funtions.snapshotToArray(snap)[0]
+                        this.setState({
+                            estadoCaja: caja.estado
+                        })
+                    }
+                })
+            }
+        })
     }
 
     obtenerDataBaseDatos = () => {
@@ -135,7 +153,7 @@ class Ventas extends Component {
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
-        } 
+        }
 
         if (item.id === 'accions') {
             return <>
@@ -148,7 +166,7 @@ class Ventas extends Component {
                     this.enviarToPlantillaData(n)
                 }}
                 >
-                    <LocalPrintshopIcon/>
+                    <LocalPrintshopIcon />
                 </IconButton>
             </>
         }
@@ -179,7 +197,7 @@ class Ventas extends Component {
                         estado={true}
                     />
                 </div>
-            }) 
+            })
             {/* <div style={{ width: 'max-content' }}>
                     <IconButton>
                         <FileCopy />
@@ -438,27 +456,27 @@ class Ventas extends Component {
             descuento: item.descuento,
             fecha_venta: item.fecha_venta,
             hora_venta: item.hora_venta,
-            tipo_pago:item.tipo_pago,
-            valor_acreditado:item.valor_acreditado,
-            fecha_a_pagar:item.fecha_a_pagar,
-            numero_tarjeta:item.numero_tarjeta,
-            nombre_banco:item.nombre_banco,
+            tipo_pago: item.tipo_pago,
+            valor_acreditado: item.valor_acreditado,
+            fecha_a_pagar: item.fecha_a_pagar,
+            numero_tarjeta: item.numero_tarjeta,
+            nombre_banco: item.nombre_banco,
         }
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                if(item.tipo_venta==='factura'){
+                if (item.tipo_venta === 'factura') {
                     var clienteRef = db.ref('users/' + user.uid + '/clientes/' + item.cliente.codigo);
-                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                    var empresaRef = db.ref('auth_admins/' + user.uid + "/nombre_comercial")
                     clienteRef.once('value', (snapshot) => {
                         if (snapshot.val()) {
                             itemFormat.nombreCliente = snapshot.val().nombre
                             itemFormat.emailCliente = snapshot.val().email
                             itemFormat.identificacionCliente = snapshot.val().numero_identificacion
                             itemFormat.direccionCliente = snapshot.val().direccion
-                            
+
                             empresaRef.once('value', (snap) => {
-                                if (snap.val()) {                                
+                                if (snap.val()) {
                                     itemFormat.nombreEmpresa = snap.val()
                                     this.setState({
                                         itemFormateadoImprimir: itemFormat
@@ -468,10 +486,10 @@ class Ventas extends Component {
                             })
                         }
                     })
-                }else{
-                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                } else {
+                    var empresaRef = db.ref('auth_admins/' + user.uid + "/nombre_comercial")
                     empresaRef.once('value', (snap) => {
-                        if (snap.val()) {                                
+                        if (snap.val()) {
                             itemFormat.nombreEmpresa = snap.val()
                             this.setState({
                                 itemFormateadoImprimir: itemFormat
@@ -491,7 +509,7 @@ class Ventas extends Component {
             <Layout title="Ventas" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
                 <MenuHerramientas>
-                    <ItemMenuHerramienta
+                    {/*  <ItemMenuHerramienta
                         titleButton="Nueva Venta"
                         color="primary"
                         visible={true}
@@ -499,14 +517,46 @@ class Ventas extends Component {
                             this.setState({ itemEditar: null })
                             this.setState({ openModalNewVenta: true })
                         }}
-                    />
+                    /> */}
+                    {
+                        Boolean(this.state.estadoCaja) === true ?
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton onClick={() => {
+                                        this.setState({
+                                            codigoEmitirFactura: n.codigo,
+                                            estadoModalCancelarVenta: true,
+                                        })
+                                    }}>
+                                        <MonetizationOn style={{ color: '#00c853' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                            :
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton onClick={() => {
+                                        this.setState({
+                                            codigoEmitirFactura: n.codigo,
+                                            estadoModalCancelarVenta: true,
+                                        })
+                                    }}>
+                                        <MonetizationOn style={{ color: '#EF5350' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                    }
                     <ItemMenuHerramienta
                         titleButton="Nueva Venta"
                         color="primary"
                         visible={true}
                         onClick={() => {
-                            this.setState({ itemEditar: null })
-                            this.setState({ openModalNewVentaFinal: true })
+                            if (this.state.estadoCaja) {
+                                this.setState({ itemEditar: null })
+                                this.setState({ openModalNewVentaFinal: true })
+                            } else {
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
+                            }
                         }}
                     />
 
@@ -547,14 +597,14 @@ class Ventas extends Component {
                     }}
                 />
 
-                <FullScreenDialog openModal={this.state.openModalNewVenta}>
+                {/*  <FullScreenDialog openModal={this.state.openModalNewVenta}>
                     <NuevaVenta
                         usuario={this.state.usuario}
                         handleClose={() => this.setState({ openModalNewVenta: false })}
                         item={this.state.itemEditar}
                     >
                     </NuevaVenta>
-                </FullScreenDialog>
+                </FullScreenDialog> */}
 
                 <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
                     <ModalNewVenta

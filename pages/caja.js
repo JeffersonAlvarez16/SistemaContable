@@ -4,6 +4,11 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Search from '../components/components/Search';
 import Divider from '@material-ui/core/Divider';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
+import Tooltip from '@material-ui/core/Tooltip';
+import DoneIcon from '@material-ui/icons/Done';
+import Avatar from '@material-ui/core/Avatar';
+import Chip from '@material-ui/core/Chip';
 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -12,6 +17,9 @@ import TablaNormal from '../components/components/tables/TableNormal';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import AbrirCaja from '../components/modals_container/caja/AbrirCaja';
 import CerrarCaja from '../components/modals_container/caja/CerrarCaja';
+import funtions from '../utils/funtions';
+import { IconButton } from '@material-ui/core';
+import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
 class Caja extends Component {
 
@@ -22,22 +30,15 @@ class Caja extends Component {
         listaVentasCajaTemporal: [],
         rowsVentasCaja: [
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
-            { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
-            { id: 'tipo_cliente', numeric: true, disablePadding: false, label: 'Tipo Cliente' },
-            { id: 'fecha_nacimiento', numeric: true, disablePadding: false, label: 'Fecha Nacimiento' },
-            { id: 'sexo', numeric: true, disablePadding: false, label: 'Sexo' },
-            { id: 'telefono', numeric: true, disablePadding: false, label: 'Telefono' },
-            { id: 'celular', numeric: true, disablePadding: false, label: 'Telefono' },
-            { id: 'numero_identificacion', numeric: true, disablePadding: false, label: 'Numero identificación' },
-            { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
-            { id: 'barrio', numeric: true, disablePadding: false, label: 'Barrio' },
-            { id: 'ciudad', numeric: true, disablePadding: false, label: 'Ciudad' },
-            { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
+            { id: 'estado', numeric: true, disablePadding: false, label: 'Estado' },
+            { id: 'saldo_inicial', numeric: true, disablePadding: false, label: 'Saldo Inicial' },
+            { id: 'saldo_final', numeric: true, disablePadding: false, label: 'Saldo Final' },
+            { id: 'operaciones', numeric: true, disablePadding: false, label: 'Estado de operaciones' },
+            { id: 'fecha_abrir', numeric: true, disablePadding: false, label: 'Caja Abierta - Fecha' },
+            { id: 'fecha_cerrar', numeric: true, disablePadding: false, label: 'Caja Cerrada - Fecha' },
+            { id: 'hora_abrir', numeric: true, disablePadding: false, label: 'Caja Iniciada - Hora' },
+            { id: 'hora_cerrrar', numeric: true, disablePadding: false, label: 'Caja Cerrada - Hora' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
-            { id: 'limite_deuda', numeric: true, disablePadding: false, label: 'Límite deuda' },
-            { id: 'credito', numeric: true, disablePadding: false, label: 'Crédito' },
-            { id: 'fecha_registro', numeric: true, disablePadding: false, label: 'Fecha registro' },
-            { id: 'hora_registro', numeric: true, disablePadding: false, label: 'Hora registro' },
             { id: 'usuario', numeric: true, disablePadding: false, label: 'Usuario' },
         ],
         itemsSeleccionados: [],
@@ -48,15 +49,18 @@ class Caja extends Component {
         openModalCerrarCaja: false,
         //estado caja
         estadoCaja: null,
+        cajaSeleccionada: null,
     }
 
     componentDidMount() {
-        this.obtenerEstadoCaja()
+
+    }
+
+    getCajasBaseDeDatos = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var cajaVentasRef = db.ref('users/' + user.uid + '/caja_ventas');
-                var cajaVentasRef = db.ref('users/' + user.uid + '/caja_ventas');
+                var cajaVentasRef = db.ref('users/' + user.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
                 cajaVentasRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -70,11 +74,13 @@ class Caja extends Component {
                             b = new Date(b.order);
                             return a > b ? -1 : a < b ? 1 : 0;
                         })
+                        console.log(filterList)
                         this.setState({
                             listaVentasCaja: filterList,
                             listaVentasCajaTemporal: filterList,
                             estadoTabla: 'llena'
                         })
+                        this.obtenerEstadoCaja()
                     } else {
                         this.setState({
                             listaVentasCaja: [],
@@ -88,63 +94,146 @@ class Caja extends Component {
     }
 
     obtenerEstadoCaja = () => {
-        const { usuario } = this.state
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/caja/' + usuario.code).orderByChild('order').limitToLast(1)
-                productosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                        const caja = funtions.snapshotToArray(snapshot)[0]
-                        this.setState({
-                            estadoCaja: caja.estado
-                        })
-                    }else{
-                        this.setState({
-                            estadoCaja: null
-                        })
-                    }
-                })
-            }
-        })
+        const { listaVentasCaja } = this.state
+        var item = listaVentasCaja[0]
+        if (Boolean(item.estado)) {
+            this.setState({
+                estadoCaja: Boolean(item.estado),
+                cajaSeleccionada: item
+            })
+        } else {
+            this.setState({
+                estadoCaja: Boolean(item.estado),
+                cajaSeleccionada: item
+            })
+        } if (item === null) {
+            this.setState({
+                estadoCaja: false,
+                cajaSeleccionada: null
+            })
+        }
     }
+
 
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
         }
-
-        if (item.id === 'nombre') {
-            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.nombre)}</div>
+        if (item.id === 'estado') {
+            return n.estado ?
+                <div style={{ color: '#EF5350' }}>Abierta</div>
+                :
+                <div >Cerrada</div>
         }
+        if (item.id === 'saldo_inicial') {
+            return n.saldo_inicial
+        }
+        if (item.id === 'saldo_final') {
+            return n.saldo_final
+        }
+        if (item.id === 'fecha_abrir') {
+            return n.fecha_abrir
+        }
+        if (item.id === 'fecha_cerrar') {
+            return n.fecha_cerrar
+        }
+        if (item.id === 'hora_abrir') {
+            return n.hora_abrir
+        }
+        if (item.id === 'hora_cerrrar') {
+            return n.hora_cerrrar
+        }
+        if (item.id === 'operaciones') {
 
+            return n.ventas != null ?
+                <div>
+                    <Chip
+                        avatar={<Avatar style={{width:'max-content', paddingLeft:15,paddingRight:15,paddingTop:3,paddingBottom:3}}>
+                            {
+                                Object.values(n.ventas).length
+                            }
+                        </Avatar>}
+                        label="Ventas"
+                        clickable
+                        color="primary"
+                        deleteIcon={<DoneIcon />}
+                    />
+
+                </div>
+                :
+                <div>
+                    <Chip
+                        avatar={<Avatar style={{width:'max-content', paddingLeft:15,paddingRight:15,paddingTop:3,paddingBottom:3}}>
+                            0
+                        </Avatar>}
+                        label="Ventas"
+                        clickable
+                        color="inherit"
+                        deleteIcon={<DoneIcon />}
+                    />
+
+                </div>
+        }
+        if (item.id === 'observacion') {
+            return n.observacion
+        }
         if (item.id === 'usuario') {
-            return n.usuario
+            return <ReturnTextTable
+                referencia="usuarios"
+                codigo={n.usuario}
+                datoTraido="nombre"
+                estado={true}
+            />
         }
+
     }
 
     render() {
         return (
-            <Layout title="Caja" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+            <Layout title="Caja" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.getCajasBaseDeDatos()
+                }, 100)
+            }}>
 
                 <MenuHerramientas>
                     {
                         Boolean(this.state.estadoCaja) === true &&
-                        <ItemMenuHerramienta
-                            titleButton="Cerrar Caja"
-                            color="primary"
-                            visible={true}
-                            onClick={() => this.setState({ openModalCerrarCaja: true })}
-                        />
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton >
+                                    <MonetizationOn style={{ color: '#00c853' }} />
+                                </IconButton>
+                            </Tooltip>
+                            <ItemMenuHerramienta
+                                titleButton="Cerrar Caja"
+                                color="primary"
+                                visible={true}
+                                onClick={() => this.setState({ openModalCerrarCaja: true })}
+                            />
+                        </>
                     }
                     {
                         Boolean(this.state.estadoCaja) === false &&
-                        <ItemMenuHerramienta
-                            titleButton="Abrir Caja"
-                            color="primary"
-                            visible={true}
-                            onClick={() => this.setState({ openModalAbrirCaja: true })}
-                        />
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        codigoEmitirFactura: n.codigo,
+                                        estadoModalCancelarVenta: true,
+                                    })
+                                }}>
+                                    <MonetizationOn style={{ color: '#EF5350' }} />
+                                </IconButton>
+                            </Tooltip>
+                            <ItemMenuHerramienta
+                                titleButton="Abrir Caja"
+                                color="primary"
+                                visible={true}
+                                onClick={() => this.setState({ openModalAbrirCaja: true })}
+                            />
+                        </>
                     }
                     {
                         Boolean(this.state.estadoCaja) === null &&
@@ -161,9 +250,9 @@ class Caja extends Component {
                         titleButton="Ver total"
                         color="primary"
                         visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
+                        disabled={!this.state.estadoCaja}
                         onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
+                            if (this.state.estadoCaja) {
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
                             }
                         }}
@@ -172,9 +261,9 @@ class Caja extends Component {
                         titleButton="Agregar dinero"
                         color="primary"
                         visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
+                        disabled={!this.state.estadoCaja}
                         onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
+                            if (this.state.estadoCaja) {
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
                             }
                         }}
@@ -183,9 +272,9 @@ class Caja extends Component {
                         titleButton="Retirar dinero"
                         color="primary"
                         visible={true}
-                        disabled={!this.state.itemsSeleccionados.length > 0}
+                        disabled={!this.state.estadoCaja}
                         onClick={() => {
-                            if (this.state.itemsSeleccionados.length > 0) {
+                            if (this.state.estadoCaja) {
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
                             }
                         }}
@@ -204,13 +293,13 @@ class Caja extends Component {
                 <Divider />
 
                 <TablaNormal
-                    textoTitleP="Clientes"
-                    textoTitleS="Cliente"
-                    selectedItems={false}
+                    textoTitleP="Cajas"
+                    textoTitleS="Caja"
+                    selectedItems={true}
                     toolbar={false}
                     notTab={true}
                     data={this.state.listaVentasCaja}
-                    rows={this.state.rowslistaVentasCaja}
+                    rows={this.state.rowsVentasCaja}
                     handleGetData={this.handleGetData}
                     estadoTabla={this.state.estadoTabla}
                     itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
@@ -227,7 +316,12 @@ class Caja extends Component {
                     open={this.state.openModalCerrarCaja}
                     handleClose={() => this.setState({ openModalCerrarCaja: false })}
                 >
-                    <CerrarCaja usuario={this.state.usuario} handleClose={() => this.setState({ openModalCerrarCaja: false })} />
+                    <CerrarCaja
+                        usuario={this.state.usuario}
+                        handleClose={() =>
+                            this.setState({ openModalCerrarCaja: false })}
+                        cajaSeleccionada={this.state.cajaSeleccionada}
+                    />
                 </ModalContainerNormal>
 
             </Layout>

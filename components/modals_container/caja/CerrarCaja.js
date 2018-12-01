@@ -16,39 +16,62 @@ class CerrarCaja extends Component {
         saldoFinal: 0,
         saldo_inicial: 0,
         totalSistema: 0,
-        observacion: 0,
+        observacion: '',
 
         estadoCaja: null,
         codigoReferencia: null,
+        textoSaldoFinal:''
     }
 
     componentDidMount() {
-        const { usuario } = this.props
+        const { cajaSeleccionada } = this.props
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
-                var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/caja/' + usuario.code).orderByChild('order').limitToLast(1)
-                productosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                        const caja = funtions.snapshotToArray(snapshot)[0]
-                        this.setState({
-                            estadoCaja: caja.estado,
-                            codigoReferencia: caja.codigo,
-                            saldo_inicial: caja.saldo_inicial,
-                        })
-                    }
-                })
+                /*  var db = firebase.database();
+                 var productosRef = db.ref('users/' + user.uid + '/caja/cajas_normales/').orderByChild('order').limitToLast(1) */
+                if (cajaSeleccionada != null) {
+                    /*  productosRef.on('value', (snapshot) => { */
+                    /*  if (snapshot.val()) { */
+                    this.setState({
+                        estadoCaja: cajaSeleccionada.estado,
+                        codigoReferencia: cajaSeleccionada.codigo,
+                        saldo_inicial: cajaSeleccionada.saldo_inicial,
+                    })
+                    /*  } */
+                    /*  }) */
+                }
+            }
+        })
+    }
+
+    componentWillReceiveProps(props) {
+        const { cajaSeleccionada } = props
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                /*  var db = firebase.database();
+                 var productosRef = db.ref('users/' + user.uid + '/caja/cajas_normales/').orderByChild('order').limitToLast(1) */
+                if (cajaSeleccionada != null) {
+                    /*  productosRef.on('value', (snapshot) => { */
+                    /*  if (snapshot.val()) { */
+                    this.setState({
+                        estadoCaja: cajaSeleccionada.estado,
+                        codigoReferencia: cajaSeleccionada.codigo,
+                        saldo_inicial: cajaSeleccionada.saldo_inicial,
+                    })
+                    /*  } */
+                    /*  }) */
+                }
             }
         })
     }
 
     cerrarCaja = () => {
-        const { usuario } = this.props
+        const { usuario, handleClose } = this.props
         const { codigoReferencia, saldoFinal, observacion } = this.state
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/' + usuario.code + "/" + codigoReferencia)
+                var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigoReferencia)
                 cajaUsuarioRef.update({
                     saldo_final: saldoFinal,
                     ventas: [],
@@ -56,7 +79,9 @@ class CerrarCaja extends Component {
                     fecha_cerrar: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
                     hora_cerrrar: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     estado: false,
+                    usuario_cerrar: usuario.code
                 })
+                setTimeout(() => { handleClose() }, 100)
             }
         })
     }
@@ -68,7 +93,6 @@ class CerrarCaja extends Component {
                 flexDirection: 'column',
                 margin: 16
             }}>
-
                 <Typography variant="title" gutterBottom>
                     Cerrar Caja
                 </Typography>
@@ -85,14 +109,30 @@ class CerrarCaja extends Component {
                         variant="outlined"
                         disabled
                         style={{
-                            marginRight:10
+                            marginRight: 10
                         }}
                     />
                     <TextField
                         id="outlined-number-saldo-final"
                         label="Saldo final"
                         value={this.state.saldoFinal}
-                        onChange={e => this.setState({ saldoFinal: e.target.value })}
+                        helperText={this.state.textoSaldoFinal}
+                        onChange={e => {
+                            this.setState({ saldoFinal: e.target.value })
+                            setTimeout(()=>{
+                                if(Number(this.state.saldoFinal) >= Number(this.state.saldo_inicial)){
+                                    this.setState({
+                                        textoSaldoFinal:''
+                                    })
+                                }else{
+                                    this.setState({
+                                        textoSaldoFinal:'Este valor es menor que el Saldo inicial'
+                                    })
+                                }
+                            },100)
+
+                        }}
+                        autoComplete='off'
                         margin="normal"
                         variant="outlined"
                     />
@@ -108,7 +148,7 @@ class CerrarCaja extends Component {
                 />
                 <TextField
                     id="outlined-number-obervacion"
-                    label="Obervación"
+                    label="Observación"
                     multiline
                     rows="3"
                     value={this.state.observacion}

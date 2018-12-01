@@ -353,6 +353,8 @@ class ModalNewVenta extends Component {
         }
     }
 
+
+
     enviarFacturaElectronica = (codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item) => {
         if (tipo_venta === 'factura') {
 
@@ -546,7 +548,9 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        operacionVentaRef.set({
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
+
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -569,7 +573,23 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: item.valor_acreditado,
             fecha_a_pagar: item.fecha_vencimiento,
+        }
+
+        var codigoVentaCaja = funtions.guidGenerator()
+        operacionVentaRefCaja.once('value', (snap) => {
+            if (snap.val()) {
+                var caja = funtions.snapshotToArray(snap)[0]
+
+                if (Boolean(caja.estado)) {
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
+                    operacionVentaCaja.set(itemVenta)
+                } else {
+                    setSnackBars.openSnack('error', 'rootSnackBar', 'abrir caja', 1000)
+                }
+            }
         })
+
+        operacionVentaRef.set(itemVenta)
     }
     setSaveRegistroVentaTarjetaCredito = (codigoVenta, item) => {
         const {
@@ -1036,7 +1056,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta:Number(((Number(item.precio_costo)*Number(this.state.precioSeleccionado.porcentaje))+Number(item.precio_costo)).toFixed(2))
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2))
                     })
                     this.setState({
                         itemProductoCargado: null
@@ -1073,7 +1093,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta:Number(((Number(item.precio_costo)*Number(this.state.precioSeleccionado.porcentaje))+Number(item.precio_costo)).toFixed(2)),
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
                     })
                     this.setState({
                         listaProductosSeleccionados: array,
@@ -1331,7 +1351,7 @@ class ModalNewVenta extends Component {
                                 clienteSeleccionado={this.state.clienteSeleccionado}
                                 errorCliente={this.state.clienteFacturacion.length > 0 ? false : true}
                                 usuario={this.props.usuario}
-                                seleccionarCliente={this.seleccionarCliente}                                
+                                seleccionarCliente={this.seleccionarCliente}
                             />
                         }
 
