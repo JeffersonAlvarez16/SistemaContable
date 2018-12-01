@@ -284,24 +284,21 @@ class Usuarios extends Component {
                         }}
                     />
                     <div>
-                        joder carajop
+                        joder carajop 1
                     </div>
                     <div>
-                        joder carajop
-                    </div>
-<<<<<<< HEAD
-=======
-                    <div>
-                        joder carajop
+                        joder carajop 2 
                     </div>
                     <div>
-                        joder carajop
+                        joder carajop 3 
                     </div>
                     <div>
-                        joder carajop
+                        joder carajop 4
+                    </div>
+                    <div>
+                        joder carajop 5
                     </div>
                     
->>>>>>> 7206f271bfc0f120d9219e4d3b15fac53d2fc2b0
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search
