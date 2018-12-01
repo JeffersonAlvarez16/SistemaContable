@@ -81,9 +81,22 @@ class ListaProductos extends Component {
         estadoModalDeleteActivarDesactivar: 'eliminar',
         //item Selecionado
         itemsSeleccionados: [],
+        estadoacciones: ''
     }
 
     componentDidMount() {
+        setTimeout(() => {
+            if (this.props.usuario === null) {
+
+            } else {
+                console.log('paso')
+                this.obtenerBaseDatos()
+            }
+        }, 100)
+
+    }
+
+    obtenerBaseDatos = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
@@ -128,6 +141,32 @@ class ListaProductos extends Component {
         });
     }
 
+    comprobarUsuario = (item) => {
+        if (this.state.estadoacciones === 'desactivar') {
+            if (item.usuario === this.props.usuario.code) {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+            } else {
+                setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Producto', 2000)
+            }
+        } else if (this.state.estadoacciones === 'activar') {
+            if (item.usuario === this.props.usuario.code) {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+            } else {
+                setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Producto', 2000)
+            }
+        } else {
+            if (item.usuario === this.props.usuario.code) {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ openModalFullScreen: true })
+            } else {
+                setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Producto', 2000)
+            }
+        }
+
+    }
+
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return this.getColorActivadoDesactivado(n.estado, n.codigo)
@@ -135,10 +174,16 @@ class ListaProductos extends Component {
 
         if (item.id === 'acciones') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Tooltip title="Editar"  placement="left">
-                    <IconButton aria-label="Editar" onClick={()=>{
-                        this.setState({ itemSeleccionado: n })
-                        this.setState({ openModalFullScreen: true })
+                <Tooltip title="Editar" placement="left">
+                    <IconButton aria-label="Editar" onClick={() => {
+                        this.setState({
+                            estadoacciones: 'editar'
+                        })
+                        setTimeout(() => {
+                            this.comprobarUsuario(n)
+                        }, 100)
+                        /*   this.setState({ itemSeleccionado: n })
+                          this.setState({ openModalFullScreen: true }) */
                     }}>
                         <EditIcon color='primary' />
                     </IconButton>
@@ -146,18 +191,30 @@ class ListaProductos extends Component {
                 {
                     Boolean(n.estado) ?
                         <Tooltip title="Desactivar" placement="right">
-                            <IconButton aria-label="Desactivar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                            <IconButton aria-label="Desactivar" value="desactivar" onClick={(event) => {
+                                this.setState({
+                                    estadoacciones: 'desactivar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+                                /*  this.setState({ itemSeleccionado: n })
+                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' }) */
                             }}>
                                 <VisibilityOffIcon />
                             </IconButton>
                         </Tooltip>
                         :
                         <Tooltip title="Activar">
-                            <IconButton aria-label="Activar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                            <IconButton aria-label="Activar" value="activar" onClick={() => {
+                                this.setState({
+                                    estadoacciones: 'activar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+                                /*  this.setState({ itemSeleccionado: n })
+                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' }) */
                             }}>
                                 <VisibilityIcon color='primary' />
                             </IconButton>

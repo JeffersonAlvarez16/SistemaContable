@@ -30,7 +30,7 @@ class Productos extends Component {
         //valor para cambiar de tab
         valueTab: 0,
         //usuario 
-        usuario: {}
+        usuario:null
     }
 
 
