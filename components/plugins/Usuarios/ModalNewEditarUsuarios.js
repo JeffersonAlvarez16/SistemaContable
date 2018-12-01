@@ -96,18 +96,18 @@ class ModalUsuarios extends React.Component {
                         code: codigo,
                         nombre: this.state.nombre,
                         password: this.state.password,
-                        tipo_usuario: this.state.tipo_usuario,
+                        tipo_usuario: 'vendedor',
                         estado: true,
-                        privilegios:{
+                        privilegios: {
                             productos: this.state.productos,
-                        stock: this.state.stock,
-                        proveedores: this.state.proveedores,
-                        clientes: this.state.clientes,
-                        ventas: this.state.ventas,
-                        retenciones: this.state.retenciones,
-                        usuarios: this.state.usuarios,
+                            stock: this.state.stock,
+                            proveedores: this.state.proveedores,
+                            clientes: this.state.clientes,
+                            ventas: this.state.ventas,
+                            retenciones: this.state.retenciones,
+                            usuarios: this.state.usuarios,
                         },
-                        privilegiosGenerales:{
+                        privilegiosGenerales: {
                             generales: this.state.generales
                         }
                     })
@@ -117,25 +117,25 @@ class ModalUsuarios extends React.Component {
                     }, 100)
                 } else {
                     var productosRef = db.ref('users/' + user.uid + '/usuarios/' + this.props.item.code)
-                   
-                    productosRef.update({                      
+
+                    productosRef.update({
                         nombre: this.state.nombre,
                         password: this.state.password,
-                        tipo_usuario: this.state.tipo_usuario,                      
+                        tipo_usuario: 'vendedor',
                         estado: this.props.item.estado,
-                        privilegios:{
+                        privilegios: {
                             productos: this.state.productos,
-                        stock: this.state.stock,
-                        proveedores: this.state.proveedores,
-                        clientes: this.state.clientes,
-                        ventas: this.state.ventas,
-                        retenciones: this.state.retenciones,
-                        usuarios: this.state.usuarios,
+                            stock: this.state.stock,
+                            proveedores: this.state.proveedores,
+                            clientes: this.state.clientes,
+                            ventas: this.state.ventas,
+                            retenciones: this.state.retenciones,
+                            usuarios: this.state.usuarios,
                         },
-                        privilegiosGenerales:{
+                        privilegiosGenerales: {
                             generales: this.state.generales
                         }
-                    }) 
+                    })
                     setTimeout(() => {
                         this.props.handleClose()
                         setSnackBars.openSnack('success', 'rootSnackBar', 'Usuario registrado con exito', 2000)
@@ -145,7 +145,7 @@ class ModalUsuarios extends React.Component {
 
             }
         })
-        
+
     }
     //programar es como vivir toda una vida de hacer tarea pero amar hacer tarea
     render() {
@@ -199,20 +199,7 @@ class ModalUsuarios extends React.Component {
                         </Grid>
                     </div>
                     <Grid item xs="12" style={{ margin: 2 }}>
-
-
-
-                        <TextField
-                            style={{ width: '100%' }}
-                            id="standard-tipo-usuario"
-                            label="Tipo Usuario"
-                            required
-                            value={this.state.tipo_usuario}
-                            onChange={(event) => this.setState({ tipo_usuario: event.target.value })}
-                            margin="normal"
-                            variant="filled"
-                        />
-
+                       
 
                     </Grid>
                     <Grid item xs="12" style={{ margin: 2 }}>

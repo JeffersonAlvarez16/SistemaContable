@@ -35,6 +35,7 @@ class Usuarios extends Component {
 
         rowslistaUsuarios: [
             { id: 'accions', numeric: false, disablePadding: true, label: 'Acciones' },
+            { id: 'estado', numeric: false, disablePadding: true, label: 'Estado' },
             { id: 'nombre_usuario', numeric: false, disablePadding: true, label: 'Nombre Usuario' },
             { id: 'tipo_usuario', numeric: false, disablePadding: true, label: 'Tipo Usuario' },
             { id: 'privilegios', numeric: true, disablePadding: false, label: 'Privilegios' },
@@ -97,56 +98,72 @@ class Usuarios extends Component {
     handleGetData = (n, item) => {
         if (item.id === 'accions') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Tooltip title="Editar" placement="left">
-                    <IconButton aria-label="Editar"
-                        onClick={() => {
-                            this.setState({
-                                itemEditar: n,
-                                openModalNewUsuario: true,
-                                tipo_accion: 'editar'
-
-                            })
-                        }}>
-                        <EditIcon color='primary' />
-                    </IconButton>
-                </Tooltip>
 
                 {
-                    Boolean(n.estado) ?
-                        <Tooltip title="Desactivar" placement="right">
-                            <IconButton
-                                aria-label="Desactivar"
-                                onClick={() => {
-                                    this.setState({
-                                        openModalEliminarUsuario: true,
-                                        tipo_accion: 'desactivar',
-                                        itemEditar: n
-                                    })
-                                }}>
-                                <VisibilityOffIcon />
-                            </IconButton>
-                        </Tooltip>
+                    n.tipo_usuario === 'administrador' ?
+                        <strong style={{ textAlign: 'center' }}>No se puede Editar el usuario<br /> Administrador</strong>
                         :
-                        <Tooltip title="Activar">
-                            <IconButton
-                                aria-label="Activar"
-                                onClick={() => {
-                                    this.setState({
-                                        openModalEliminarUsuario: true,
-                                        tipo_accion: 'activar',
-                                        itemEditar: n
+                        <div>
+                            <Tooltip title="Editar" placement="left">
+                                <IconButton aria-label="Editar"
+                                    onClick={() => {
+                                        this.setState({
+                                            itemEditar: n,
+                                            openModalNewUsuario: true,
+                                            tipo_accion: 'editar'
 
-                                    })
-                                }}>
-                                <VisibilityIcon color='primary' />
-                            </IconButton>
-                        </Tooltip>
+                                        })
+                                    }}>
+                                    <EditIcon color='primary' />
+                                </IconButton>
+                            </Tooltip>
+
+                            {
+                                Boolean(n.estado) ?
+                                    <Tooltip title="Desactivar" placement="right">
+                                        <IconButton
+                                            aria-label="Desactivar"
+                                            onClick={() => {
+                                                this.setState({
+                                                    openModalEliminarUsuario: true,
+                                                    tipo_accion: 'desactivar',
+                                                    itemEditar: n
+                                                })
+                                            }}>
+                                            <VisibilityOffIcon />
+                                        </IconButton>
+                                    </Tooltip>
+                                    :
+                                    <Tooltip title="Activar">
+                                        <IconButton
+                                            aria-label="Activar"
+                                            onClick={() => {
+                                                this.setState({
+                                                    openModalEliminarUsuario: true,
+                                                    tipo_accion: 'activar',
+                                                    itemEditar: n
+
+                                                })
+                                            }}>
+                                            <VisibilityIcon color='primary' />
+                                        </IconButton>
+                                    </Tooltip>
+                            }
+                        </div>
                 }
 
 
             </div>
         }
 
+        if (item.id === 'estado') {
+            return <div style={{ width: 'max-content' }}>{
+                n.estado === true ?
+                <strong style={{ textAlign: 'center' }}>Activado</strong>
+                    :
+                    <strong style={{ textAlign: 'center' }}>Desactivado</strong>
+            }</div>
+        }
         if (item.id === 'nombre_usuario') {
             return <div style={{ width: 'max-content' }}>{n.nombre}</div>
         }
@@ -252,17 +269,17 @@ class Usuarios extends Component {
 
                 }
             })
-        }else{
+        } else {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     var db = firebase.database();
                     var productosRef = db.ref('users/' + user.uid + '/usuarios/' + usuarioSeleccionado.code);
-                   
+
                     productosRef.update({
                         estado: false
                     })
                     this.setState({ estadoModalSimple: false })
-                    setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario activado correctamente', 2000)
+                    setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario Desactivado correctamente', 2000)
 
                 }
             })
@@ -283,10 +300,7 @@ class Usuarios extends Component {
                             this.setState({ openModalNewUsuario: true })
                         }}
                     />
-                    <div>
-                        joder carajop 00
-                    </div>
-                    
+
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search
