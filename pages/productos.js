@@ -21,6 +21,7 @@ import ListaProductos from '../components/components/productos/components/ListaP
 import Stock from '../components/components/productos/components/Stock'
 import Proveedores from '../components/components/productos/components/Proveedores'
 import ControlVencimiento from '../components/components/productos/components/ControlVencimiento'
+import { CircularProgress } from '@material-ui/core';
 
 
 
@@ -30,9 +31,34 @@ class Productos extends Component {
         //valor para cambiar de tab
         valueTab: 0,
         //usuario 
-        usuario:null
+        usuario: null,
+        estadoPermisos: null
+    }
+    componentDidMount() {
+
     }
 
+    obtenerDataBaseDatos = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.productos === true) {
+                            this.setState({
+                                estadoPermisos: true
+                            })
+                        }else{
+                            this.setState({
+                                estadoPermisos: false
+                            })
+                        }
+                    }
+                });
+            }
+        });
+    }
 
     handleChangeTab = (event, valueTab) => {
         this.setState({ valueTab });
@@ -41,7 +67,13 @@ class Productos extends Component {
     render() {
 
         return (
-            <Layout title="Productos" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+            <Layout title="Productos" onChangueUserState={usuario => {
+
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerDataBaseDatos()
+                }, 100)
+            }}>
 
                 {/* Tab bar */}
                 <AppBar position="static" color="inherit">
@@ -51,13 +83,25 @@ class Productos extends Component {
                         <Tab label="Proveedores" /> */}
                     </Tabs>
                 </AppBar>
-
-                <div>
-                    {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario}/>}
-                    {/* this.state.valueTab === 1 && <Stock usuario={this.state.usuario}/> */}
-                    {/* this.state.valueTab === 2 && <Proveedores usuario={this.state.usuario}/> */}
-                </div>
-
+                {
+                    this.state.estadoPermisos&&
+                    <div>
+                        {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario} />}
+                        {/* this.state.valueTab === 1 && <Stock usuario={this.state.usuario}/> */}
+                        {/* this.state.valueTab === 2 && <Proveedores usuario={this.state.usuario}/> */}
+                    </div>
+                }
+                {
+                       this.state.estadoPermisos===false&&
+                    <div style={{display:'flex',justifyContent:'center',alignItems:'center',textAlign:'center',height:'80vh'}}>
+                            <h3><strong>Usted no tiene permisos para <br/>
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos===null&&
+                    <CircularProgress  />
+                }
             </Layout>
         );
     }

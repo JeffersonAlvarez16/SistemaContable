@@ -19,7 +19,7 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
-import { TextField } from '@material-ui/core';
+import { TextField, CircularProgress, Tooltip } from '@material-ui/core';
 
 class Stock extends Component {
 
@@ -59,6 +59,14 @@ class Stock extends Component {
         tipoAjuste: '',
         //fecha actual del sistem
         fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+
+        //permisosUsuarios
+        title:'',
+        titlep:'',
+        estadoPermisoDevolucionCliente: null,
+        estadoPermisoDevolucionProveedor:null,
+        estadoPermisoCompraProductos:null,
+        estadoPermisoAjusteStock:null
     }
 
     obtenerFechFormateada = () => {
@@ -70,6 +78,72 @@ class Stock extends Component {
 
     componentDidMount() {
         this.cargarData()
+        this.setState({
+            titlep:''
+        })
+
+    }
+
+    obtenerPermisosUsuarios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.stock.devolucion_cliente === true) {
+                            this.setState({
+                                estadoPermisoDevolucionCliente: false,
+                                title:''
+                            })
+                        }else{
+                            this.setState({
+                                estadoPermisoDevolucionCliente: true,
+                                title:''
+                            })
+                        }
+                        if (snapshot.val().privilegios.stock.devolucion_proveedor === true) {
+                            this.setState({
+                                estadoPermisoDevolucionProveedor: false,
+                                title:''
+                            })
+                        }else{
+
+                            this.setState({
+                                estadoPermisoDevolucionProveedor: true,
+                                      
+                            })
+                        }
+                        if (snapshot.val().privilegios.stock.compra_productos === true) {
+                            this.setState({
+                                estadoPermisoCompraProductos: false,
+                               
+                            })
+                        }else{
+
+                            this.setState({
+                                estadoPermisoCompraProductos: true,
+                                titlep:'No tiene Permiso para algunas acciones'
+                            })
+                        }
+                        if (snapshot.val().privilegios.stock.ajuste_stock === true) {
+                            this.setState({
+                                estadoPermisoAjusteStock: false,
+                            title:''
+
+                            })
+                        }else{
+                            this.setState({
+                                estadoPermisoAjusteStock: true,
+                         
+                                
+                            })
+                        }
+
+                    }
+                });
+            }
+        });
     }
 
     cargarData = () => {
@@ -251,8 +325,16 @@ class Stock extends Component {
     }
 
     render() {
+        const {titlep, estadoPermisoDevolucionCliente,estadoPermisoDevolucionProveedor,estadoPermisoAjusteStock,estadoPermisoCompraProductos,title } = this.state
         return (
-            <Layout title="Stock" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+            <Layout title="Stock" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerPermisosUsuarios()
+                }, 100)
+            }}>
+
+
                 <MenuHerramientas>
                     <ItemMenuHerramienta
                         titleButton="Entrada"
@@ -266,25 +348,39 @@ class Stock extends Component {
                         anchorEl={this.state.referenciaMenuEntrada}
                         open={Boolean(this.state.referenciaMenuEntrada)}
                         onClose={() => this.setState({ referenciaMenuEntrada: null })}
-                    >
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'devolucion_cliente',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
-                            Devolución del cliente
+                    >      
+                     <Tooltip title={title} placement="right">
+                            <MenuItem
+                                disabled={estadoPermisoDevolucionCliente}
+                                onClick={() => this.setState({
+                                    tipoAjuste: 'devolucion_cliente',
+                                    estadoModalSimpleCompraProductos: true
+                                })}>
+                                Devolución del cliente
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
+                        </Tooltip>
+
+                        }
+                        <Tooltip title={title} placement="right">
+                        <MenuItem
+                          disabled={estadoPermisoCompraProductos}
+                        onClick={() => this.setState({
                             tipoAjuste: 'compra_producto',
                             estadoModalSimpleCompraProductos: true
                         })}>
                             Compra de productos
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
+                        </Tooltip>
+                        <Tooltip title={title} placement="right">
+                        <MenuItem 
+                         disabled={estadoPermisoAjusteStock}
+                        onClick={() => this.setState({
                             tipoAjuste: 'ajuste-stock-entrada',
                             estadoModalSimpleCompraProductos: true
                         })}>
                             Ajuste de Stock
                         </MenuItem>
+                        </Tooltip>
                     </Menu>
 
                     <ItemMenuHerramienta
@@ -300,18 +396,26 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuSalida)}
                         onClose={() => this.setState({ referenciaMenuSalida: null })}
                     >
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'devolucion-proveedor',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                     <Tooltip title={title} placement="right">
+                        <MenuItem 
+                         disabled={estadoPermisoDevolucionProveedor}
+                         onClick={() => this.setState({
+                             tipoAjuste: 'devolucion-proveedor',
+                             estadoModalSimpleCompraProductos: true
+                            })}>
                             Devolución al proveedor
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'ajuste-stock-salida',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        </Tooltip>
+                        <Tooltip title={title} placement="right">
+                        <MenuItem 
+                         disabled={estadoPermisoAjusteStock}
+                         onClick={() => this.setState({
+                             tipoAjuste: 'ajuste-stock-salida',
+                             estadoModalSimpleCompraProductos: true
+                            })}>
                             Ajuste de Stock
                         </MenuItem>
+                            </Tooltip>
                     </Menu>
 
                     <TextField
@@ -323,8 +427,9 @@ class Stock extends Component {
                         }}
                         onChange={e => this.cambiarListaPorFecha(e.target.value)}
                     />
-
-                    <div style={{ flex: 0.9 }}></div>
+                    
+                    <div style={{flex:.9}}> </div>
+                   
 
                     <Search
                         id='buscar-producto'
@@ -360,6 +465,19 @@ class Stock extends Component {
                         tipoAjuste={this.state.tipoAjuste}
                     />
                 </FullScreenDialog>
+
+
+                {/*  {
+                       this.state.estadoPermisos===false&&
+                    <div style={{display:'flex',justifyContent:'center',alignItems:'center',textAlign:'center',height:'80vh'}}>
+                            <h3><strong>Usted no tiene permisos para <br/>
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos===null&&
+                    <CircularProgress  />
+                } */}
 
             </Layout>
         );

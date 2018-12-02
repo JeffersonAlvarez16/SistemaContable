@@ -87,9 +87,7 @@ class ListaProductos extends Component {
     componentDidMount() {
         setTimeout(() => {
             if (this.props.usuario === null) {
-
-            } else {
-                console.log('paso')
+            } else {               
                 this.obtenerBaseDatos()
             }
         }, 100)
