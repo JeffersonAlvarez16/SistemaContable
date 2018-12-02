@@ -15,7 +15,7 @@ class CerrarCaja extends Component {
     state = {
         saldoFinal: 0,
         saldo_inicial: 0,
-        totalSistema: 0,
+        sumaTotalVentas: 0,
         observacion: '',
 
         estadoCaja: null,
@@ -24,7 +24,7 @@ class CerrarCaja extends Component {
     }
 
     componentDidMount() {
-        const { cajaSeleccionada } = this.props
+        const { cajaSeleccionada,sumaTotalVentas } = this.props
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 /*  var db = firebase.database();
@@ -36,6 +36,7 @@ class CerrarCaja extends Component {
                         estadoCaja: cajaSeleccionada.estado,
                         codigoReferencia: cajaSeleccionada.codigo,
                         saldo_inicial: cajaSeleccionada.saldo_inicial,
+                        sumaTotalVentas: sumaTotalVentas
                     })
                     /*  } */
                     /*  }) */
@@ -45,7 +46,7 @@ class CerrarCaja extends Component {
     }
 
     componentWillReceiveProps(props) {
-        const { cajaSeleccionada } = props
+        const { cajaSeleccionada,sumaTotalVentas } = props
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 /*  var db = firebase.database();
@@ -57,10 +58,30 @@ class CerrarCaja extends Component {
                         estadoCaja: cajaSeleccionada.estado,
                         codigoReferencia: cajaSeleccionada.codigo,
                         saldo_inicial: cajaSeleccionada.saldo_inicial,
+                        sumaTotalVentas: sumaTotalVentas
                     })
                     /*  } */
                     /*  }) */
                 }
+            }
+        })
+    }
+
+    totalDelSistema=()=>{
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigoReferencia)
+                cajaUsuarioRef.update({
+                    saldo_final: saldoFinal,
+                    ventas: [],
+                    observacion,
+                    fecha_cerrar: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    hora_cerrrar: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+                    estado: false,
+                    usuario_cerrar: usuario.code
+                })
+                setTimeout(() => { handleClose() }, 100)
             }
         })
     }
@@ -141,8 +162,8 @@ class CerrarCaja extends Component {
                     id="outlined-number-total-sisitema"
                     label="Total del sistema"
                     disabled
-                    value={this.state.totalSistema}
-                    onChange={e => this.setState({ totalSistema: e.target.value })}
+                    value={this.state.sumaTotalVentas}
+                    onChange={e => this.setState({ sumaTotalVentas: e.target.value })}
                     margin="normal"
                     variant="outlined"
                 />
