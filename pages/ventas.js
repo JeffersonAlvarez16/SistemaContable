@@ -84,10 +84,27 @@ class Ventas extends Component {
         //item para editar
         itemEditar: null,
         //fecha actual
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
         //estado decaja,
         estadoCaja: false
     }
+
+    obtenerFechaActual=()=>{
+        var date= new Date()
+        var day= date.getDate()
+        var mon= date.getMonth()
+        var yea= date.getFullYear()
+        if(String(day).length===1){
+            day='0'+day
+        }
+        if(String(mon).length===1){
+            mon='0'+mon
+        }
+        this.setState({
+            fechaActual:`${yea}-${mon}-${day}`
+        })
+    }
+
 
     obtenerFechFormateada = () => {
         const { fechaActual } = this.state
@@ -99,7 +116,7 @@ class Ventas extends Component {
     componentDidMount() {
         this.obtenerDataBaseDatos()
         var db = firebase.database();
-
+        this.obtenerFechaActual()
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
@@ -504,7 +521,7 @@ class Ventas extends Component {
     }
 
     render() {
-
+console.log(this.state.fechaActual)
         return (
             <Layout title="Ventas" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
@@ -560,15 +577,18 @@ class Ventas extends Component {
                         }}
                     />
 
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
+                    <div style={{display:'flex', alignItems:'center'}}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            margin='dense'
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
 
                     <div style={{ flex: 0.9 }}></div>
 

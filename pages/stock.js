@@ -58,7 +58,7 @@ class Stock extends Component {
         //tipo de ajuste para productos
         tipoAjuste: '',
         //fecha actual del sistem
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
     }
 
     obtenerFechFormateada = () => {
@@ -68,8 +68,25 @@ class Stock extends Component {
         return nueva
     }
 
+    obtenerFechaActual = () => {
+        var date = new Date()
+        var day = date.getDate()
+        var mon = date.getMonth()
+        var yea = date.getFullYear()
+        if (String(day).length === 1) {
+            day = '0' + day
+        }
+        if (String(mon).length === 1) {
+            mon = '0' + mon
+        }
+        this.setState({
+            fechaActual: `${yea}-${mon}-${day}`
+        })
+    }
+
     componentDidMount() {
         this.cargarData()
+        this.obtenerFechaActual()
     }
 
     cargarData = () => {
@@ -313,17 +330,17 @@ class Stock extends Component {
                             Ajuste de Stock
                         </MenuItem>
                     </Menu>
-
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
-
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search

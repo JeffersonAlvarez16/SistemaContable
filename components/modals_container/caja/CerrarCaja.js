@@ -95,7 +95,6 @@ class CerrarCaja extends Component {
                 var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigoReferencia)
                 cajaUsuarioRef.update({
                     saldo_final: saldoFinal,
-                    ventas: [],
                     observacion,
                     fecha_cerrar: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
                     hora_cerrrar: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,

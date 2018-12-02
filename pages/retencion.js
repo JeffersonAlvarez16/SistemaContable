@@ -71,7 +71,7 @@ class Retencion extends Component {
         //item para editar
         itemEditar: null,
         //fecha actual
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
     }
 
     obtenerFechFormateada = () => {
@@ -82,6 +82,22 @@ class Retencion extends Component {
     }
     componentDidMount() {
         this.obtenerDataBaseDatos()
+        this.obtenerFechaActual()
+    }
+    obtenerFechaActual = () => {
+        var date = new Date()
+        var day = date.getDate()
+        var mon = date.getMonth()
+        var yea = date.getFullYear()
+        if (String(day).length === 1) {
+            day = '0' + day
+        }
+        if (String(mon).length === 1) {
+            mon = '0' + mon
+        }
+        this.setState({
+            fechaActual: `${yea}-${mon}-${day}`
+        })
     }
 
     obtenerDataBaseDatos = () => {
@@ -284,17 +300,17 @@ class Retencion extends Component {
                             this.setState({ openModalNewRetencion: true })
                         }}
                     />
-
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
-
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search

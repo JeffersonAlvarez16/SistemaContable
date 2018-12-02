@@ -232,8 +232,6 @@ class Caja extends Component {
                 }, 100)
             }}>
 
-                {
-                    Boolean(this.state.estadoCaja) ?
                         <MenuHerramientas>
                             {
                                 Boolean(this.state.estadoCaja) === true &&
@@ -326,10 +324,6 @@ class Caja extends Component {
                                 handleSearch={this.handleSearch}
                             />
                         </MenuHerramientas>
-                        :
-                        <div style={{margin:10,width:'100%',display:'flex',alignItems:'center',flexDirection:'row'}}>
-                            <CircularProgress size={25} style={{marginRight:20}}/>
-                        </div>
 
                 }
 
