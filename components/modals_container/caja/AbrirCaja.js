@@ -44,7 +44,8 @@ class AbrirCaja extends Component {
             if (user) {
                 var db = firebase.database();
                 var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigo)
-                cajaUsuarioRef.set({
+                var cajaUsuarioAbiertaRef = db.ref('users/' + user.uid + '/caja/cajas_abiertas_usuario/' + codigo)
+                var item = {
                     codigo: codigo,
                     saldo_inicial: saldo_inicial,
                     saldo_final: '0',
@@ -58,9 +59,11 @@ class AbrirCaja extends Component {
                     estado: true,
                     usuario_cerrar: '',
                     order: '' + order,
-                    valor_caja:saldo_inicial,
-                })
-                setTimeout(()=>{ this.props.handleClose()},100)
+                    valor_caja: saldo_inicial,
+                }
+                cajaUsuarioRef.set(item)
+                cajaUsuarioAbiertaRef.set(item)
+                setTimeout(() => { this.props.handleClose() }, 100)
             }
         })
     }
@@ -90,7 +93,7 @@ class AbrirCaja extends Component {
                 }}>
                     <Button disabled={this.state.estadoCaja} color="primary" variant="contained" onClick={() => {
                         this.abrirCaja()
-                        
+
                     }}>
                         Abrir Caja
                     </Button>

@@ -93,6 +93,8 @@ class CerrarCaja extends Component {
             if (user) {
                 var db = firebase.database();
                 var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigoReferencia)
+                var cajaUsuarioAbiertaRef = db.ref('users/' + user.uid + '/caja/cajas_abiertas_usuario/' + codigoReferencia)
+                
                 cajaUsuarioRef.update({
                     saldo_final: saldoFinal,
                     observacion,
@@ -101,6 +103,7 @@ class CerrarCaja extends Component {
                     estado: false,
                     usuario_cerrar: usuario.code
                 })
+                cajaUsuarioAbiertaRef.remove()
                 setTimeout(() => { handleClose() }, 100)
             }
         })

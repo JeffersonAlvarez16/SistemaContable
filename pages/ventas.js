@@ -94,8 +94,8 @@ class Ventas extends Component {
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
-        setTimeout(()=>{this.obtenerDataBaseDatos()},100)
-        
+        setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
+
     }
 
     obtenerDataBaseDatos = () => {
@@ -133,7 +133,7 @@ class Ventas extends Component {
         });
 
         var db = firebase.database();
-        
+
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
@@ -147,7 +147,8 @@ class Ventas extends Component {
                         })
                         var caja = filterList[0]
                         this.setState({
-                            estadoCaja: caja.estado
+                            estadoCaja: caja.estado,
+                            cajaSeleccionada: caja
                         })
                     }
                 })
@@ -400,10 +401,38 @@ class Ventas extends Component {
                     snapshot.val().descuento,
                     snapshot.val().cambio,
                 )
+                this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
                 setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
             }
         })
     }
+
+    // venta caja devolver
+    setVentaCaja(itemVenta, tipo_pago) {
+        var db = firebase.database();
+        var codigoVentaCaja = funtions.guidGenerator()
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+        operacionVentaRefCaja.once('value', (snap) => {
+            if (snap.val()) {
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
+                if (Boolean(caja.estado)) {
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + codigoVentaCaja)
+                    operacionVentaCaja.set(itemVenta)
+                    var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+
+                    cajaRefValorActual.once('value', (snap2) => {
+                        if (snap2.val()) {
+                            cajaRefValorActual.update({
+                                valor_caja: Number(Number(snap2.val().valor_caja) - Number(itemVenta.total)).toFixed(2)
+                            })
+
+                        }
+                    })
+                }
+            }
+        })
+    }
+
 
     //opercacion stock
     setOperacionStock = (listaProductos, cliente, dinero_resibido, total, subtotal, descuento, cambio) => {
@@ -445,6 +474,7 @@ class Ventas extends Component {
 
     deleteVenta = codigo => {
         var db = firebase.database();
+        var ventRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigo);
         var ventRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigo);
         ventRef.remove()
         setSnackBars.openSnack('success', 'rootSnackBar', 'Venta eliminada con exito', 2000)
@@ -509,7 +539,6 @@ class Ventas extends Component {
     }
 
     render() {
-        console.log(this.state.fechaActual)
         return (
             <Layout title="Ventas" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
@@ -527,12 +556,7 @@ class Ventas extends Component {
                         Boolean(this.state.estadoCaja) === true ?
                             <>
                                 <Tooltip title="Estado de caja">
-                                    <IconButton onClick={() => {
-                                        this.setState({
-                                            codigoEmitirFactura: n.codigo,
-                                            estadoModalCancelarVenta: true,
-                                        })
-                                    }}>
+                                    <IconButton >
                                         <MonetizationOn style={{ color: '#00c853' }} />
                                     </IconButton>
                                 </Tooltip>
@@ -540,12 +564,7 @@ class Ventas extends Component {
                             :
                             <>
                                 <Tooltip title="Estado de caja">
-                                    <IconButton onClick={() => {
-                                        this.setState({
-                                            codigoEmitirFactura: n.codigo,
-                                            estadoModalCancelarVenta: true,
-                                        })
-                                    }}>
+                                    <IconButton >
                                         <MonetizationOn style={{ color: '#EF5350' }} />
                                     </IconButton>
                                 </Tooltip>
@@ -657,6 +676,7 @@ class Ventas extends Component {
                             this.updateDataProductos(this.state.codigoEmitirFactura)
                             this.setState({ estadoModalCancelarVenta: false })
                         }}
+                        cajaSeleccionada={this.state.cajaSeleccionada}
                     />
                 </ModalContainerNormal>
 

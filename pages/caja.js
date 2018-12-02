@@ -24,6 +24,7 @@ import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 import AgregarDineroCaja from '../components/modals_container/caja/AgregarDineroCaja';
 import RetirarDineroCaja from '../components/modals_container/caja/RetirarDineroCaja';
 import colors from '../utils/colors';
+import ChipTabla from '../components/modals_container/caja/ChipTabla';
 
 class Caja extends Component {
 
@@ -35,16 +36,18 @@ class Caja extends Component {
         rowsVentasCaja: [
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'estado', numeric: true, disablePadding: false, label: 'Estado' },
-            { id: 'saldo_inicial', numeric: true, disablePadding: false, label: 'Saldo Inicial' },
-            { id: 'valor_caja', numeric: true, disablePadding: false, label: 'Valor actual de Caja' },
-            { id: 'saldo_final', numeric: true, disablePadding: false, label: 'Saldo Final' },
+            { id: 'saldo_inicial', numeric: true, disablePadding: false, label: 'Saldo inicial' },
+            { id: 'valor_caja', numeric: true, disablePadding: false, label: 'Valor actual de caja' },
+            { id: 'saldo_final', numeric: true, disablePadding: false, label: 'Saldo final' },
             { id: 'operaciones', numeric: true, disablePadding: false, label: 'Ventas' },
-            { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero Ingresado' },
-            { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero Retirado' },
-            { id: 'fecha_abrir', numeric: true, disablePadding: false, label: 'Caja Abierta - Fecha' },
-            { id: 'fecha_cerrar', numeric: true, disablePadding: false, label: 'Caja Cerrada - Fecha' },
-            { id: 'hora_abrir', numeric: true, disablePadding: false, label: 'Caja Iniciada - Hora' },
-            { id: 'hora_cerrrar', numeric: true, disablePadding: false, label: 'Caja Cerrada - Hora' },
+            { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero ingresado' },
+            { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero retirado' },
+            { id: 'ventas_devueltas', numeric: true, disablePadding: false, label: 'Ventas devueltas' },
+            { id: 'compras_productos', numeric: true, disablePadding: false, label: 'Compra de productos' },
+            { id: 'fecha_abrir', numeric: true, disablePadding: false, label: 'Caja abierta - Fecha' },
+            { id: 'fecha_cerrar', numeric: true, disablePadding: false, label: 'Caja cerrada - Fecha' },
+            { id: 'hora_abrir', numeric: true, disablePadding: false, label: 'Caja iniciada - Hora' },
+            { id: 'hora_cerrrar', numeric: true, disablePadding: false, label: 'Caja cerrada - Hora' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'usuario', numeric: true, disablePadding: false, label: 'Usuario' },
         ],
@@ -65,7 +68,7 @@ class Caja extends Component {
     }
 
     componentDidMount() {
-
+        
     }
 
     getCajasBaseDeDatos = () => {
@@ -82,6 +85,8 @@ class Caja extends Component {
                             sumaTotalVentas: [],
                             sumaTotalDineroIngresado: [],
                             sumaTotalDineroRetirado: [],
+                            sumaTotalVentasDevueltas: [],
+                            sumaTotalComprasProductos: [],
                         })
                         var lista = funtions.snapshotToArray(snapshot)
                         var filterList = lista.sort((a, b) => {
@@ -93,6 +98,8 @@ class Caja extends Component {
                             this.sumaVentas(item.ventas, item.codigo)
                             this.sumaDineroIngresado(item.ingreso_dinero, item.codigo)
                             this.sumaDineroRetirado(item.retiro_dinero, item.codigo)
+                            this.sumaVentasDevueltas(item.ventas_devueltas, item.codigo)
+                            this.sumaComprasProductos(item.compras_productos, item.codigo)
                         })
 
                         this.setState({
@@ -148,7 +155,7 @@ class Caja extends Component {
                     label={<div style={{ color: colors.getColorWhite() }}>Abierto</div>}
                     clickable
                     style={{
-                        background: colors.getColorEstadoCajaActivado()
+                        background: colors.getColorPrymaryLightCajaActivada()
                     }}
 
                 />
@@ -172,10 +179,10 @@ class Caja extends Component {
             />
         }
         if (item.id === 'fecha_abrir') {
-            return n.fecha_abrir
+            return <div style={{ width: 'max-content' }}>{n.fecha_abrir}</div>
         }
         if (item.id === 'fecha_cerrar') {
-            return n.fecha_cerrar
+            return <div style={{ width: 'max-content' }}>{n.fecha_cerrar}</div>
         }
         if (item.id === 'hora_abrir') {
             return n.hora_abrir
@@ -189,43 +196,22 @@ class Caja extends Component {
                     <div>
                         {
                             Boolean(n.estado) ?
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3, background: colors.getColorEstadoCajaActivadoDark() }}>
-                                        {
-                                            Object.values(n.ventas).length
-                                        }
-                                    </Avatar>}
-                                    label="Ventas"
-                                    clickable
-                                    color="primary"
-                                    style={{
-                                        background: colors.getColorEstadoCajaActivado()
-                                    }}
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {`En efectivo: ${this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ventas).length}
+                                    total={this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}
+                                    label={'Ventas'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
                                 />
                                 :
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
-                                        {
-                                            Object.values(n.ventas).length
-                                        }
-                                    </Avatar>}
-                                    label="Ventas"
-                                    clickable
-                                    color="primary"
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {`En efectivo: ${this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ventas).length}
+                                    total={this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}
+                                    label={'Dinero ingresado'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
                                 />
                         }
                     </div>
@@ -251,43 +237,22 @@ class Caja extends Component {
                     <div>
                         {
                             Boolean(n.estado) ?
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3, background: colors.getColorEstadoCajaActivadoDark() }}>
-                                        {
-                                            Object.values(n.ingreso_dinero).length
-                                        }
-                                    </Avatar>}
-                                    label="Dinero retirado"
-                                    clickable
-                                    color="primary"
-                                    style={{
-                                        background: colors.getColorEstadoCajaActivado()
-                                    }}
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                        {`Total: ${this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ingreso_dinero).length}
+                                    total={this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Dinero ingresado'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
                                 />
                                 :
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
-                                        {
-                                            Object.values(n.ingreso_dinero).length
-                                        }
-                                    </Avatar>}
-                                    label="Dinero ingresado"
-                                    clickable
-                                    color="primary"
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                        {`Total: ${this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ingreso_dinero).length}
+                                    total={this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Dinero ingresado'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
                                 />
                         }
 
@@ -315,43 +280,22 @@ class Caja extends Component {
                     <div>
                         {
                             Boolean(n.estado) ?
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3, background: colors.getColorEstadoCajaActivadoDark() }}>
-                                        {
-                                            Object.values(n.retiro_dinero).length
-                                        }
-                                    </Avatar>}
-                                    label="Dinero retirado"
-                                    clickable
-                                    color="primary"
-                                    style={{
-                                        background: colors.getColorEstadoCajaActivado()
-                                    }}
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                        {`Total: ${this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.retiro_dinero).length}
+                                    total={this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Dinero retirado'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
                                 />
                                 :
-                                <Chip
-                                    avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
-                                        {
-                                            Object.values(n.retiro_dinero).length
-                                        }
-                                    </Avatar>}
-                                    label="Dinero retirado"
-                                    clickable
-                                    color="primary"
-                                    onDelete={() => this.setState({})}
-                                    deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                        <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
-                                        <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                        {`Total: ${this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}`}
-                                        </div>
-                                    </div>}
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.retiro_dinero).length}
+                                    total={this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Dinero retirado'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
                                 />
 
                         }
@@ -373,6 +317,92 @@ class Caja extends Component {
                 }
             </div>
         }
+        if (item.id === 'ventas_devueltas') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.ventas_devueltas != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ventas_devueltas).length}
+                                    total={this.state.sumaTotalVentasDevueltas.filter(item => item.codigo === n.codigo)[0].sumaTotal}
+                                    label={'Ventas devueltas'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ventas_devueltas).length}
+                                    total={this.state.sumaTotalVentasDevueltas.filter(item => item.codigo === n.codigo)[0].sumaTotal}
+                                    label={'Ventas devueltas'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Ventas devueltas"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'compras_productos') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.compras_productos != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.compras_productos).length}
+                                    total={this.state.sumaTotalComprasProductos.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Compra de productos'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.compras_productos).length}
+                                    total={this.state.sumaTotalComprasProductos.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Compra de productos'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Compra de productos"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
         if (item.id === 'valor_caja') {
             return Boolean(n.estado) ?
                 <Chip
@@ -381,7 +411,7 @@ class Caja extends Component {
                     }}>{Number(n.valor_caja).toFixed(2)}</div>}
                     clickable
                     style={{
-                        background: colors.getColorEstadoCajaActivado()
+                        background: colors.getColorPrymaryLightCajaActivada()
                     }}
                 />
                 :
@@ -444,6 +474,46 @@ class Caja extends Component {
             })
         }
     }
+    sumaVentasDevueltas = (ventas, codigo) => {
+        var sumaEfectivo = 0
+        var sumaCredito = 0
+        var sumaTarjetaCredito = 0
+        var sumaTarjetaBebito = 0
+        var sumaCheque = 0
+        var newArray = this.state.sumaTotalVentasDevueltas
+        if (ventas != null) {
+            var array = Object.values(ventas)
+            array.forEach(element => {
+                if (element.tipo_pago === 'efectivo') {
+                    sumaEfectivo = Number(element.total) + Number(sumaEfectivo)
+                }
+                if (element.tipo_pago === 'credito') {
+                    sumaCredito = Number(element.total) + Number(sumaCredito)
+                }
+                if (element.tipo_pago === 'tarjeta-credito') {
+                    sumaTarjetaCredito = Number(element.total) + Number(sumaTarjetaCredito)
+                }
+                if (element.tipo_pago === 'tarjeta-debito') {
+                    sumaTarjetaBebito = Number(element.total) + Number(sumaTarjetaCredito)
+                }
+                if (element.tipo_pago === 'cheque') {
+                    sumaCheque = Number(element.total) + Number(sumaTarjetaCredito)
+                }
+            });
+            newArray.push({
+                sumaEfectivo: Number(sumaEfectivo).toFixed(2),
+                sumaCredito: Number(sumaCredito).toFixed(2),
+                sumaTarjetaCredito: Number(sumaTarjetaCredito).toFixed(2),
+                sumaTarjetaBebito: Number(sumaTarjetaBebito).toFixed(2),
+                sumaCheque: Number(sumaCheque).toFixed(2),
+                sumaTotal: (sumaEfectivo + sumaCredito + sumaTarjetaBebito + sumaTarjetaCredito + sumaCheque).toFixed(2),
+                codigo,
+            })
+            this.setState({
+                sumaTotalVentasDevueltas: newArray
+            })
+        }
+    }
     sumaDineroIngresado = (ingreso_dinero, codigo) => {
         var suma = 0
         var newArray = this.state.sumaTotalDineroIngresado
@@ -475,6 +545,23 @@ class Caja extends Component {
             })
             this.setState({
                 sumaTotalDineroRetirado: newArray
+            })
+        }
+    }
+    sumaComprasProductos = (compras_productos, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalComprasProductos
+        if (compras_productos != null) {
+            var array = Object.values(compras_productos)
+            array.forEach(element => {
+                suma = Number(Number(element.total_final) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalComprasProductos: newArray
             })
         }
     }

@@ -96,6 +96,30 @@ class ModalCompraProductos extends Component {
         setSnackBars.openSnack('info', 'rootSnackBar', 'Compra relizada con éxito', 2000)
         this.props.handleClose()
     }
+    // guardar venta caja
+    setCompraCaja(itemVenta) {
+        var db = firebase.database();
+        var codigoVentaCaja = funtions.guidGenerator()
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+        operacionVentaRefCaja.once('value', (snap) => {
+            if (snap.val()) {
+                var caja = funtions.snapshotToArray(snap).filter(it=>it.usuario===this.props.usuario.code)[0]
+                if (Boolean(caja.estado)) {
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/compras_productos/' + codigoVentaCaja)
+                    operacionVentaCaja.set(itemVenta)
+                   
+                    var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                    cajaRefValorActual.once('value', (snap2) => {
+                        if (snap2.val()) {
+                             cajaRefValorActual.update({
+                                valor_caja: `${Number(Number(snap2.val().valor_caja) - Number(itemVenta.total_final)).toFixed(2)}`
+                            })
+                        }
+                    })
+                }
+            }
+        })
+    }
 
     finalizarCompra = () => {
         if (this.comprovarFinalizarCompraYDevolucionProveedor()) {
@@ -176,7 +200,8 @@ class ModalCompraProductos extends Component {
         var order = new Date()
         var db = firebase.database();
         var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
-        operacionStockRef.set({
+
+        var itemOperacion = {
             codigo: codigoStock,
             tipo_operacion: this.props.tipoAjuste,
             fecha: funtions.obtenerFechaActual(),
@@ -197,7 +222,11 @@ class ModalCompraProductos extends Component {
             vuelto: '',
             acreditado: '',
             order: order + ""
-        });
+        }
+
+        operacionStockRef.set(itemOperacion)
+        this.setCompraCaja(itemOperacion)
+
     }
 
     onChangue = item => {
@@ -482,14 +511,14 @@ class ModalCompraProductos extends Component {
                         {
                             tipoAjuste === 'compra_producto' &&
                             <AutoCompleteProveedores
-                            styleText={styles.styleSearch}
-                            dataRef="proveedores"
-                            dataRefObject="proveedor"
-                            error={this.state.proveedorCompra.length>0?false:true}
-                            onChangue={(item) => this.setState({ proveedorCompra: item.codigo })}
-                            usuario={this.props.usuario}
-                            codigoProveedor=''
-                        />
+                                styleText={styles.styleSearch}
+                                dataRef="proveedores"
+                                dataRefObject="proveedor"
+                                error={this.state.proveedorCompra.length > 0 ? false : true}
+                                onChangue={(item) => this.setState({ proveedorCompra: item.codigo })}
+                                usuario={this.props.usuario}
+                                codigoProveedor=''
+                            />
                         }
                         {
                             tipoAjuste === 'devolucion_cliente' &&
@@ -508,7 +537,7 @@ class ModalCompraProductos extends Component {
                                 styleText={styles.styleSearch}
                                 dataRef="proveedores"
                                 dataRefObject="proveedor"
-                                error={this.state.proveedorCompra.length>0?false:true}
+                                error={this.state.proveedorCompra.length > 0 ? false : true}
                                 onChangue={(item) => this.setState({ proveedorCompra: item.codigo })}
                                 usuario={this.props.usuario}
                                 codigoProveedor=''
