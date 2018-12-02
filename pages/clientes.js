@@ -25,6 +25,7 @@ import Divider from '@material-ui/core/Divider';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactivar';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
+import { CircularProgress } from '@material-ui/core';
 
 
 class Clientes extends Component {
@@ -60,6 +61,7 @@ class Clientes extends Component {
         ],
         //usuario
         usuario: '',
+        estadoPermisos: null
     }
 
     componentDidMount() {
@@ -104,10 +106,16 @@ class Clientes extends Component {
 
         if (item.id === 'acciones') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Tooltip title="Editar"  placement="left">
-                    <IconButton aria-label="Editar" onClick={()=>{
-                        this.setState({ itemSeleccionado: n })
-                        this.setState({ openModalNewCliente: true })
+                <Tooltip title="Editar" placement="left">
+                    <IconButton aria-label="Editar" onClick={() => {
+                        this.setState({
+                            estadoacciones: 'editar'
+                        })
+                        setTimeout(() => {
+                            this.comprobarUsuario(n)
+                        }, 100)
+                        /*  this.setState({ itemSeleccionado: n })
+                          this.setState({ openModalNewCliente: true }) */
                     }}>
                         <EditIcon color='primary' />
                     </IconButton>
@@ -116,8 +124,14 @@ class Clientes extends Component {
                     Boolean(n.estado) ?
                         <Tooltip title="Desactivar" placement="right">
                             <IconButton aria-label="Desactivar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                                this.setState({
+                                    estadoacciones: 'desactivar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+                                /* this.setState({ itemSeleccionado: n })
+                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' }) */
                             }}>
                                 <VisibilityOffIcon />
                             </IconButton>
@@ -125,8 +139,15 @@ class Clientes extends Component {
                         :
                         <Tooltip title="Activar">
                             <IconButton aria-label="Activar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                                this.setState({
+                                    estadoacciones: 'activar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+
+                                /*   this.setState({ itemSeleccionado: n })
+                                  this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' }) */
                             }}>
                                 <VisibilityIcon color='primary' />
                             </IconButton>
@@ -206,11 +227,11 @@ class Clientes extends Component {
 
         if (item.id === 'usuario') {
             return <ReturnTextTable
-            referencia="usuarios"
-            codigo={n.usuario}
-            datoTraido="nombre"
-            estado={n.estado}
-        />
+                referencia="usuarios"
+                codigo={n.usuario}
+                datoTraido="nombre"
+                estado={n.estado}
+            />
         }
     }
 
@@ -287,65 +308,146 @@ class Clientes extends Component {
         setSnackBars.openSnack('warning', 'rootSnackBar', 'Clientes desactivados correctamente', 2000)
     }
 
+    obtenerPermisosusuarios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.clientes === true) {
+                            this.setState({
+                                estadoPermisos: true
+                            })
+                        } else {
+                            this.setState({
+                                estadoPermisos: false
+                            })
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    comprobarUsuario = (item) => {
+        if (this.state.usuario.tipo_usuario === 'administrador') {
+            if (this.state.estadoacciones === 'desactivar') {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+            } else if (this.state.estadoacciones === 'activar') {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+            } else {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ openModalNewCliente: true })
+            }
+        } else {
+            if (this.state.estadoacciones === 'desactivar') {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Cliente', 2000)
+                }
+            } else if (this.state.estadoacciones === 'activar') {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Cliente', 2000)
+                }
+            } else {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ openModalNewCliente: true })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Cliente', 2000)
+                }
+            }
+        }
+     }
+
     render() {
         return (
-            <Layout title="Clientes" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+            <Layout title="Clientes" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerPermisosusuarios()
+                }, 100)
+            }}>
+                {
+                    this.state.estadoPermisos === true &&
+                    <div>
 
-                <MenuHerramientas>
-                    <ItemMenuHerramienta
-                        titleButton="Nuevo Cliente"
-                        color="primary"
-                        visible={true}
-                        onClick={() => this.setState({  itemSeleccionado:null, openModalNewCliente: true })}
-                    />
-                  
+                        <MenuHerramientas>
+                            <ItemMenuHerramienta
+                                titleButton="Nuevo Cliente"
+                                color="primary"
+                                visible={true}
+                                onClick={() => this.setState({ itemSeleccionado: null, openModalNewCliente: true })}
+                            />
 
-                    <div style={{ flex: 0.9 }}></div>
 
-                    <Search
-                        id='buscar-cliente-clientes'
-                        textoSearch="Buscar..."
-                        textoTooltip="Buscar Cliente"
-                        handleSearch={this.handleSearch}
-                    />
-                </MenuHerramientas>
+                            <div style={{ flex: 0.9 }}></div>
 
-                <Divider />
+                            <Search
+                                id='buscar-cliente-clientes'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar Cliente"
+                                handleSearch={this.handleSearch}
+                            />
+                        </MenuHerramientas>
 
-                <TablaNormal
-                    textoTitleP="Clientes"
-                    textoTitleS="Cliente"
-                    selectedItems={true}
-                    toolbar={false}
-                    notTab={true}
-                    data={this.state.listaClientes}
-                    rows={this.state.rowslistaClientes}
-                    handleGetData={this.handleGetData}
-                    estadoTabla={this.state.estadoTabla}
-                    itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
-                />
+                        <Divider />
 
-                <FullScreenDialog openModal={this.state.openModalNewCliente}>
-                    <ModalNewCliente
-                        item={this.state.itemSeleccionado}
-                        handleClose={() => this.setState({ openModalNewCliente: false })}
-                        usuario={this.state.usuario}
-                    >
-                    </ModalNewCliente>
-                </FullScreenDialog>
+                        <TablaNormal
+                            textoTitleP="Clientes"
+                            textoTitleS="Cliente"
+                            selectedItems={true}
+                            toolbar={false}
+                            notTab={true}
+                            data={this.state.listaClientes}
+                            rows={this.state.rowslistaClientes}
+                            handleGetData={this.handleGetData}
+                            estadoTabla={this.state.estadoTabla}
+                            itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
+                        />
 
-                <ModalContainerNormal
-                    open={this.state.estadoModalSimple}
-                    handleClose={() => this.setState({ estadoModalSimple: false })}
-                >
-                    <DeleteActivarDesactivar
-                        tipo={this.state.estadoModalDeleteActivarDesactivar}
-                        handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
-                        handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
-                        handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
-                    />
-                </ModalContainerNormal>
+                        <FullScreenDialog openModal={this.state.openModalNewCliente}>
+                            <ModalNewCliente
+                                item={this.state.itemSeleccionado}
+                                handleClose={() => this.setState({ openModalNewCliente: false })}
+                                usuario={this.state.usuario}
+                            >
+                            </ModalNewCliente>
+                        </FullScreenDialog>
+
+                        <ModalContainerNormal
+                            open={this.state.estadoModalSimple}
+                            handleClose={() => this.setState({ estadoModalSimple: false })}
+                        >
+                            <DeleteActivarDesactivar
+                                tipo={this.state.estadoModalDeleteActivarDesactivar}
+                                handleClose={() => this.setState({ estadoModalSimple: false })}
+                                handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
+                                handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
+                                handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
+                            />
+                        </ModalContainerNormal>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
+                }
             </Layout>
         );
     }
