@@ -504,7 +504,7 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        var itemVenta={
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -600,7 +600,7 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        var itemVenta={
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -627,10 +627,10 @@ class ModalNewVenta extends Component {
         this.setVentaCaja(itemVenta)
         operacionVentaRef.set(itemVenta)
 
-        
+
     }
 
-    setVentaCaja(itemVenta){
+    setVentaCaja(itemVenta) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
@@ -640,6 +640,15 @@ class ModalNewVenta extends Component {
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
+                    var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                    cajaRefValorActual.once('value', (snap2) => {
+                        if (snap2.val()) {
+                            cajaRefValorActual.update({
+                                valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
+                            })
+
+                        }
+                    })
                 }
             }
         })

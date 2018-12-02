@@ -13,7 +13,7 @@ import funtions from '../../../utils/funtions';
 class CerrarCaja extends Component {
 
     state = {
-        saldoFinal: 0,
+        saldoFinal: '',
         saldo_inicial: 0,
         sumaTotalVentas: 0,
         observacion: '',
@@ -134,21 +134,27 @@ class CerrarCaja extends Component {
                     />
                     <TextField
                         id="outlined-number-saldo-final"
-                        label="Saldo final"
+                        label="Saldo final en caja"
                         value={this.state.saldoFinal}
                         helperText={this.state.textoSaldoFinal}
+                        error={this.state.saldoFinal.length===0?true:false}
                         onChange={e => {
                             this.setState({ saldoFinal: e.target.value })
                             setTimeout(()=>{
-                                if(Number(this.state.saldoFinal) >= Number(this.state.saldo_inicial)){
-                                    this.setState({
-                                        textoSaldoFinal:''
-                                    })
-                                }else{
-                                    this.setState({
-                                        textoSaldoFinal:'Este valor es menor que el Saldo inicial'
-                                    })
-                                }
+                                var sumaSaldoInicialTotalSistema=Number(this.state.sumaTotalVentas)+Number(this.state.saldo_inicial)
+                                    if(Number(this.state.saldoFinal) > sumaSaldoInicialTotalSistema){
+                                        this.setState({
+                                            textoSaldoFinal:`Está sobrando ${(Number(this.state.saldoFinal)-(Number(Number(this.state.sumaTotalVentas)+Number(this.state.saldo_inicial)))).toFixed(2)}`
+                                        })
+                                    }else if(Number(this.state.saldoFinal) < sumaSaldoInicialTotalSistema){
+                                        this.setState({
+                                            textoSaldoFinal:`Está faltando ${(Number(Number(this.state.sumaTotalVentas)+Number(this.state.saldo_inicial))-Number(this.state.saldoFinal)).toFixed(2)}`
+                                        })
+                                    }else if(Number(this.state.saldoFinal) === sumaSaldoInicialTotalSistema){
+                                        this.setState({
+                                            textoSaldoFinal:''
+                                        })
+                                    }
                             },100)
 
                         }}

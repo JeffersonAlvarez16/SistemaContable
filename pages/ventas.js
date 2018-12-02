@@ -95,21 +95,7 @@ class Ventas extends Component {
             fechaActual: funtions.obtenerFechaActual()
         })
         setTimeout(()=>{this.obtenerDataBaseDatos()},100)
-        var db = firebase.database();
         
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
-                operacionVentaRefCaja.once('value', (snap) => {
-                    if (snap.val()) {
-                        var caja = funtions.snapshotToArray(snap)[0]
-                        this.setState({
-                            estadoCaja: caja.estado
-                        })
-                    }
-                })
-            }
-        })
     }
 
     obtenerDataBaseDatos = () => {
@@ -145,6 +131,28 @@ class Ventas extends Component {
                 });
             }
         });
+
+        var db = firebase.database();
+        
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var lista = funtions.snapshotToArray(snap)
+                        var filterList = lista.sort((a, b) => {
+                            a = new Date(a.order);
+                            b = new Date(b.order);
+                            return a > b ? -1 : a < b ? 1 : 0;
+                        })
+                        var caja = filterList[0]
+                        this.setState({
+                            estadoCaja: caja.estado
+                        })
+                    }
+                })
+            }
+        })
     }
 
     handleGetData = (n, item) => {

@@ -57,7 +57,8 @@ class AbrirCaja extends Component {
                     hora_cerrrar: '',
                     estado: true,
                     usuario_cerrar: '',
-                    order: '' + order
+                    order: '' + order,
+                    valor_caja:saldo_inicial,
                 })
                 setTimeout(()=>{ this.props.handleClose()},100)
             }
