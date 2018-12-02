@@ -117,7 +117,7 @@ class NuevaRetencion extends Component {
                 retencionesRef.set({
                     codigo: codigo,
                     retencion: retencion,
-                    fecha_registro: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    fecha_registro: funtions.obtenerFechaActual(),
                     hora_registro: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     estado: 'pendiente',
                     error_emision:'',

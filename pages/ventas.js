@@ -89,34 +89,14 @@ class Ventas extends Component {
         estadoCaja: false
     }
 
-    obtenerFechaActual=()=>{
-        var date= new Date()
-        var day= date.getDate()
-        var mon= date.getMonth()
-        var yea= date.getFullYear()
-        if(String(day).length===1){
-            day='0'+day
-        }
-        if(String(mon).length===1){
-            mon='0'+mon
-        }
-        this.setState({
-            fechaActual:`${yea}-${mon}-${day}`
-        })
-    }
-
-
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
 
     componentDidMount() {
-        this.obtenerDataBaseDatos()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
+        setTimeout(()=>{this.obtenerDataBaseDatos()},100)
         var db = firebase.database();
-        this.obtenerFechaActual()
+        
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
@@ -136,7 +116,7 @@ class Ventas extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(this.obtenerFechFormateada())
+                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(funtions.obtenerFechaActual())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -434,7 +414,7 @@ class Ventas extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'devolucion_cliente',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: cliente,
             productos: arrayProductos,
@@ -521,7 +501,7 @@ class Ventas extends Component {
     }
 
     render() {
-console.log(this.state.fechaActual)
+        console.log(this.state.fechaActual)
         return (
             <Layout title="Ventas" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
@@ -577,7 +557,7 @@ console.log(this.state.fechaActual)
                         }}
                     />
 
-                    <div style={{display:'flex', alignItems:'center'}}>
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
                         <TextField
                             id="datetime-local"
                             type="date"

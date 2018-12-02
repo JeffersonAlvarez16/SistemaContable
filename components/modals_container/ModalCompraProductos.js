@@ -179,7 +179,7 @@ class ModalCompraProductos extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: this.props.tipoAjuste,
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: this.state.proveedorCompra.length > 0 ? this.state.proveedorCompra : this.state.clienteDevolucion,
             productos: arrayProductos,

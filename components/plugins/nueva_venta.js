@@ -282,7 +282,7 @@ class NuevaVenta extends Component {
             iva: sumaIva,
             total: sumaTotal,
             productos: this.state.productosSeleccionados,
-            fecha_venta: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             empleado: this.props.usuario.code,
             order: '' + order,
@@ -320,7 +320,7 @@ class NuevaVenta extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'venta-producto',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : cliente,
             productos: arrayProductos,

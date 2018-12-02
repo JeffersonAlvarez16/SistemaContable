@@ -76,7 +76,7 @@ class CerrarCaja extends Component {
                     saldo_final: saldoFinal,
                     ventas: [],
                     observacion,
-                    fecha_cerrar: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    fecha_cerrar: funtions.obtenerFechaActual(),
                     hora_cerrrar: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     estado: false,
                     usuario_cerrar: usuario.code
@@ -96,7 +96,7 @@ class CerrarCaja extends Component {
                 cajaUsuarioRef.update({
                     saldo_final: saldoFinal,
                     observacion,
-                    fecha_cerrar: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    fecha_cerrar: funtions.obtenerFechaActual(),
                     hora_cerrrar: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     estado: false,
                     usuario_cerrar: usuario.code

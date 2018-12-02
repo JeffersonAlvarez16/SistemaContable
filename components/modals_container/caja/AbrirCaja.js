@@ -51,7 +51,7 @@ class AbrirCaja extends Component {
                     usuario: usuario.code,
                     observacion: '',
                     ventas: [],
-                    fecha_abrir: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    fecha_abrir: funtions.obtenerFechaActual(),
                     hora_abrir: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     fecha_cerrar: '',
                     hora_cerrrar: '',

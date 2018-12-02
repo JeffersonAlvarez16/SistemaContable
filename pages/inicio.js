@@ -17,7 +17,7 @@ class Inicio extends Component {
         listaStockTemporal: [],
         estadoTabla: '',
 
-        fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+        fecha: funtions.obtenerFechaActual(),
         productosVendidos: [],
 
         sumaProdcutosCompra: 0,

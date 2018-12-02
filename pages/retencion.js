@@ -74,29 +74,11 @@ class Retencion extends Component {
         fechaActual: '',
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
+    
     componentDidMount() {
         this.obtenerDataBaseDatos()
-        this.obtenerFechaActual()
-    }
-    obtenerFechaActual = () => {
-        var date = new Date()
-        var day = date.getDate()
-        var mon = date.getMonth()
-        var yea = date.getFullYear()
-        if (String(day).length === 1) {
-            day = '0' + day
-        }
-        if (String(mon).length === 1) {
-            mon = '0' + mon
-        }
         this.setState({
-            fechaActual: `${yea}-${mon}-${day}`
+            fechaActual: funtions.obtenerFechaActual()
         })
     }
 
@@ -104,7 +86,7 @@ class Retencion extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(this.obtenerFechFormateada())
+                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(funtions.obtenerFechaActual())
                 retencionesRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({

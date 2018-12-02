@@ -61,39 +61,20 @@ class Stock extends Component {
         fechaActual: '',
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
 
-    obtenerFechaActual = () => {
-        var date = new Date()
-        var day = date.getDate()
-        var mon = date.getMonth()
-        var yea = date.getFullYear()
-        if (String(day).length === 1) {
-            day = '0' + day
-        }
-        if (String(mon).length === 1) {
-            mon = '0' + mon
-        }
-        this.setState({
-            fechaActual: `${yea}-${mon}-${day}`
-        })
-    }
-
+    
     componentDidMount() {
         this.cargarData()
-        this.obtenerFechaActual()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
     }
 
     cargarData = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(this.obtenerFechFormateada())
+                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(funtions.obtenerFechaActual())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
