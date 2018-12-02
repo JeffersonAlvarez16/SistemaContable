@@ -232,98 +232,97 @@ class Caja extends Component {
                 }, 100)
             }}>
 
-                        <MenuHerramientas>
-                            {
-                                Boolean(this.state.estadoCaja) === true &&
-                                <>
-                                    <Tooltip title="Estado de caja">
-                                        <IconButton >
-                                            <MonetizationOn style={{ color: '#00c853' }} />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <ItemMenuHerramienta
-                                        titleButton="Cerrar Caja"
-                                        color="primary"
-                                        visible={true}
-                                        onClick={() => this.setState({ openModalCerrarCaja: true })}
-                                    />
-                                </>
-                            }
-                            {
-                                Boolean(this.state.estadoCaja) === false &&
-                                <>
-                                    <Tooltip title="Estado de caja">
-                                        <IconButton onClick={() => {
-                                            this.setState({
-                                                codigoEmitirFactura: n.codigo,
-                                                estadoModalCancelarVenta: true,
-                                            })
-                                        }}>
-                                            <MonetizationOn style={{ color: '#EF5350' }} />
-                                        </IconButton>
-                                    </Tooltip>
-                                    <ItemMenuHerramienta
-                                        titleButton="Abrir Caja"
-                                        color="primary"
-                                        visible={true}
-                                        onClick={() => this.setState({ openModalAbrirCaja: true })}
-                                    />
-                                </>
-                            }
-                            {
-                                Boolean(this.state.estadoCaja) === null &&
+                {
+                    this.state.estadoCaja === null &&
+                    <div style={{margin:15}}>
+                        <CircularProgress size={30}/>
+                    </div>
+                }
+                {
+                   this.state.estadoCaja != null &&
+                    <MenuHerramientas>
+                        {
+                            Boolean(this.state.estadoCaja) === true &&
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton >
+                                        <MonetizationOn style={{ color: '#00c853' }} />
+                                    </IconButton>
+                                </Tooltip>
+                                <ItemMenuHerramienta
+                                    titleButton="Cerrar Caja"
+                                    color="primary"
+                                    visible={true}
+                                    onClick={() => this.setState({ openModalCerrarCaja: true })}
+                                />
+                            </>
+                        }
+                        {
+                            Boolean(this.state.estadoCaja) === false &&
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton onClick={() => {
+                                        this.setState({
+                                            codigoEmitirFactura: n.codigo,
+                                            estadoModalCancelarVenta: true,
+                                        })
+                                    }}>
+                                        <MonetizationOn style={{ color: '#EF5350' }} />
+                                    </IconButton>
+                                </Tooltip>
                                 <ItemMenuHerramienta
                                     titleButton="Abrir Caja"
                                     color="primary"
                                     visible={true}
                                     onClick={() => this.setState({ openModalAbrirCaja: true })}
                                 />
-                            }
+                            </>
+                        }
 
 
-                            <ItemMenuHerramienta
-                                titleButton="Ver total"
-                                color="primary"
-                                visible={true}
-                                disabled={!this.state.estadoCaja}
-                                onClick={() => {
-                                    if (this.state.estadoCaja) {
-                                        this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
-                                    }
-                                }}
-                            />
-                            <ItemMenuHerramienta
-                                titleButton="Agregar dinero"
-                                color="primary"
-                                visible={true}
-                                disabled={!this.state.estadoCaja}
-                                onClick={() => {
-                                    if (this.state.estadoCaja) {
-                                        this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
-                                    }
-                                }}
-                            />
-                            <ItemMenuHerramienta
-                                titleButton="Retirar dinero"
-                                color="primary"
-                                visible={true}
-                                disabled={!this.state.estadoCaja}
-                                onClick={() => {
-                                    if (this.state.estadoCaja) {
-                                        this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
-                                    }
-                                }}
-                            />
+                        <ItemMenuHerramienta
+                            titleButton="Ver total"
+                            color="primary"
+                            visible={true}
+                            disabled={!this.state.estadoCaja}
+                            onClick={() => {
+                                if (this.state.estadoCaja) {
+                                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
+                                }
+                            }}
+                        />
+                        <ItemMenuHerramienta
+                            titleButton="Agregar dinero"
+                            color="primary"
+                            visible={true}
+                            disabled={!this.state.estadoCaja}
+                            onClick={() => {
+                                if (this.state.estadoCaja) {
+                                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                                }
+                            }}
+                        />
+                        <ItemMenuHerramienta
+                            titleButton="Retirar dinero"
+                            color="primary"
+                            visible={true}
+                            disabled={!this.state.estadoCaja}
+                            onClick={() => {
+                                if (this.state.estadoCaja) {
+                                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                                }
+                            }}
+                        />
 
-                            <div style={{ flex: 0.9 }}></div>
+                        <div style={{ flex: 0.9 }}></div>
 
-                            <Search
-                                id='buscar-cliente-clientes'
-                                textoSearch="Buscar..."
-                                textoTooltip="Buscar Cliente"
-                                handleSearch={this.handleSearch}
-                            />
-                        </MenuHerramientas>
+                        <Search
+                            id='buscar-cliente-clientes'
+                            textoSearch="Buscar..."
+                            textoTooltip="Buscar Cliente"
+                            handleSearch={this.handleSearch}
+                        />
+                    </MenuHerramientas>
 
                 }
 
