@@ -6,6 +6,7 @@ import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Tooltip from '@material-ui/core/Tooltip';
+import colors from '../../../utils/colors';
 
 class TableNormalHead extends React.Component {
 
@@ -17,8 +18,10 @@ class TableNormalHead extends React.Component {
         const { onSelectAllClick, order, orderBy, numSelected, rowCount, rows, selectedItems } = this.props;
 
         return (
-            <TableHead style={{background:'rgba(0, 0, 0, 0.2)'}}>
-                <TableRow>
+            <TableHead  color='primary'>
+                <TableRow
+               
+                >
                     {
                         !selectedItems &&
                         <TableCell padding="checkbox">
@@ -35,6 +38,7 @@ class TableNormalHead extends React.Component {
                             <TableCell
                                 key={row.id}
                                 sortDirection={orderBy === row.id ? order : false}
+                               
                             >
                                 <Tooltip
                                     title="Ordenar Por"
@@ -46,7 +50,7 @@ class TableNormalHead extends React.Component {
                                         direction={order}
                                         onClick={this.createSortHandler(row.id)}
                                     >
-                                        {row.label}
+                                        <div style={{width:'max-content', fontSize:15,fontWeight:800}}>{row.label}</div>
                                     </TableSortLabel>
                                 </Tooltip>
                             </TableCell>

@@ -168,7 +168,7 @@ class ModalNewProducto extends Component {
             operacionStockRef.set({
                 codigo: codigoStock,
                 tipo_operacion: 'edicion-producto',
-                fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                fecha: funtions.obtenerFechaActual(),
                 hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                 cliente_proveedor: producto.proveedor,
                 productos: [
@@ -208,7 +208,7 @@ class ModalNewProducto extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'registro-producto',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: producto.proveedor,
             productos: [
@@ -278,7 +278,7 @@ class ModalNewProducto extends Component {
                 stock_maximo: this.state.stock_maximo,
 
                 fecha_vencimiento: this.state.fecha_vencimiento,
-                fecha_registro: this.props.item ? this.state.fecha_registro : `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                fecha_registro: this.props.item ? this.state.fecha_registro : funtions.obtenerFechaActual(),
                 hora_registro: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
 
                 tiene_iva: this.state.tiene_iva,

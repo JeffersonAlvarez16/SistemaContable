@@ -22,7 +22,7 @@ class AbrirCaja extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/caja/' + usuario.code).orderByChild('order').limitToLast(1)
+                var productosRef = db.ref('users/' + user.uid + '/caja/cajas_normales' + usuario.code).orderByChild('order').limitToLast(1)
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         const caja = funtions.snapshotToArray(snapshot)[0]
@@ -43,21 +43,27 @@ class AbrirCaja extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/' + usuario.code + "/" + codigo)
-                cajaUsuarioRef.set({
+                var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + codigo)
+                var cajaUsuarioAbiertaRef = db.ref('users/' + user.uid + '/caja/cajas_abiertas_usuario/' + codigo)
+                var item = {
                     codigo: codigo,
                     saldo_inicial: saldo_inicial,
                     saldo_final: '0',
                     usuario: usuario.code,
-                    observacion:'',
+                    observacion: '',
                     ventas: [],
-                    fecha_abrir: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                    fecha_abrir: funtions.obtenerFechaActual(),
                     hora_abrir: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     fecha_cerrar: '',
                     hora_cerrrar: '',
                     estado: true,
-                    order: '' + order
-                })
+                    usuario_cerrar: '',
+                    order: '' + order,
+                    valor_caja: saldo_inicial,
+                }
+                cajaUsuarioRef.set(item)
+                cajaUsuarioAbiertaRef.set(item)
+                setTimeout(() => { this.props.handleClose() }, 100)
             }
         })
     }
@@ -85,9 +91,10 @@ class AbrirCaja extends Component {
                     display: 'flex',
                     flexDirection: 'row'
                 }}>
-                    <Button disabled={this.state.estadoCaja} color="primary" variant="contained" onClick={() =>
+                    <Button disabled={this.state.estadoCaja} color="primary" variant="contained" onClick={() => {
                         this.abrirCaja()
-                    }>
+
+                    }}>
                         Abrir Caja
                     </Button>
                     <Button color="primary" onClick={() =>

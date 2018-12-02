@@ -10,6 +10,7 @@ import Divider from '@material-ui/core/Divider';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
@@ -47,7 +48,7 @@ import ModalNewVenta from '../components/plugins/ModalNewVenta';
 class Ventas extends Component {
 
     state = {
-       
+
         itemsSeleccionados: [],
         listaVentas: [],
         estadoTabla: 'cargando',
@@ -65,7 +66,7 @@ class Ventas extends Component {
             { id: 'descuento', numeric: true, disablePadding: false, label: 'Descuento' },
             { id: 'dinero_resibido', numeric: true, disablePadding: false, label: 'Dinero recibido' },
             { id: 'cambio', numeric: true, disablePadding: false, label: 'Cambio/Vuelto' },
-            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' }, 
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'fecha_venta', numeric: true, disablePadding: false, label: 'Fecha de venta' },
@@ -79,29 +80,29 @@ class Ventas extends Component {
         estadoModalEmitirFactura: false,
         estadoModalCancelarVenta: false,
         estadoModalEditarVenta: false,
-        openModalNewVentaFinal:false,
+        openModalNewVentaFinal: false,
         //item para editar
         itemEditar: null,
         //fecha actual
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
+        //estado decaja,
+        estadoCaja: false
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
 
     componentDidMount() {
-        this.obtenerDataBaseDatos()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
+        setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
+
     }
 
     obtenerDataBaseDatos = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(this.obtenerFechFormateada())
+                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(funtions.obtenerFechaActual())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -130,12 +131,35 @@ class Ventas extends Component {
                 });
             }
         });
+
+        var db = firebase.database();
+
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var lista = funtions.snapshotToArray(snap)
+                        var filterList = lista.sort((a, b) => {
+                            a = new Date(a.order);
+                            b = new Date(b.order);
+                            return a > b ? -1 : a < b ? 1 : 0;
+                        })
+                        var caja = filterList[0]
+                        this.setState({
+                            estadoCaja: caja.estado,
+                            cajaSeleccionada: caja
+                        })
+                    }
+                })
+            }
+        })
     }
 
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
-        } 
+        }
 
         if (item.id === 'accions') {
             return <>
@@ -148,7 +172,7 @@ class Ventas extends Component {
                     this.enviarToPlantillaData(n)
                 }}
                 >
-                    <LocalPrintshopIcon/>
+                    <LocalPrintshopIcon />
                 </IconButton>
             </>
         }
@@ -179,7 +203,7 @@ class Ventas extends Component {
                         estado={true}
                     />
                 </div>
-            }) 
+            })
             {/* <div style={{ width: 'max-content' }}>
                     <IconButton>
                         <FileCopy />
@@ -377,10 +401,38 @@ class Ventas extends Component {
                     snapshot.val().descuento,
                     snapshot.val().cambio,
                 )
+                this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
                 setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
             }
         })
     }
+
+    // venta caja devolver
+    setVentaCaja(itemVenta, tipo_pago) {
+        var db = firebase.database();
+        var codigoVentaCaja = funtions.guidGenerator()
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+        operacionVentaRefCaja.once('value', (snap) => {
+            if (snap.val()) {
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
+                if (Boolean(caja.estado)) {
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + codigoVentaCaja)
+                    operacionVentaCaja.set(itemVenta)
+                    var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+
+                    cajaRefValorActual.once('value', (snap2) => {
+                        if (snap2.val()) {
+                            cajaRefValorActual.update({
+                                valor_caja: Number(Number(snap2.val().valor_caja) - Number(itemVenta.total)).toFixed(2)
+                            })
+
+                        }
+                    })
+                }
+            }
+        })
+    }
+
 
     //opercacion stock
     setOperacionStock = (listaProductos, cliente, dinero_resibido, total, subtotal, descuento, cambio) => {
@@ -399,7 +451,7 @@ class Ventas extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'devolucion_cliente',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: cliente,
             productos: arrayProductos,
@@ -423,6 +475,7 @@ class Ventas extends Component {
     deleteVenta = codigo => {
         var db = firebase.database();
         var ventRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigo);
+        var ventRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigo);
         ventRef.remove()
         setSnackBars.openSnack('success', 'rootSnackBar', 'Venta eliminada con exito', 2000)
     }
@@ -438,27 +491,27 @@ class Ventas extends Component {
             descuento: item.descuento,
             fecha_venta: item.fecha_venta,
             hora_venta: item.hora_venta,
-            tipo_pago:item.tipo_pago,
-            valor_acreditado:item.valor_acreditado,
-            fecha_a_pagar:item.fecha_a_pagar,
-            numero_tarjeta:item.numero_tarjeta,
-            nombre_banco:item.nombre_banco,
+            tipo_pago: item.tipo_pago,
+            valor_acreditado: item.valor_acreditado,
+            fecha_a_pagar: item.fecha_a_pagar,
+            numero_tarjeta: item.numero_tarjeta,
+            nombre_banco: item.nombre_banco,
         }
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                if(item.tipo_venta==='factura'){
+                if (item.tipo_venta === 'factura') {
                     var clienteRef = db.ref('users/' + user.uid + '/clientes/' + item.cliente.codigo);
-                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                    var empresaRef = db.ref('auth_admins/' + user.uid + "/nombre_comercial")
                     clienteRef.once('value', (snapshot) => {
                         if (snapshot.val()) {
                             itemFormat.nombreCliente = snapshot.val().nombre
                             itemFormat.emailCliente = snapshot.val().email
                             itemFormat.identificacionCliente = snapshot.val().numero_identificacion
                             itemFormat.direccionCliente = snapshot.val().direccion
-                            
+
                             empresaRef.once('value', (snap) => {
-                                if (snap.val()) {                                
+                                if (snap.val()) {
                                     itemFormat.nombreEmpresa = snap.val()
                                     this.setState({
                                         itemFormateadoImprimir: itemFormat
@@ -468,10 +521,10 @@ class Ventas extends Component {
                             })
                         }
                     })
-                }else{
-                    var empresaRef = db.ref('auth_admins/'+ user.uid+"/nombre_comercial" )
+                } else {
+                    var empresaRef = db.ref('auth_admins/' + user.uid + "/nombre_comercial")
                     empresaRef.once('value', (snap) => {
-                        if (snap.val()) {                                
+                        if (snap.val()) {
                             itemFormat.nombreEmpresa = snap.val()
                             this.setState({
                                 itemFormateadoImprimir: itemFormat
@@ -486,12 +539,11 @@ class Ventas extends Component {
     }
 
     render() {
-
         return (
             <Layout title="Ventas" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
 
                 <MenuHerramientas>
-                    <ItemMenuHerramienta
+                    {/*  <ItemMenuHerramienta
                         titleButton="Nueva Venta"
                         color="primary"
                         visible={true}
@@ -499,26 +551,51 @@ class Ventas extends Component {
                             this.setState({ itemEditar: null })
                             this.setState({ openModalNewVenta: true })
                         }}
-                    />
+                    /> */}
+                    {
+                        Boolean(this.state.estadoCaja) === true ?
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton >
+                                        <MonetizationOn style={{ color: '#00c853' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                            :
+                            <>
+                                <Tooltip title="Estado de caja">
+                                    <IconButton >
+                                        <MonetizationOn style={{ color: '#EF5350' }} />
+                                    </IconButton>
+                                </Tooltip>
+                            </>
+                    }
                     <ItemMenuHerramienta
                         titleButton="Nueva Venta"
                         color="primary"
                         visible={true}
                         onClick={() => {
-                            this.setState({ itemEditar: null })
-                            this.setState({ openModalNewVentaFinal: true })
+                            if (this.state.estadoCaja) {
+                                this.setState({ itemEditar: null })
+                                this.setState({ openModalNewVentaFinal: true })
+                            } else {
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
+                            }
                         }}
                     />
 
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            margin='dense'
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
 
                     <div style={{ flex: 0.9 }}></div>
 
@@ -547,14 +624,14 @@ class Ventas extends Component {
                     }}
                 />
 
-                <FullScreenDialog openModal={this.state.openModalNewVenta}>
+                {/*  <FullScreenDialog openModal={this.state.openModalNewVenta}>
                     <NuevaVenta
                         usuario={this.state.usuario}
                         handleClose={() => this.setState({ openModalNewVenta: false })}
                         item={this.state.itemEditar}
                     >
                     </NuevaVenta>
-                </FullScreenDialog>
+                </FullScreenDialog> */}
 
                 <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
                     <ModalNewVenta
@@ -599,6 +676,7 @@ class Ventas extends Component {
                             this.updateDataProductos(this.state.codigoEmitirFactura)
                             this.setState({ estadoModalCancelarVenta: false })
                         }}
+                        cajaSeleccionada={this.state.cajaSeleccionada}
                     />
                 </ModalContainerNormal>
 

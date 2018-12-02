@@ -71,24 +71,22 @@ class Retencion extends Component {
         //item para editar
         itemEditar: null,
         //fecha actual
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
+    
     componentDidMount() {
         this.obtenerDataBaseDatos()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
     }
 
     obtenerDataBaseDatos = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(this.obtenerFechFormateada())
+                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(funtions.obtenerFechaActual())
                 retencionesRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -284,17 +282,17 @@ class Retencion extends Component {
                             this.setState({ openModalNewRetencion: true })
                         }}
                     />
-
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
-
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search

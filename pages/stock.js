@@ -3,6 +3,7 @@ import Divider from '@material-ui/core/Divider';
 
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 //firebase 
 import firebase from 'firebase/app';
@@ -19,7 +20,8 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
-import { TextField } from '@material-ui/core';
+import { TextField, IconButton, Tooltip } from '@material-ui/core';
+import setSnackBars from '../components/plugins/setSnackBars';
 
 class Stock extends Component {
 
@@ -58,25 +60,43 @@ class Stock extends Component {
         //tipo de ajuste para productos
         tipoAjuste: '',
         //fecha actual del sistem
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
+        //usuario
+        usuario: null
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
+
 
     componentDidMount() {
         this.cargarData()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({
+                            cajaSeleccionada: funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                        })
+                        console.log(setTimeout(() => { this.state.cajaSeleccionada }, 500))
+                    } else {
+                        this.setState({
+                            cajaSeleccionada: null
+                        })
+                    }
+                })
+            }
+        })
     }
 
     cargarData = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(this.obtenerFechFormateada())
+                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(funtions.obtenerFechaActual())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -254,6 +274,28 @@ class Stock extends Component {
         return (
             <Layout title="Stock" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
                 <MenuHerramientas>
+
+                    {
+                        this.state.cajaSeleccionada && Boolean(this.state.cajaSeleccionada.estado) === true &&
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton >
+                                    <MonetizationOn style={{ color: '#00c853' }} />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    }
+                    {
+                        this.state.cajaSeleccionada === null &&
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton >
+                                    <MonetizationOn style={{ color: '#EF5350' }} />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    }
+
                     <ItemMenuHerramienta
                         titleButton="Entrada"
                         color="primary"
@@ -267,22 +309,42 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuEntrada)}
                         onClose={() => this.setState({ referenciaMenuEntrada: null })}
                     >
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'devolucion_cliente',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'devolucion_cliente',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                        }}>
                             Devolución del cliente
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'compra_producto',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'compra_producto',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Compra de productos
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'ajuste-stock-entrada',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'ajuste-stock-entrada',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Ajuste de Stock
                         </MenuItem>
                     </Menu>
@@ -300,30 +362,44 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuSalida)}
                         onClose={() => this.setState({ referenciaMenuSalida: null })}
                     >
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'devolucion-proveedor',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'devolucion-proveedor',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Devolución al proveedor
                         </MenuItem>
-                        <MenuItem onClick={() => this.setState({
-                            tipoAjuste: 'ajuste-stock-salida',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'ajuste-stock-salida',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Ajuste de Stock
                         </MenuItem>
                     </Menu>
-
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
-
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
                     <div style={{ flex: 0.9 }}></div>
 
                     <Search

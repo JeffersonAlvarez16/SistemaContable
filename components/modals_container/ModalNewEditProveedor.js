@@ -287,7 +287,7 @@ class ModalNewEditProveedor extends Component {
                 barrio: this.state.barrio,
                 email: this.state.email,
                 observacion: this.state.observacion,
-                fecha: this.props.item ? this.state.fecha_registro : `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                fecha: this.props.item ? this.state.fecha_registro : funtions.obtenerFechaActual(),
                 hora: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                 usuario: this.state.usuario,
                 estado: this.state.estado,
