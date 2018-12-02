@@ -57,9 +57,11 @@ class Caja extends Component {
         //estado caja
         estadoCaja: null,
         cajaSeleccionada: null,
-
+        //modals
         openModalDineroCajaRetirar: false,
         openModalDineroCajaAgregar: false,
+        //sumaTotalVentas array
+        sumaTotalVentas: []
     }
 
     componentDidMount() {
@@ -76,7 +78,10 @@ class Caja extends Component {
                         this.setState({
                             listaVentasCaja: [],
                             listaVentasCajaTemporal: [],
-                            estadoTabla: 'cargando'
+                            estadoTabla: 'cargando',
+                            sumaTotalVentas: [],
+                            sumaTotalDineroIngresado: [],
+                            sumaTotalDineroRetirado: [],
                         })
                         var lista = funtions.snapshotToArray(snapshot)
                         var filterList = lista.sort((a, b) => {
@@ -84,11 +89,11 @@ class Caja extends Component {
                             b = new Date(b.order);
                             return a > b ? -1 : a < b ? 1 : 0;
                         })
-
-                        var item = filterList[0]
-                        this.sumaVentas(item.ventas)
-                        this.sumaDineroIngresado(item.ingreso_dinero)
-                        this.sumaDineroRetirado(item.retiro_dinero)
+                        filterList.forEach(item => {
+                            this.sumaVentas(item.ventas, item.codigo)
+                            this.sumaDineroIngresado(item.ingreso_dinero, item.codigo)
+                            this.sumaDineroRetirado(item.retiro_dinero, item.codigo)
+                        })
 
                         this.setState({
                             listaVentasCaja: filterList,
@@ -200,7 +205,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {`En efectivo: ${this.state.sumaTotalVentas}`}
+                                            {`En efectivo: ${this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}`}
                                         </div>
                                     </div>}
                                 />
@@ -218,7 +223,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {`En efectivo: ${this.state.sumaTotalVentas}`}
+                                            {`En efectivo: ${this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}`}
                                         </div>
                                     </div>}
                                 />
@@ -262,10 +267,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {
-                                                this.state.sumaTotalDineroIngresado
-                                            }
-
+                                        {`Total: ${this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}`}
                                         </div>
                                     </div>}
                                 />
@@ -283,10 +285,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {
-                                                this.state.sumaTotalDineroIngresado
-                                            }
-
+                                        {`Total: ${this.state.sumaTotalDineroIngresado.filter(item => item.codigo === n.codigo)[0].suma}`}
                                         </div>
                                     </div>}
                                 />
@@ -332,10 +331,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {
-                                                this.state.sumaTotalDineroRetirado
-                                            }
-
+                                        {`Total: ${this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}`}
                                         </div>
                                     </div>}
                                 />
@@ -353,10 +349,7 @@ class Caja extends Component {
                                     deleteIcon={<div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                                         <AttachMoneyIcon style={{ padding: 20, color: 'white' }} />
                                         <div style={{ marginLeft: -20, marginRight: 20 }}>
-                                            {
-                                                this.state.sumaTotalDineroRetirado
-                                            }
-
+                                        {`Total: ${this.state.sumaTotalDineroRetirado.filter(item => item.codigo === n.codigo)[0].suma}`}
                                         </div>
                                     </div>}
                                 />
@@ -412,46 +405,96 @@ class Caja extends Component {
 
     }
 
-    sumaVentas = (ventas) => {
-        var suma = 0
+    sumaVentas = (ventas, codigo) => {
+        var sumaEfectivo = 0
+        var sumaCredito = 0
+        var sumaTarjetaCredito = 0
+        var sumaTarjetaBebito = 0
+        var sumaCheque = 0
+        var newArray = this.state.sumaTotalVentas
         if (ventas != null) {
             var array = Object.values(ventas)
             array.forEach(element => {
-                console.log(element)
                 if (element.tipo_pago === 'efectivo') {
-                    suma = Number(element.total) + Number(suma)
+                    sumaEfectivo = Number(element.total) + Number(sumaEfectivo)
+                }
+                if (element.tipo_pago === 'credito') {
+                    sumaCredito = Number(element.total) + Number(sumaCredito)
+                }
+                if (element.tipo_pago === 'tarjeta-credito') {
+                    sumaTarjetaCredito = Number(element.total) + Number(sumaTarjetaCredito)
+                }
+                if (element.tipo_pago === 'tarjeta-debito') {
+                    sumaTarjetaBebito = Number(element.total) + Number(sumaTarjetaCredito)
+                }
+                if (element.tipo_pago === 'cheque') {
+                    sumaCheque = Number(element.total) + Number(sumaTarjetaCredito)
                 }
             });
+            newArray.push({
+                sumaEfectivo: Number(sumaEfectivo).toFixed(2),
+                sumaCredito: Number(sumaCredito).toFixed(2),
+                sumaTarjetaCredito: Number(sumaTarjetaCredito).toFixed(2),
+                sumaTarjetaBebito: Number(sumaTarjetaBebito).toFixed(2),
+                sumaCheque: Number(sumaCheque).toFixed(2),
+                codigo,
+            })
             this.setState({
-                sumaTotalVentas: suma.toFixed(2)
+                sumaTotalVentas: newArray
             })
         }
     }
-    sumaDineroIngresado = (ingreso_dinero) => {
+    sumaDineroIngresado = (ingreso_dinero, codigo) => {
         var suma = 0
+        var newArray = this.state.sumaTotalDineroIngresado
         if (ingreso_dinero != null) {
             var array = Object.values(ingreso_dinero)
             array.forEach(element => {
-                suma = Number(element.valor) + Number(suma)
+                suma = Number(Number(element.valor) + Number(suma)).toFixed(2)
             });
+            newArray.push({
+                suma,
+                codigo
+            })
             this.setState({
-                sumaTotalDineroIngresado: suma.toFixed(2)
+                sumaTotalDineroIngresado: newArray
             })
         }
     }
-    sumaDineroRetirado = (dinero_retirado) => {
+    sumaDineroRetirado = (dinero_retirado, codigo) => {
         var suma = 0
+        var newArray = this.state.sumaTotalDineroRetirado
         if (dinero_retirado != null) {
             var array = Object.values(dinero_retirado)
             array.forEach(element => {
-                suma = Number(element.valor) + Number(suma)
+                suma = Number(Number(element.valor) + Number(suma)).toFixed(2)
             });
+            newArray.push({
+                suma,
+                codigo
+            })
             this.setState({
-                sumaTotalDineroRetirado: suma.toFixed(2)
+                sumaTotalDineroRetirado: newArray
             })
         }
     }
-
+    obtenerSumaTotalCajaAbierta = () => {
+        var item = null
+        if (this.state.cajaSeleccionada != null) {
+            if (this.state.sumaTotalVentas != null) {
+                item = this.state.sumaTotalVentas.filter(item => item.codigo === this.state.cajaSeleccionada.codigo)[0]
+            }
+        }
+        if (item != null) {
+            if (item.sumaEfectivo != null) {
+                return item.sumaEfectivo
+            } else {
+                return '0.00'
+            }
+        } else {
+            return '0.00'
+        }
+    }
     render() {
         return (
             <Layout title="Caja" onChangueUserState={usuario => {
@@ -587,7 +630,7 @@ class Caja extends Component {
                         handleClose={() =>
                             this.setState({ openModalCerrarCaja: false })}
                         cajaSeleccionada={this.state.cajaSeleccionada}
-                        sumaTotalVentas={this.state.sumaTotalVentas}
+                        sumaTotalVentas={this.obtenerSumaTotalCajaAbierta}
                     />
                 </ModalContainerNormal>
                 <ModalContainerNormal

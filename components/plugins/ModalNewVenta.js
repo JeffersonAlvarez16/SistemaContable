@@ -528,7 +528,7 @@ class ModalNewVenta extends Component {
             valor_acreditado: '',
             fecha_a_pagar: '',
         }
-        this.setVentaCaja(itemVenta)
+        this.setVentaCaja(itemVenta, tipo_pago)
         operacionVentaRef.set(itemVenta)
     }
     setSaveRegistroVentaCredito = (codigoVenta, item) => {
@@ -576,7 +576,7 @@ class ModalNewVenta extends Component {
             fecha_a_pagar: item.fecha_vencimiento,
         }
 
-        this.setVentaCaja(itemVenta)
+        this.setVentaCaja(itemVenta, tipo_pago)
 
         operacionVentaRef.set(itemVenta)
     }
@@ -624,13 +624,13 @@ class ModalNewVenta extends Component {
             valor_acreditado: '',
             fecha_a_pagar: '',
         }
-        this.setVentaCaja(itemVenta)
+        this.setVentaCaja(itemVenta, tipo_pago)
         operacionVentaRef.set(itemVenta)
 
 
     }
 
-    setVentaCaja(itemVenta) {
+    setVentaCaja(itemVenta, tipo_pago) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
@@ -641,14 +641,16 @@ class ModalNewVenta extends Component {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
-                    cajaRefValorActual.once('value', (snap2) => {
-                        if (snap2.val()) {
-                            cajaRefValorActual.update({
-                                valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
-                            })
+                    if (tipo_pago === 'efectivo') {
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                cajaRefValorActual.update({
+                                    valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
+                                })
 
-                        }
-                    })
+                            }
+                        })
+                    }
                 }
             }
         })

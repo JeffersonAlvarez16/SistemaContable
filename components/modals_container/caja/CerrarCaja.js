@@ -36,7 +36,7 @@ class CerrarCaja extends Component {
                         estadoCaja: cajaSeleccionada.estado,
                         codigoReferencia: cajaSeleccionada.codigo,
                         saldo_inicial: cajaSeleccionada.saldo_inicial,
-                        sumaTotalVentas: sumaTotalVentas
+                        sumaTotalVentas: sumaTotalVentas()
                     })
                     /*  } */
                     /*  }) */
