@@ -185,9 +185,33 @@ class Usuarios extends Component {
                             <strong> Desactivado </strong>
                     }
                 </div>
-                <div>Acceso a Stock
+                <div>Acceso a Devolucion de Clientes
                 {
-                        n.privilegios.stock ?
+                        n.privilegios.stock.devolucion_cliente ?
+                            <strong> Activado </strong>
+                            :
+                            <strong> Desactivado </strong>
+                    }
+                </div>
+                <div>Acceso a Compra de Productos
+                {
+                        n.privilegios.stock.compra_productos ?
+                            <strong> Activado </strong>
+                            :
+                            <strong> Desactivado </strong>
+                    }
+                </div>
+                <div>Acceso a Devolucion a Proveedores
+                {
+                        n.privilegios.stock.devolucion_proveedor ?
+                            <strong> Activado </strong>
+                            :
+                            <strong> Desactivado </strong>
+                    }
+                </div>
+                <div>Acceso a Ajustes de Stock
+                {
+                        n.privilegios.stock.ajuste_stock ?
                             <strong> Activado </strong>
                             :
                             <strong> Desactivado </strong>
