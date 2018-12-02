@@ -34,7 +34,8 @@ class Main extends Component {
                                 alignItems:'center',
                                 justifyContent:'center',
                                 fontSize:36,
-                                fontFamily: "Lucida Sans Typewriter"
+                                fontFamily: "Courier new",
+                                fontWeight:'800'
 
                             }}>{`${this.state.usuario.nombre}`} <br/> RapiFac te da la bievenida</div>
                         </Layout>

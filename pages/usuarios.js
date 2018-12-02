@@ -6,10 +6,12 @@ import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Search from '../components/components/Search';
-import { Divider, Tooltip, IconButton } from '@material-ui/core';
+import { Divider, Tooltip, IconButton, ExpansionPanel, Typography, ExpansionPanelDetails, Chip } from '@material-ui/core';
 import TablaNormal from '../components/components/tables/TableNormal';
 import funtions from '../utils/funtions';
-import CloseIcon from '@material-ui/icons/Close';
+import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
+import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 
@@ -53,7 +55,8 @@ class Usuarios extends Component {
         openModalNewUsuario: false,
         openModalEliminarUsuario: false,
         itemEditar: {},
-        tipo_accion: ''
+        tipo_accion: '',
+        estadoPermisos: null
     }
 
     componentDidMount() {
@@ -103,7 +106,7 @@ class Usuarios extends Component {
                     n.tipo_usuario === 'administrador' ?
                         <strong style={{ textAlign: 'center' }}>No se puede Editar el usuario<br /> Administrador</strong>
                         :
-                        <div>
+                        <div style={{ display: 'flex' }}>
                             <Tooltip title="Editar" placement="left">
                                 <IconButton aria-label="Editar"
                                     onClick={() => {
@@ -120,6 +123,8 @@ class Usuarios extends Component {
 
                             {
                                 Boolean(n.estado) ?
+
+
                                     <Tooltip title="Desactivar" placement="right">
                                         <IconButton
                                             aria-label="Desactivar"
@@ -148,6 +153,7 @@ class Usuarios extends Component {
                                             <VisibilityIcon color='primary' />
                                         </IconButton>
                                     </Tooltip>
+
                             }
                         </div>
                 }
@@ -158,10 +164,10 @@ class Usuarios extends Component {
 
         if (item.id === 'estado') {
             return <div style={{ width: 'max-content' }}>{
-                n.estado === true ?
-                <strong style={{ textAlign: 'center' }}>Activado</strong>
-                    :
-                    <strong style={{ textAlign: 'center' }}>Desactivado</strong>
+                n.estado === true ?               
+                   <strong style={{ textAlign: 'center' }}>Activo</strong>
+                     :
+                   <strong style={{ textAlign: 'center' }}>Inactivo</strong>
             }</div>
         }
         if (item.id === 'nombre_usuario') {
@@ -169,7 +175,7 @@ class Usuarios extends Component {
         }
 
         if (item.id === 'tipo_usuario') {
-            return <div style={{ width: 'max-content' }}>{n.tipo_usuario}</div>
+            return <div style={{ width: 'max-content' }}>{this.MaysPrimera(n.tipo_usuario)}</div>
 
         }
 
@@ -177,86 +183,96 @@ class Usuarios extends Component {
 
         if (item.id === 'privilegios') {
             return <div style={{ width: 'max-content' }}>
-                <div>Acceso a Productos
+                <ExpansionPanel style={{ width: 350,backgroundColor:'#009688' }}>
+                    <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
+                        <Typography style={{color:'white'}}>Ver Privilegios</Typography>
+                    </ExpansionPanelSummary>
+                    <ExpansionPanelDetails>
+                        <div style={{ width: 'max-content' }}>
+                            <div>Acceso a Productos
                 {
-                        n.privilegios.productos ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Devolucion de Clientes
+                                    n.privilegios.productos ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Devolucion de Clientes
                 {
-                        n.privilegios.stock.devolucion_cliente ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Compra de Productos
+                                    n.privilegios.stock.devolucion_cliente ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Compra de Productos
                 {
-                        n.privilegios.stock.compra_productos ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Devolucion a Proveedores
+                                    n.privilegios.stock.compra_productos ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Devolucion a Proveedores
                 {
-                        n.privilegios.stock.devolucion_proveedor ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Ajustes de Stock
+                                    n.privilegios.stock.devolucion_proveedor ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Ajustes de Stock
                 {
-                        n.privilegios.stock.ajuste_stock ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Proveedores
+                                    n.privilegios.stock.ajuste_stock ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Proveedores
                 {
-                        n.privilegios.proveedores ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Clientes
+                                    n.privilegios.proveedores ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Clientes
                 {
-                        n.privilegios.clientes ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Ventas
+                                    n.privilegios.clientes ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Ventas
                 {
-                        n.privilegios.ventas ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Retenciones
+                                    n.privilegios.ventas ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Retenciones
                 {
-                        n.privilegios.retenciones ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
-                <div>Acceso a Usuarios
+                                    n.privilegios.retenciones ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                            <div>Acceso a Usuarios
                 {
-                        n.privilegios.usuarios ?
-                            <strong> Activado </strong>
-                            :
-                            <strong> Desactivado </strong>
-                    }
-                </div>
+                                    n.privilegios.usuarios ?
+                                        <strong> Activado </strong>
+                                        :
+                                        <strong> Desactivado </strong>
+                                }
+                            </div>
+                        </div>
+                    </ExpansionPanelDetails>
+                </ExpansionPanel>
+
             </div>
         }
         if (item.id === 'privilegiosGenerales') {
@@ -278,19 +294,16 @@ class Usuarios extends Component {
     }
 
     handleActivarUsuario = (usuarioSeleccionado, accion) => {
-        console.log(accion)
         if (accion === 'activar') {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     var db = firebase.database();
                     var productosRef = db.ref('users/' + user.uid + '/usuarios/' + usuarioSeleccionado.code);
-                    console.log(productosRef.toString())
                     productosRef.update({
                         estado: true
                     })
                     this.setState({ estadoModalSimple: false })
                     setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario activado correctamente', 2000)
-
                 }
             })
         } else {
@@ -298,80 +311,122 @@ class Usuarios extends Component {
                 if (user) {
                     var db = firebase.database();
                     var productosRef = db.ref('users/' + user.uid + '/usuarios/' + usuarioSeleccionado.code);
-
                     productosRef.update({
                         estado: false
                     })
                     this.setState({ estadoModalSimple: false })
                     setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario Desactivado correctamente', 2000)
-
                 }
             })
         }
 
     }
+
+    obtenerPermisosusuarios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.usuarios === true) {
+                            this.setState({
+                                estadoPermisos: true
+                            })
+                        } else {
+                            this.setState({
+                                estadoPermisos: false
+                            })
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    MaysPrimera(string) {
+        return string.charAt(0).toUpperCase() + string.slice(1);
+      }
     render() {
         return (
-            <Layout title="Usuarios" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
-                <MenuHerramientas>
+            <Layout title="Usuarios" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerPermisosusuarios()
+                }, 100)
+            }
+            }>
+                {
+                    this.state.estadoPermisos === true &&
+                    <div>
+                        <MenuHerramientas>
 
-                    <ItemMenuHerramienta
-                        titleButton="Nuevo Usuario"
-                        color="primary"
-                        visible={true}
-                        onClick={() => {
-                            this.setState({ itemEditar: null })
-                            this.setState({ openModalNewUsuario: true })
-                        }}
-                    />
+                            <ItemMenuHerramienta
+                                titleButton="Nuevo Usuario"
+                                color="primary"
+                                visible={true}
+                                onClick={() => {
+                                    this.setState({ itemEditar: null })
+                                    this.setState({ openModalNewUsuario: true })
+                                }}
+                            />
 
-                    <div style={{ flex: 0.9 }}></div>
+                            <div style={{ flex: 0.9 }}></div>
 
-                    <Search
-                        id='buscar-cliente-clientes'
-                        textoSearch="Buscar..."
-                        textoTooltip="Buscar Usuario"
-                        handleSearch={this.handleSearch}
-                    />
-                </MenuHerramientas>
-                <Divider />
-                <TablaNormal
-                    textoTitleP="Usuarios"
-                    textoTitleS="Usuarios"
-                    selectedItems={true}
-                    toolbar={false}
-                    notTab={true}
-                    data={this.state.listaUsuarios}
-                    rows={this.state.rowslistaUsuarios}
-                    handleGetData={this.handleGetData}
-                    estadoTabla={this.state.estadoTabla}
-                    itemsSeleccionados={items => {
-                        this.setState({ itemsSeleccionados: items })
-                    }}
-                />
+                            <Search
+                                id='buscar-cliente-clientes'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar Usuario"
+                                handleSearch={this.handleSearch}
+                            />
+                        </MenuHerramientas>
+                        <Divider />
+                        <TablaNormal
+                            textoTitleP="Usuarios"
+                            textoTitleS="Usuarios"
+                            selectedItems={true}
+                            toolbar={false}
+                            notTab={true}
+                            data={this.state.listaUsuarios}
+                            rows={this.state.rowslistaUsuarios}
+                            handleGetData={this.handleGetData}
+                            estadoTabla={this.state.estadoTabla}
+                            itemsSeleccionados={items => {
+                                this.setState({ itemsSeleccionados: items })
+                            }}
+                        />
 
-                <ModalContainerNormal
-                    open={this.state.openModalNewUsuario} >
-                    <ModalNewEditarUsuarios
-                        handleClose={() => this.setState({ openModalNewUsuario: false, itemEditar: null })}
-                        item={this.state.itemEditar} />
-                </ModalContainerNormal>
+                        <ModalContainerNormal
+                            open={this.state.openModalNewUsuario} >
+                            <ModalNewEditarUsuarios
+                                handleClose={() => this.setState({ openModalNewUsuario: false, itemEditar: null })}
+                                item={this.state.itemEditar} />
+                        </ModalContainerNormal>
 
-                <ModalContainerNormal open={this.state.openModalEliminarUsuario}>
-                    <ModalEliminarUsuario
-                        usuario={this.state.codigoEliminarUsuario}
-                        tipo_accion={this.state.tipo_accion}
-                        handleClose={() => this.setState({ openModalEliminarUsuario: false, itemEditar: null })}
-                        handleActivarUsuario={() => {
-                            this.handleActivarUsuario(this.state.itemEditar, this.state.tipo_accion)
-                            this.setState({ openModalEliminarUsuario: false, })
-                        }} />
-                </ModalContainerNormal>
-                {/*  <ModalNewEditarUsuarios
-                        usuario={this.state.usuario}
-                        openModal={this.state.openModalNewUsuario}
-                        
-                       /> */}
+                        <ModalContainerNormal open={this.state.openModalEliminarUsuario}>
+                            <ModalEliminarUsuario
+                                usuario={this.state.codigoEliminarUsuario}
+                                tipo_accion={this.state.tipo_accion}
+                                handleClose={() => this.setState({ openModalEliminarUsuario: false, itemEditar: null })}
+                                handleActivarUsuario={() => {
+                                    this.handleActivarUsuario(this.state.itemEditar, this.state.tipo_accion)
+                                    this.setState({ openModalEliminarUsuario: false, })
+                                }} />
+                        </ModalContainerNormal>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
+                }
+
 
             </Layout>
         );

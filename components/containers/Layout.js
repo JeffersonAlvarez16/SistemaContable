@@ -102,7 +102,8 @@ class Layout extends Component {
                     {/* Material Ui */}
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
                     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-
+                    <script src='build/pdfmake.min.js'></script>
+                    <script src='build/vfs_fonts.js'></script>
                 </Head>
                 {
                     this.state.online === true ?
@@ -135,7 +136,7 @@ class Layout extends Component {
                                 background: 'red',
                                 padding: 20,
                                 color: 'white',
-                                borderRadius:50
+                                borderRadius: 50
                             }}>
                                 Por favor revise su conexión a internet!
                             </div>

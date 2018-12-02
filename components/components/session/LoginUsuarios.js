@@ -63,6 +63,16 @@ class LoginUsuarios extends Component {
         }
     }
 
+    enter=(event)=>{
+       if(event.keyCode===13){
+        this.handleLoginUser()
+       }
+        //this.handleLoginUser()
+    }
+
+
+       
+    
     
 
     render() {
@@ -88,6 +98,7 @@ class LoginUsuarios extends Component {
                                 }}
                                 value={this.state.userSelecionadoPassword}
                                 onChange={(text) => this.setState({ userSelecionadoPassword: text.target.value })}
+                                onKeyUp={(event)=> {this.enter(event)  }}
                             />
                         </DialogContentText>
                     </DialogContent>
@@ -128,7 +139,7 @@ class LoginUsuarios extends Component {
                                 <div>
                                     {
                                         users.map((item) =>
-                                         <ItemUser key={item.id} onClick={() => this.handleClickOpen(item)} title={item.nombre} />)
+                                         <ItemUser key={item.id} onClick={() => this.handleClickOpen(item)} title={item.nombre} letra={(nombre)=>this.MaysPrimera(nombre)} />)
                                     }
                                 </div>
                             }
