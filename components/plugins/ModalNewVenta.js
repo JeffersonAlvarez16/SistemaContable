@@ -633,10 +633,10 @@ class ModalNewVenta extends Component {
     setVentaCaja(itemVenta, tipo_pago) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
-        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')       
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
-                var caja = funtions.snapshotToArray(snap)[0]
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
