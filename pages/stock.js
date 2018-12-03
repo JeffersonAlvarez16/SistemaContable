@@ -77,10 +77,7 @@ class Stock extends Component {
     }
 
     componentDidMount() {
-        this.cargarData()
-        this.setState({
-            titlep:''
-        })
+        this.cargarData()       
 
     }
 
@@ -349,7 +346,7 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuEntrada)}
                         onClose={() => this.setState({ referenciaMenuEntrada: null })}
                     >      
-                     <Tooltip title={title} placement="right">
+                   
                             <MenuItem
                                 disabled={estadoPermisoDevolucionCliente}
                                 onClick={() => this.setState({
@@ -358,10 +355,10 @@ class Stock extends Component {
                                 })}>
                                 Devolución del cliente
                         </MenuItem>
-                        </Tooltip>
+                     
 
                         }
-                        <Tooltip title={title} placement="right">
+                   
                         <MenuItem
                           disabled={estadoPermisoCompraProductos}
                         onClick={() => this.setState({
@@ -370,8 +367,8 @@ class Stock extends Component {
                         })}>
                             Compra de productos
                         </MenuItem>
-                        </Tooltip>
-                        <Tooltip title={title} placement="right">
+                     
+                       
                         <MenuItem 
                          disabled={estadoPermisoAjusteStock}
                         onClick={() => this.setState({
@@ -380,7 +377,7 @@ class Stock extends Component {
                         })}>
                             Ajuste de Stock
                         </MenuItem>
-                        </Tooltip>
+                 
                     </Menu>
 
                     <ItemMenuHerramienta
@@ -396,7 +393,7 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuSalida)}
                         onClose={() => this.setState({ referenciaMenuSalida: null })}
                     >
-                     <Tooltip title={title} placement="right">
+                  
                         <MenuItem 
                          disabled={estadoPermisoDevolucionProveedor}
                          onClick={() => this.setState({
@@ -405,8 +402,7 @@ class Stock extends Component {
                             })}>
                             Devolución al proveedor
                         </MenuItem>
-                        </Tooltip>
-                        <Tooltip title={title} placement="right">
+                       
                         <MenuItem 
                          disabled={estadoPermisoAjusteStock}
                          onClick={() => this.setState({
@@ -415,7 +411,7 @@ class Stock extends Component {
                             })}>
                             Ajuste de Stock
                         </MenuItem>
-                            </Tooltip>
+                         
                     </Menu>
 
                     <TextField
