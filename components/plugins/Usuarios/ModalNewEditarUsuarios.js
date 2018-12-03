@@ -45,7 +45,9 @@ class ModalUsuarios extends React.Component {
         generales: false,
         openTipo: null,
         anchorEl: null,
-        title: ''
+        title: '',
+        cuentas_cobrar:false,
+        caja:false
     };
 
     componentDidMount() {
@@ -68,6 +70,8 @@ class ModalUsuarios extends React.Component {
                 retenciones: this.props.item.privilegios.retenciones,
                 proveedores: this.props.item.privilegios.proveedores,
                 clientes: this.props.item.privilegios.clientes,
+                cuentas_cobrar:this.props.item.privilegios.cuentas_cobrar,
+                caja:this.props.item.privilegios.caja,
                 usuarios: this.props.item.privilegios.usuarios,
                 generales: this.props.item.privilegiosGenerales.generales,
 
@@ -112,6 +116,8 @@ class ModalUsuarios extends React.Component {
                                 compra_productos:this.state.compra_productos,
                                 ajuste_stock:this.state.ajuste_stock
                             },
+                            cuentas_cobrar:this.state.cuentas_cobrar,
+                            caja:this.state.caja,
                             proveedores: this.state.proveedores,
                             clientes: this.state.clientes,
                             ventas: this.state.ventas,
@@ -142,6 +148,8 @@ class ModalUsuarios extends React.Component {
                                 compra_productos:this.state.compra_productos,
                                 ajuste_stock:this.state.ajuste_stock
                             },
+                            cuentas_cobrar:this.state.cuentas_cobrar,
+                            caja:this.state.caja,
                             proveedores: this.state.proveedores,
                             clientes: this.state.clientes,
                             ventas: this.state.ventas,
@@ -154,7 +162,7 @@ class ModalUsuarios extends React.Component {
                     })
                     setTimeout(() => {
                         this.props.handleClose()
-                        setSnackBars.openSnack('success', 'rootSnackBar', 'Usuario registrado con exito', 2000)
+                        setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario actualizado con exito', 2000)
                     }, 100)
                 }
 
@@ -167,7 +175,7 @@ class ModalUsuarios extends React.Component {
     render() {
 
         const { classes } = this.props;
-        const { openTipo,compra_productos,devolucion_cliente,devolucion_proveedor,ajuste_stock, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
+        const { cuentas_cobrar,caja,compra_productos,devolucion_cliente,devolucion_proveedor,ajuste_stock, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
 
         return (
             <div style={{ width: 600, maxHeight: 650 }}>
@@ -278,6 +286,23 @@ class ModalUsuarios extends React.Component {
                                         }
                                         label="Clientes"
                                     />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={caja}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        caja: !this.state.caja
+                                                    })
+
+                                                }}
+
+                                            />
+                                        }
+                                        label="Caja"
+                                    />
                                 </Grid>
                                 <Grid item xs={6}>
                                     <FormControlLabel
@@ -328,6 +353,23 @@ class ModalUsuarios extends React.Component {
                                             />
                                         }
                                         label="Usuarios"
+                                    />
+                                     <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={cuentas_cobrar}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        cuentas_cobrar: !this.state.cuentas_cobrar
+                                                    })
+
+                                                }}
+
+                                            />
+                                        }
+                                        label="Cuentas por Cobrar"
                                     />
                                 </Grid>
                             </div>

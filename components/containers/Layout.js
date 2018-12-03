@@ -102,8 +102,6 @@ class Layout extends Component {
                     {/* Material Ui */}
                     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
                     <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-                    <script src='build/pdfmake.min.js'></script>
-                    <script src='build/vfs_fonts.js'></script>
                 </Head>
                 {
                     this.state.online === true ?

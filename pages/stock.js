@@ -20,7 +20,7 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
-import { TextField, IconButton, Tooltip,CircularProgress } from '@material-ui/core';
+import { TextField, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
 import setSnackBars from '../components/plugins/setSnackBars';
 
 class Stock extends Component {
@@ -60,17 +60,18 @@ class Stock extends Component {
         //tipo de ajuste para productos
         tipoAjuste: '',
         //fecha actual del sistem
-        
+
         //permisosUsuarios
-        title:'',
-        titlep:'',
+        title: '',
+        titlep: '',
         estadoPermisoDevolucionCliente: null,
-        estadoPermisoDevolucionProveedor:null,
-        estadoPermisoCompraProductos:null,
-        estadoPermisoAjusteStock:null,
+        estadoPermisoDevolucionProveedor: null,
+        estadoPermisoCompraProductos: null,
+        estadoPermisoAjusteStock: null,
         fechaActual: '',
         //usuario
-        usuario: null
+        usuario: null,
+        cajaSeleccionada: null
     }
 
 
@@ -80,17 +81,26 @@ class Stock extends Component {
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
+
+    }
+
+    cargarCaja = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
                 operacionVentaRefCaja.once('value', (snap) => {
                     if (snap.val()) {
-                        console.log(snap.val())
-                        this.setState({
-                            cajaSeleccionada: funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
-                        })
-                        console.log(setTimeout(() => { this.state.cajaSeleccionada }, 500))
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                        if(caja!=null){
+                            this.setState({
+                                cajaSeleccionada:caja
+                            })
+                        }else{
+                            this.setState({
+                                cajaSeleccionada: null
+                            }) 
+                        }
                     } else {
                         this.setState({
                             cajaSeleccionada: null
@@ -99,63 +109,63 @@ class Stock extends Component {
                 })
             }
         })
+
     }
 
     obtenerPermisosUsuarios = () => {
-
+        console.log(this.state.usuario)
         firebase.auth().onAuthStateChanged((user) => {
-            console.log(this.state)
             if (user) {
                 var db = firebase.database();
-                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.codigo}`)
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
                 usuariosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {
+                    if (snapshot.val()) {                    
                         if (snapshot.val().privilegios.stock.devolucion_cliente === true) {
                             this.setState({
                                 estadoPermisoDevolucionCliente: false,
-                                title:''
+                                title: ''
                             })
-                        }else{
+                        } else {
                             this.setState({
                                 estadoPermisoDevolucionCliente: true,
-                                title:''
+                                title: ''
                             })
                         }
                         if (snapshot.val().privilegios.stock.devolucion_proveedor === true) {
                             this.setState({
                                 estadoPermisoDevolucionProveedor: false,
-                                title:''
+                                title: ''
                             })
-                        }else{
+                        } else {
 
                             this.setState({
                                 estadoPermisoDevolucionProveedor: true,
-                                      
+
                             })
                         }
                         if (snapshot.val().privilegios.stock.compra_productos === true) {
                             this.setState({
                                 estadoPermisoCompraProductos: false,
-                               
+
                             })
-                        }else{
+                        } else {
 
                             this.setState({
                                 estadoPermisoCompraProductos: true,
-                                titlep:'No tiene Permiso para algunas acciones'
+                                titlep: 'No tiene Permiso para algunas acciones'
                             })
                         }
                         if (snapshot.val().privilegios.stock.ajuste_stock === true) {
                             this.setState({
                                 estadoPermisoAjusteStock: false,
-                            title:''
+                                title: ''
 
                             })
-                        }else{
+                        } else {
                             this.setState({
                                 estadoPermisoAjusteStock: true,
-                         
-                                
+
+
                             })
                         }
 
@@ -344,20 +354,19 @@ class Stock extends Component {
     }
 
     render() {
-        const {titlep, estadoPermisoDevolucionCliente,estadoPermisoDevolucionProveedor,estadoPermisoAjusteStock,estadoPermisoCompraProductos,title } = this.state
+        console.log(this.state.cajaSeleccionada)
+        const { titlep, estadoPermisoDevolucionCliente, estadoPermisoDevolucionProveedor, estadoPermisoAjusteStock, estadoPermisoCompraProductos, title } = this.state
         return (
             <Layout title="Stock" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
-                setTimeout(() => {
+                setTimeout(() => {                   
                     this.obtenerPermisosUsuarios()
+                    this.cargarCaja()
                 }, 100)
             }}>
-
-
                 <MenuHerramientas>
-
                     {
-                        this.state.cajaSeleccionada && Boolean(this.state.cajaSeleccionada.estado) === true &&
+                        this.state.cajaSeleccionada != null && Boolean(this.state.cajaSeleccionada.estado) === true &&
                         <>
                             <Tooltip title="Estado de caja">
                                 <IconButton >
@@ -383,58 +392,57 @@ class Stock extends Component {
                         visible={true}
                         onClick={event => this.setState({ referenciaMenuEntrada: event.currentTarget })}
                     />
-
                     <Menu
                         id="simple-menu-entrada"
                         anchorEl={this.state.referenciaMenuEntrada}
                         open={Boolean(this.state.referenciaMenuEntrada)}
                         onClose={() => this.setState({ referenciaMenuEntrada: null })}
                     >
-                        <MenuItem 
-                        disabled={estadoPermisoDevolucionCliente}
-                        onClick={() => {
-                            if(this.state.cajaSeleccionada!=null){
-                                this.setState({
-                                    tipoAjuste: 'devolucion_cliente',
-                                    estadoModalSimpleCompraProductos: true
-                                })
-                            }else{
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
-                            }
-                        }}>
+                        <MenuItem
+                            disabled={estadoPermisoDevolucionCliente}
+                            onClick={() => {
+                                if (this.state.cajaSeleccionada != null) {
+                                    this.setState({
+                                        tipoAjuste: 'devolucion_cliente',
+                                        estadoModalSimpleCompraProductos: true
+                                    })
+                                } else {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                                }
+                            }}>
                             Devolución del cliente
                         </MenuItem>
-                        <MenuItem 
-                        disabled={estadoPermisoCompraProductos}
-                        onClick={() => {
-                            if(this.state.cajaSeleccionada!=null){
-                                this.setState({
-                                    tipoAjuste: 'compra_producto',
-                                    estadoModalSimpleCompraProductos: true
-                                })
-                            }else{
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
-                            }
-                            
-                        }}>
+                        <MenuItem
+                            disabled={estadoPermisoCompraProductos}
+                            onClick={() => {
+                                if (this.state.cajaSeleccionada != null) {
+                                    this.setState({
+                                        tipoAjuste: 'compra_producto',
+                                        estadoModalSimpleCompraProductos: true
+                                    })
+                                } else {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                                }
+
+                            }}>
                             Compra de productos
                         </MenuItem>
-                        <MenuItem 
-                        disabled={estadoPermisoAjusteStock}
-                        onClick={() => {
-                            if(this.state.cajaSeleccionada!=null){
-                                this.setState({
-                                    tipoAjuste: 'ajuste-stock-entrada',
-                                    estadoModalSimpleCompraProductos: true
-                                })
-                            }else{
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
-                            }
-                            
-                        }}>
+                        <MenuItem
+                            disabled={estadoPermisoAjusteStock}
+                            onClick={() => {
+                                if (this.state.cajaSeleccionada != null) {
+                                    this.setState({
+                                        tipoAjuste: 'ajuste-stock-entrada',
+                                        estadoModalSimpleCompraProductos: true
+                                    })
+                                } else {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                                }
+
+                            }}>
                             Ajuste de Stock
                         </MenuItem>
-                 
+
                     </Menu>
 
                     <ItemMenuHerramienta
@@ -450,37 +458,37 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuSalida)}
                         onClose={() => this.setState({ referenciaMenuSalida: null })}
                     >
-                        <MenuItem 
-                        disabled={estadoPermisoDevolucionProveedor}
-                        onClick={() => {
-                            if(this.state.cajaSeleccionada!=null){
-                                this.setState({
-                                    tipoAjuste: 'devolucion-proveedor',
-                                    estadoModalSimpleCompraProductos: true
-                                })
-                            }else{
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
-                            }
-                            
-                        }}>
+                        <MenuItem
+                            disabled={estadoPermisoDevolucionProveedor}
+                            onClick={() => {
+                                if (this.state.cajaSeleccionada != null) {
+                                    this.setState({
+                                        tipoAjuste: 'devolucion-proveedor',
+                                        estadoModalSimpleCompraProductos: true
+                                    })
+                                } else {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                                }
+
+                            }}>
                             Devolución al proveedor
                         </MenuItem>
-                        <MenuItem 
-                        disabled={estadoPermisoAjusteStock}
-                        onClick={() => {
-                            if(this.state.cajaSeleccionada!=null){
-                                this.setState({
-                                    tipoAjuste: 'ajuste-stock-salida',
-                                    estadoModalSimpleCompraProductos: true
-                                })
-                            }else{
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
-                            }
-                            
-                        }}>
+                        <MenuItem
+                            disabled={estadoPermisoAjusteStock}
+                            onClick={() => {
+                                if (this.state.cajaSeleccionada != null) {
+                                    this.setState({
+                                        tipoAjuste: 'ajuste-stock-salida',
+                                        estadoModalSimpleCompraProductos: true
+                                    })
+                                } else {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                                }
+
+                            }}>
                             Ajuste de Stock
                         </MenuItem>
-                         
+
                     </Menu>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <TextField
@@ -529,20 +537,6 @@ class Stock extends Component {
                         tipoAjuste={this.state.tipoAjuste}
                     />
                 </FullScreenDialog>
-
-
-                {/*  {
-                       this.state.estadoPermisos===false&&
-                    <div style={{display:'flex',justifyContent:'center',alignItems:'center',textAlign:'center',height:'80vh'}}>
-                            <h3><strong>Usted no tiene permisos para <br/>
-                            esta seccion comuniquese con el administrador</strong></h3>
-                    </div>
-                }
-                {
-                    this.state.estadoPermisos===null&&
-                    <CircularProgress  />
-                } */}
-
             </Layout>
         );
     }

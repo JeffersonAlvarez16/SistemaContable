@@ -110,6 +110,16 @@ export const mailFolderListItems = (
                 <ListItemText primary="Caja" />
             </ListItem>
         </Link>
+        <Link prefetch href="/cuentas_cobrar">
+            <ListItem button>
+                <Tooltip title="Cuentas Cobrar" placement="right">
+                    <ListItemIcon>
+                        <Style />
+                    </ListItemIcon>
+                </Tooltip>
+                <ListItemText primary="Cuentas Cobrar" />
+            </ListItem>
+        </Link>
         <Link prefetch href="/usuarios">
             <ListItem button>
                 <Tooltip title="Usuarios" placement="right">
