@@ -7,6 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import CloseIcon from '@material-ui/icons/Close';
 import SettingsIcon from '@material-ui/icons/Settings';
 import IconButton from '@material-ui/core/IconButton';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -353,6 +354,8 @@ class ModalNewVenta extends Component {
         }
     }
 
+
+
     enviarFacturaElectronica = (codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item) => {
         if (tipo_venta === 'factura') {
 
@@ -501,7 +504,7 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        operacionVentaRef.set({
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -514,7 +517,7 @@ class ModalNewVenta extends Component {
             iva: sumaIva,
             total: sumaTotal,
             productos: listaProductosSeleccionadosEditados,
-            fecha_venta: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             empleado: this.props.usuario.code,
             order: '' + order,
@@ -524,7 +527,9 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '',
             fecha_a_pagar: '',
-        })
+        }
+        this.setVentaCaja(itemVenta, tipo_pago)
+        operacionVentaRef.set(itemVenta)
     }
     setSaveRegistroVentaCredito = (codigoVenta, item) => {
         const {
@@ -546,7 +551,7 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        operacionVentaRef.set({
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -559,7 +564,7 @@ class ModalNewVenta extends Component {
             iva: sumaIva,
             total: sumaTotal,
             productos: listaProductosSeleccionadosEditados,
-            fecha_venta: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             empleado: this.props.usuario.code,
             order: '' + order,
@@ -569,7 +574,11 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: item.valor_acreditado,
             fecha_a_pagar: item.fecha_vencimiento,
-        })
+        }
+
+        this.setVentaCaja(itemVenta, tipo_pago)
+
+        operacionVentaRef.set(itemVenta)
     }
     setSaveRegistroVentaTarjetaCredito = (codigoVenta, item) => {
         const {
@@ -591,7 +600,7 @@ class ModalNewVenta extends Component {
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
 
-        operacionVentaRef.set({
+        var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             descuento: descuento,
@@ -604,7 +613,7 @@ class ModalNewVenta extends Component {
             iva: sumaIva,
             total: sumaTotal,
             productos: listaProductosSeleccionadosEditados,
-            fecha_venta: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             empleado: this.props.usuario.code,
             order: '' + order,
@@ -614,6 +623,36 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '',
             fecha_a_pagar: '',
+        }
+        this.setVentaCaja(itemVenta, tipo_pago)
+        operacionVentaRef.set(itemVenta)
+
+
+    }
+
+    setVentaCaja(itemVenta, tipo_pago) {
+        var db = firebase.database();
+        var codigoVentaCaja = funtions.guidGenerator()
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
+        operacionVentaRefCaja.once('value', (snap) => {
+            if (snap.val()) {
+                var caja = funtions.snapshotToArray(snap)[0]
+                if (Boolean(caja.estado)) {
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
+                    operacionVentaCaja.set(itemVenta)
+                    var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                    if (tipo_pago === 'efectivo') {
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                cajaRefValorActual.update({
+                                    valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
+                                })
+
+                            }
+                        })
+                    }
+                }
+            }
         })
     }
     ////////////////////////////////////////
@@ -644,7 +683,7 @@ class ModalNewVenta extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'venta-producto',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
@@ -674,7 +713,7 @@ class ModalNewVenta extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'venta-producto',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
@@ -703,7 +742,7 @@ class ModalNewVenta extends Component {
         operacionStockRef.set({
             codigo: codigoStock,
             tipo_operacion: 'venta-producto',
-            fecha: `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+            fecha: funtions.obtenerFechaActual(),
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
@@ -1036,7 +1075,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta:Number(((Number(item.precio_costo)*Number(this.state.precioSeleccionado.porcentaje))+Number(item.precio_costo)).toFixed(2))
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2))
                     })
                     this.setState({
                         itemProductoCargado: null
@@ -1073,7 +1112,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta:Number(((Number(item.precio_costo)*Number(this.state.precioSeleccionado.porcentaje))+Number(item.precio_costo)).toFixed(2)),
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
                     })
                     this.setState({
                         listaProductosSeleccionados: array,
@@ -1331,7 +1370,7 @@ class ModalNewVenta extends Component {
                                 clienteSeleccionado={this.state.clienteSeleccionado}
                                 errorCliente={this.state.clienteFacturacion.length > 0 ? false : true}
                                 usuario={this.props.usuario}
-                                seleccionarCliente={this.seleccionarCliente}                                
+                                seleccionarCliente={this.seleccionarCliente}
                             />
                         }
 

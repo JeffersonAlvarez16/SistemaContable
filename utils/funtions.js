@@ -131,6 +131,20 @@ class FUNTIONS {
         return array
     };
 
+    obtenerFechaActual=()=>{
+        var date= new Date()
+        var day= date.getDate()
+        var mon= date.getMonth()
+        var yea= date.getFullYear()
+        if(String(day).length===1){
+            day='0'+day
+        }
+        if(String(mon).length===1){
+            mon='0'+mon
+        }
+        return `${yea}-${mon}-${day}`
+    }
+
 
 }
 

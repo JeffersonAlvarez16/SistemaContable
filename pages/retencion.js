@@ -37,9 +37,7 @@ import ModalEliminarRetencion from '../components/modals_container/retenciones/M
 
 
 //librerias Imprimir
-import pdfMake from 'pdfmake/build/pdfmake';
-import vfsFonts from 'pdfmake/build/vfs_fonts';
-import ResivoRetencion from '../components/plugins/plantillas/resivo_retencion';
+
 
 class Retencion extends Component {
 
@@ -77,26 +75,24 @@ class Retencion extends Component {
         //item para editar
         itemEditar: null,
         //fecha actual
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
+        fechaActual: '',
         estadoPermisos: null,
         itemFormateadoImprimir: {}
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
+
     componentDidMount() {
         this.obtenerDataBaseDatos()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
     }
 
     obtenerDataBaseDatos = () => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(this.obtenerFechFormateada())
+                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(funtions.obtenerFechaActual())
                 retencionesRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -154,7 +150,7 @@ class Retencion extends Component {
         }
         if (item.id === 'accions') {
             return <>
-               {/*  <ReactToPrint
+                {/*  <ReactToPrint
                     ref={el => (this.refEventoImprimir = el)}
                     trigger={() => <></>}
                     content={() => this.refImprimirResivo}
@@ -326,16 +322,19 @@ class Retencion extends Component {
                                 }}
                             />
 
-                            <TextField
-                                id="datetime-local"
-                                type="date"
-                                defaultValue={this.state.fechaActual}
-                                InputLabelProps={{
-                                    shrink: true,
-                                }}
-                                onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                            />
-                         
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <TextField
+                                    id="datetime-local"
+                                    type="date"
+                                    defaultValue={this.state.fechaActual}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                                />
+                            </div>
+
+
                             <div style={{ flex: 0.9 }}></div>
 
                             <Search
@@ -350,6 +349,14 @@ class Retencion extends Component {
 
                         <Divider />
 
+
+                       {/*  <ContainerPlantillas>
+                            <ResivoVenta
+                                item={this.state.itemFormateadoImprimir}
+                                ref={el => (this.refImprimirResivo = el)}
+                            />
+                        </ContainerPlantillas>
+ */}
 
 
 
@@ -388,7 +395,7 @@ class Retencion extends Component {
                                     this.setState({ estadoModalSimple: false })
                                 }}
                             />
-                        </ModalContainerNormal>                        
+                        </ModalContainerNormal>
                     </div>
                 }
                 {

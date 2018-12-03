@@ -317,7 +317,7 @@ class ModalNewCliente extends Component {
                 limite_deuda: this.state.limite_deuda,
                 credito: this.state.credito,
                 estado: this.props.item ? this.state.estado : true,
-                fecha_registro: this.props.item ? this.state.fecha_registro : `${new Date().getDate() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getFullYear()}`,
+                fecha_registro: this.props.item ? this.state.fecha_registro : funtions.obtenerFechaActual(),
                 hora_registro: this.props.item ? this.state.hora_registro : `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                 usuario: this.props.item ? this.state.usuario : this.props.usuario.code,
                 order: this.props.item ? this.state.order : order + "",

@@ -6,7 +6,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Home from '@material-ui/icons/Home';
 import DraftsIcon from '@material-ui/icons/Drafts';
-import Assignment from '@material-ui/icons/Assignment';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 import History from '@material-ui/icons/History';
 import Usuarios from '@material-ui/icons/Group';
 import DriveEta from '@material-ui/icons/DriveEta';
@@ -100,14 +100,14 @@ export const mailFolderListItems = (
                 <ListItemText primary="Retenciones" />
             </ListItem>
         </Link>
-        <Link prefetch href="/deudas_cobrar">
+        <Link prefetch href="/caja">
             <ListItem button>
-                <Tooltip title="Deudas por Cobrar" placement="right">
+                <Tooltip title="Caja" placement="right">
                     <ListItemIcon>
-                        <Style />
+                        <MonetizationOn />
                     </ListItemIcon>
                 </Tooltip>
-                <ListItemText primary="Deudas por Cobrar" />
+                <ListItemText primary="Caja" />
             </ListItem>
         </Link>
         <Link prefetch href="/usuarios">

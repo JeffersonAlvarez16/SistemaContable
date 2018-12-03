@@ -3,6 +3,7 @@ import Divider from '@material-ui/core/Divider';
 
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 //firebase 
 import firebase from 'firebase/app';
@@ -19,7 +20,8 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
-import { TextField, CircularProgress, Tooltip } from '@material-ui/core';
+import { TextField, IconButton, Tooltip,CircularProgress } from '@material-ui/core';
+import setSnackBars from '../components/plugins/setSnackBars';
 
 class Stock extends Component {
 
@@ -58,34 +60,54 @@ class Stock extends Component {
         //tipo de ajuste para productos
         tipoAjuste: '',
         //fecha actual del sistem
-        fechaActual: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
-
+        
         //permisosUsuarios
         title:'',
         titlep:'',
         estadoPermisoDevolucionCliente: null,
         estadoPermisoDevolucionProveedor:null,
         estadoPermisoCompraProductos:null,
-        estadoPermisoAjusteStock:null
+        estadoPermisoAjusteStock:null,
+        fechaActual: '',
+        //usuario
+        usuario: null
     }
 
-    obtenerFechFormateada = () => {
-        const { fechaActual } = this.state
-        var fecha = fechaActual.split('-')
-        var nueva = fecha[2] + '-' + fecha[1] + '-' + fecha[0]
-        return nueva
-    }
+
 
     componentDidMount() {
-        this.cargarData()       
-
-    }
-
-    obtenerPermisosUsuarios = () => {
+        this.cargarData()
+        this.setState({
+            fechaActual: funtions.obtenerFechaActual()
+        })
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        console.log(snap.val())
+                        this.setState({
+                            cajaSeleccionada: funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                        })
+                        console.log(setTimeout(() => { this.state.cajaSeleccionada }, 500))
+                    } else {
+                        this.setState({
+                            cajaSeleccionada: null
+                        })
+                    }
+                })
+            }
+        })
+    }
+
+    obtenerPermisosUsuarios = () => {
+
+        firebase.auth().onAuthStateChanged((user) => {
+            console.log(this.state)
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.codigo}`)
                 usuariosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         if (snapshot.val().privilegios.stock.devolucion_cliente === true) {
@@ -147,7 +169,7 @@ class Stock extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(this.obtenerFechFormateada())
+                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(funtions.obtenerFechaActual())
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -175,7 +197,7 @@ class Stock extends Component {
                     }
                 });
             }
-        });
+        })
     }
 
     handleGetData = (n, item) => {
@@ -333,6 +355,28 @@ class Stock extends Component {
 
 
                 <MenuHerramientas>
+
+                    {
+                        this.state.cajaSeleccionada && Boolean(this.state.cajaSeleccionada.estado) === true &&
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton >
+                                    <MonetizationOn style={{ color: '#00c853' }} />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    }
+                    {
+                        this.state.cajaSeleccionada === null &&
+                        <>
+                            <Tooltip title="Estado de caja">
+                                <IconButton >
+                                    <MonetizationOn style={{ color: '#EF5350' }} />
+                                </IconButton>
+                            </Tooltip>
+                        </>
+                    }
+
                     <ItemMenuHerramienta
                         titleButton="Entrada"
                         color="primary"
@@ -345,36 +389,49 @@ class Stock extends Component {
                         anchorEl={this.state.referenciaMenuEntrada}
                         open={Boolean(this.state.referenciaMenuEntrada)}
                         onClose={() => this.setState({ referenciaMenuEntrada: null })}
-                    >      
-                   
-                            <MenuItem
-                                disabled={estadoPermisoDevolucionCliente}
-                                onClick={() => this.setState({
+                    >
+                        <MenuItem 
+                        disabled={estadoPermisoDevolucionCliente}
+                        onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
                                     tipoAjuste: 'devolucion_cliente',
                                     estadoModalSimpleCompraProductos: true
-                                })}>
-                                Devolución del cliente
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                        }}>
+                            Devolución del cliente
                         </MenuItem>
-                     
-
-                        }
-                   
-                        <MenuItem
-                          disabled={estadoPermisoCompraProductos}
-                        onClick={() => this.setState({
-                            tipoAjuste: 'compra_producto',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        <MenuItem 
+                        disabled={estadoPermisoCompraProductos}
+                        onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'compra_producto',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Compra de productos
                         </MenuItem>
-                     
-                       
                         <MenuItem 
-                         disabled={estadoPermisoAjusteStock}
-                        onClick={() => this.setState({
-                            tipoAjuste: 'ajuste-stock-entrada',
-                            estadoModalSimpleCompraProductos: true
-                        })}>
+                        disabled={estadoPermisoAjusteStock}
+                        onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'ajuste-stock-entrada',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Ajuste de Stock
                         </MenuItem>
                  
@@ -393,39 +450,50 @@ class Stock extends Component {
                         open={Boolean(this.state.referenciaMenuSalida)}
                         onClose={() => this.setState({ referenciaMenuSalida: null })}
                     >
-                  
                         <MenuItem 
-                         disabled={estadoPermisoDevolucionProveedor}
-                         onClick={() => this.setState({
-                             tipoAjuste: 'devolucion-proveedor',
-                             estadoModalSimpleCompraProductos: true
-                            })}>
+                        disabled={estadoPermisoDevolucionProveedor}
+                        onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'devolucion-proveedor',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Devolución al proveedor
                         </MenuItem>
-                       
                         <MenuItem 
-                         disabled={estadoPermisoAjusteStock}
-                         onClick={() => this.setState({
-                             tipoAjuste: 'ajuste-stock-salida',
-                             estadoModalSimpleCompraProductos: true
-                            })}>
+                        disabled={estadoPermisoAjusteStock}
+                        onClick={() => {
+                            if(this.state.cajaSeleccionada!=null){
+                                this.setState({
+                                    tipoAjuste: 'ajuste-stock-salida',
+                                    estadoModalSimpleCompraProductos: true
+                                })
+                            }else{
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir Caja', 1000)
+                            }
+                            
+                        }}>
                             Ajuste de Stock
                         </MenuItem>
                          
                     </Menu>
-
-                    <TextField
-                        id="datetime-local"
-                        type="date"
-                        defaultValue={this.state.fechaActual}
-                        InputLabelProps={{
-                            shrink: true,
-                        }}
-                        onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                    />
-                    
-                    <div style={{flex:.9}}> </div>
-                   
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={this.state.fechaActual}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
+                    <div style={{ flex: 0.9 }}></div>
 
                     <Search
                         id='buscar-producto'
