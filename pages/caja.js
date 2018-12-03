@@ -25,6 +25,7 @@ import AgregarDineroCaja from '../components/modals_container/caja/AgregarDinero
 import RetirarDineroCaja from '../components/modals_container/caja/RetirarDineroCaja';
 import colors from '../utils/colors';
 import ChipTabla from '../components/modals_container/caja/ChipTabla';
+import VerTotales from '../components/modals_container/caja/VerTotales';
 
 class Caja extends Component {
 
@@ -675,7 +676,7 @@ class Caja extends Component {
                                     disabled={!this.state.estadoCaja}
                                     onClick={() => {
                                         if (this.state.estadoCaja) {
-                                            this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'eliminar' })
+                                            this.setState({ estadoModalSimple: true})
                                         }
                                     }}
                                 />
@@ -770,6 +771,13 @@ class Caja extends Component {
                                     this.setState({ openModalDineroCajaRetirar: false })}
                                 caja={this.state.cajaSeleccionada}
                             />
+                        </ModalContainerNormal>
+
+                        <ModalContainerNormal 
+                         open={this.state.estadoModalSimple}>
+                                    <VerTotales cajaSelecionada={this.state.cajaSeleccionada} handleClose={() => this.setState({ estadoModalSimple: false})}>
+                                  
+                                    </VerTotales>
                         </ModalContainerNormal>
                     </div>
                 }
