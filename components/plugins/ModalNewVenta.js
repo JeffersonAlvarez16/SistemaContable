@@ -316,7 +316,7 @@ class ModalNewVenta extends Component {
             case 'efectivo': {
                 this.updateDataProductos()
                 this.setOperacionStockEfectivo(listaProductosSeleccionadosEditados)
-                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta)
+                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta, item)
                 this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
                 break
             }
@@ -484,7 +484,7 @@ class ModalNewVenta extends Component {
     }
 
     //Registra la venta 
-    setSaveRegistroVentaEfectivo = codigoVenta => {
+    setSaveRegistroVentaEfectivo = (codigoVenta, item) => {
         const {
             clienteSeleccionado,
             descuento,
@@ -528,7 +528,7 @@ class ModalNewVenta extends Component {
             valor_acreditado: '',
             fecha_a_pagar: '',
         }
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
     }
     setSaveRegistroVentaCredito = (codigoVenta, item) => {
@@ -576,7 +576,7 @@ class ModalNewVenta extends Component {
             fecha_a_pagar: item.fecha_vencimiento,
         }
 
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
 
         operacionVentaRef.set(itemVenta)
     }
@@ -624,21 +624,21 @@ class ModalNewVenta extends Component {
             valor_acreditado: '',
             fecha_a_pagar: '',
         }
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
 
 
     }
 
-    setVentaCaja(itemVenta, tipo_pago) {
+    setVentaCaja(itemVenta, tipo_pago, item) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
-        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')       
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
                     operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
                     if (tipo_pago === 'efectivo') {
@@ -648,6 +648,125 @@ class ModalNewVenta extends Component {
                                     valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
                                 })
 
+                            }
+                        })
+                    }
+                    if (tipo_pago === 'credito') {
+                        var cuentaCobrarClienteRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo)
+                        var configuracionMes = db.ref('users/' + firebase.auth().currentUser.uid + '/configuracion/dias_a_pagar_defecto/dias')
+                        cuentaCobrarClienteRef.once('value', (snap) => {
+                            if (snap.val()) {
+                                var aumentarDeudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/'+itemVenta.codigo)
+                                var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/'+itemVenta.codigo)
+                                aumentarDeudaRef.set({
+                                    codigo: itemVenta.codigo,
+                                    valor: this.state.sumaTotal,
+                                    fecha_registro: funtions.obtenerFechaActual(),
+                                    hora_registro: funtions.obtenerHoraActual(),
+                                    estado: true
+                                })
+                                var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
+                                        
+                                if (Number(item.valor_acreditado) > 0) {
+                                    cajaRefValorAcreditado.set({
+                                        codigo: itemVenta.codigo,
+                                        valor: item.valor_acreditado,
+                                        fecha_registro: funtions.obtenerFechaActual(),
+                                        hora_registro: funtions.obtenerHoraActual(),
+                                        estado: true,
+                                        tipo:'pago_venta_credito'
+                                    })
+                                    aumentarAcreditadoRef.set({
+                                        codigo: itemVenta.codigo,
+                                        valor: item.valor_acreditado,
+                                        fecha_registro: funtions.obtenerFechaActual(),
+                                        hora_registro: funtions.obtenerHoraActual(),
+                                        estado: true,
+                                        tipo:'pago_venta_credito'
+                                    })
+                                    cajaRefValorActual.once('value', (snap2) => {
+                                        if (snap2.val()) {
+                                            cajaRefValorActual.update({
+                                                valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
+                                            })
+            
+                                        }
+                                    })
+                                }
+                            } else {
+                                Date.prototype.addDays = function (days) {
+                                    var date = new Date(this.valueOf())
+                                    date.setDate(date.getDate() + days)
+                                    var dayDate = date.getDate()
+                                    var mes = date.getMonth() + 1
+                                    if (dayDate.toString().length === 1) {
+                                        dayDate = '0' + dayDate
+                                    }
+                                    if (mes.toString().length === 1) {
+                                        mes = '0' + mes
+                                    }
+                                    return `${date.getFullYear()}-${mes}-${dayDate}`;
+                                }
+                                var date = new Date();
+                                configuracionMes.once('value', (snapp) => {
+                                    if (snapp.val()) {
+
+                                        cuentaCobrarClienteRef.set({
+                                            cliente: this.state.clienteSeleccionado,
+                                            codigo: this.state.clienteSeleccionado.codigo,
+                                            estado: true,
+                                            estado_cuenta: 'deuda',
+                                            fecha_registro: funtions.obtenerFechaActual(),
+                                            fecha_pago: date.addDays(Number(snap.val())),
+                                            hora_registro: funtions.obtenerHoraActual(),
+                                            order: '' + new Date(),
+                                            tipo_cuenta: 'venta_credito',
+                                            total: this.state.sumaTotal,
+                                            usuario: this.props.usuario.code,
+                                        })
+                                        
+
+                                        var deudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
+                                        deudaRef.set({
+                                            codigo: itemVenta.codigo,
+                                            valor: this.state.sumaTotal,
+                                            fecha_registro: funtions.obtenerFechaActual(),
+                                            hora_registro: funtions.obtenerHoraActual(),
+                                            estado: true,
+                                            tipo:'pago_venta_credito'
+                                        })
+
+                                        var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
+                                        var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/'+itemVenta.codigo)
+
+                                        if (Number(item.valor_acreditado) > 0) {
+                                            cajaRefValorAcreditado.set({
+                                                codigo: itemVenta.codigo,
+                                                valor: item.valor_acreditado,
+                                                fecha_registro: funtions.obtenerFechaActual(),
+                                                hora_registro: funtions.obtenerHoraActual(),
+                                                estado: true,
+                                                tipo:'pago_venta_credito'
+                                            })
+                                            aumentarAcreditadoRef.set({
+                                                codigo: itemVenta.codigo,
+                                                valor: item.valor_acreditado,
+                                                fecha_registro: funtions.obtenerFechaActual(),
+                                                hora_registro: funtions.obtenerHoraActual(),
+                                                estado: true,
+                                                tipo:'pago_venta_credito'
+                                            })
+                                            cajaRefValorActual.once('value', (snap2) => {
+                                                if (snap2.val()) {
+                                                    cajaRefValorActual.update({
+                                                        valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
+                                                    })
+                    
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
                             }
                         })
                     }

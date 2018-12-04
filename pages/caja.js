@@ -41,6 +41,7 @@ class Caja extends Component {
             { id: 'valor_caja', numeric: true, disablePadding: false, label: 'Valor actual de caja' },
             { id: 'saldo_final', numeric: true, disablePadding: false, label: 'Saldo final' },
             { id: 'operaciones', numeric: true, disablePadding: false, label: 'Ventas' },
+            { id: 'lista_dinero_acreditado_venta_credito', numeric: true, disablePadding: false, label: 'Dinero acreditado - Venta a credito' },
             { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero ingresado' },
             { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero retirado' },
             { id: 'ventas_devueltas', numeric: true, disablePadding: false, label: 'Ventas devueltas' },
@@ -89,6 +90,7 @@ class Caja extends Component {
                             sumaTotalDineroRetirado: [],
                             sumaTotalVentasDevueltas: [],
                             sumaTotalComprasProductos: [],
+                            sumaTotalVentasCreditoAcreditado: [],
                         })
                         var lista = funtions.snapshotToArray(snapshot)
                         var filterList = lista.sort((a, b) => {
@@ -102,6 +104,7 @@ class Caja extends Component {
                             this.sumaDineroRetirado(item.retiro_dinero, item.codigo)
                             this.sumaVentasDevueltas(item.ventas_devueltas, item.codigo)
                             this.sumaComprasProductos(item.compras_productos, item.codigo)
+                            this.sumaTotalVentasCreditoAcreditado(item.lista_dinero_acreditado_venta_credito, item.codigo)
                         })
 
                         this.setState({
@@ -224,6 +227,47 @@ class Caja extends Component {
                                 0
                         </Avatar>}
                             label="Ventas"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'lista_dinero_acreditado_venta_credito') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.lista_dinero_acreditado_venta_credito != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.lista_dinero_acreditado_venta_credito).length}
+                                    total={this.state.sumaTotalVentasCreditoAcreditado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ventas a credito'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.lista_dinero_acreditado_venta_credito).length}
+                                    total={this.state.sumaTotalVentasCreditoAcreditado.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ventas a credito'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+                        }
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Ventas a credito"
                             clickable
                             color="inherit"
                             deleteIcon={<AttachMoneyIcon />}
@@ -564,6 +608,23 @@ class Caja extends Component {
             })
             this.setState({
                 sumaTotalComprasProductos: newArray
+            })
+        }
+    }
+    sumaTotalVentasCreditoAcreditado = (lista_dinero_acreditado_venta_credito, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalVentasCreditoAcreditado
+        if (lista_dinero_acreditado_venta_credito != null) {
+            var array = Object.values(lista_dinero_acreditado_venta_credito)
+            array.forEach(element => {
+                suma = Number(Number(element.valor) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalVentasCreditoAcreditado: newArray
             })
         }
     }

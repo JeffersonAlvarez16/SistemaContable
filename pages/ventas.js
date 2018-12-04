@@ -454,7 +454,6 @@ class Ventas extends Component {
                     snapshot.val().descuento,
                     snapshot.val().cambio,
                 )
-                console.log(snapshot.val())
                 this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
                 setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
             }
@@ -470,7 +469,14 @@ class Ventas extends Component {
             if (snap.val()) {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + codigoVentaCaja)
+                    console.log(itemVenta.codigo)
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
+                    var operacionVentaCajaEliminar = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
+                    operacionVentaCajaEliminar.remove()
+
+                    var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
+                    cajaRefValorAcreditado.remove()
+
                     operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
 
