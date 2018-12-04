@@ -574,7 +574,7 @@ class Caja extends Component {
                 item = this.state.sumaTotalVentas.filter(item => item.codigo === this.state.cajaSeleccionada.codigo)[0]
             }
         }
-        if (item != null) {
+        if (item != null) {         
             if (item.sumaEfectivo != null) {
                 return item.sumaEfectivo
             } else {
@@ -606,7 +606,7 @@ class Caja extends Component {
             }
         });
     }
-    render() {
+    render() {       
         return (
             <Layout title="Caja" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
@@ -676,7 +676,7 @@ class Caja extends Component {
                                     disabled={!this.state.estadoCaja}
                                     onClick={() => {
                                         if (this.state.estadoCaja) {
-                                            this.setState({ estadoModalSimple: true})
+                                            this.setState({ estadoModalSimple: true })
                                         }
                                     }}
                                 />
@@ -773,11 +773,16 @@ class Caja extends Component {
                             />
                         </ModalContainerNormal>
 
-                        <ModalContainerNormal 
-                         open={this.state.estadoModalSimple}>
-                                    <VerTotales cajaSelecionada={this.state.cajaSeleccionada} handleClose={() => this.setState({ estadoModalSimple: false})}>
-                                  
-                                    </VerTotales>
+                        <ModalContainerNormal
+                            open={this.state.estadoModalSimple}>
+                            <VerTotales
+                                sumaTotalVentas={this.state.sumaTotalVentas}
+                                sumaTotalDineroIngresado={this.state.sumaTotalDineroIngresado}
+                                sumaTotalDineroRetirado={this.state.sumaTotalDineroRetirado}
+                                sumaTotalVentasDevueltas={this.state.sumaTotalVentasDevueltas}
+                                sumaTotalComprasProductos={this.state.sumaTotalComprasProductos}
+                                cajaSelecionada={this.state.cajaSeleccionada} handleClose={() => this.setState({ estadoModalSimple: false })}>
+                            </VerTotales>
                         </ModalContainerNormal>
                     </div>
                 }

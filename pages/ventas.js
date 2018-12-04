@@ -631,8 +631,8 @@ class Ventas extends Component {
                 this.setState({ openModalNewCliente: true })
             }
         } else {
-            if (this.state.estadoacciones === 'devolver_venta') {
-                if (item.usuario === this.state.usuario.code) {
+            if (this.state.estadoacciones === 'devolver_venta') { 
+                if (item.empleado === this.state.usuario.code) {
                     this.setState({
                         codigoEmitirFactura: item.codigo,
                         estadoModalCancelarVenta: true,
@@ -641,7 +641,7 @@ class Ventas extends Component {
                     setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.state.usuario.nombre} no registro esta Venta`, 2000)
                 }
             } else if (this.state.estadoacciones === 'emitir_factura') {
-                if (item.usuario === this.state.usuario.code) {
+                if (item.empleado === this.state.usuario.code) {
                     this.setState({
                         codigoEmitirFactura: item.codigo,
                         estadoModalEmitirFactura: true,
@@ -741,14 +741,14 @@ class Ventas extends Component {
                                     }}
                                 />
 
-                                /*    <FullScreenDialog openModal={this.state.openModalNewVenta}>
+                               <FullScreenDialog openModal={this.state.openModalNewVenta}>
                                        <NuevaVenta
                                            usuario={this.state.usuario}
                                            handleClose={() => this.setState({ openModalNewVenta: false })}
                                            item={this.state.itemEditar}
                                        >
                                        </NuevaVenta>
-                                   </FullScreenDialog> */
+                                   </FullScreenDialog>
 
                                 <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
                                     <ModalNewVenta
