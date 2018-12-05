@@ -66,7 +66,7 @@ class NuevaRetencion extends Component {
         fecha_emision_mes: '01',
         fecha_emision_year: '2018',
         fecha_emision_documento_sustento: '',
-        numero_documento: '   -   -         ',
+        numero_documento: '',
         base_disponible: '',
         valorIVA: '',
         valorRenta: '',

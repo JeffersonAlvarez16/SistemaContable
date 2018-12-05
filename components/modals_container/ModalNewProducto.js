@@ -51,8 +51,9 @@ class ModalNewProducto extends Component {
         precio_venta_b: '',
         precio_venta_c: '',
         precios: [],
+        precio_por_defecto: '',
 
-        stock_actual: '',
+        stock_actual: '0',
         stock_minimo: '10',
         stock_maximo: '100',
 
@@ -79,6 +80,7 @@ class ModalNewProducto extends Component {
     }
 
     componentDidMount() {
+        this.obtenerPrecios()
         document.addEventListener("keydown", this.escFunction, false);
         //pregutnando si biene un item por los props para saber si esditar y crear
         if (this.props.item) {
@@ -91,6 +93,7 @@ class ModalNewProducto extends Component {
                 precio_venta_a: this.props.item.precio_venta_a,
                 precio_venta_b: this.props.item.precio_venta_b,
                 precio_venta_c: this.props.item.precio_venta_c,
+                precio_por_defecto: this.props.item.precio_por_defecto,
 
                 descripcion_producto: this.props.item.descripcion_producto,
                 categoria_producto: this.props.item.categoria_producto,
@@ -119,11 +122,12 @@ class ModalNewProducto extends Component {
                 order: this.props.item.order
             })
         } else {
+            this.obtenerPreciosDefectoConfiguracion()            
             this.setState({
                 usuario: this.props.usuario.code,
                 porcentaje_iva: '12',
                 codigo: funtions.guidGenerator(),
-                unidad_medida:'unidades'
+                unidad_medida: 'unidades'
             })
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -146,6 +150,38 @@ class ModalNewProducto extends Component {
                 }
             })
         }
+    }
+
+    obtenerPrecios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/precios')
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.setState({
+                            precios: funtions.snapshotToArray(snapshot)
+                        })
+                    }
+                })
+            }
+        })
+    }
+
+    obtenerPreciosDefectoConfiguracion = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/configuracion/precio_por_defecto')
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.setState({
+                            precio_por_defecto: snapshot.val()
+                        })
+                    }
+                })
+            }
+        })
     }
 
     escFunction = (event) => {
@@ -179,6 +215,7 @@ class ModalNewProducto extends Component {
                 ],
                 total_final: '',
                 empleado: producto.usuario,
+                precio_por_defecto: producto.precio_por_defecto,
                 observacion: '',
                 subtotal: '',
                 descuento: '',
@@ -219,6 +256,7 @@ class ModalNewProducto extends Component {
             ],
             total_final: '',
             empleado: producto.usuario,
+            precio_por_defecto: producto.precio_por_defecto,
             observacion: '',
             subtotal: '',
             descuento: '',
@@ -261,6 +299,7 @@ class ModalNewProducto extends Component {
                 precio_venta_a: this.state.precio_venta_a,
                 precio_venta_b: this.state.precio_venta_b,
                 precio_venta_c: this.state.precio_venta_c,
+                precio_por_defecto: this.state.precio_por_defecto,
 
                 descripcion_producto: this.state.descripcion_producto,
                 categoria_producto: this.state.categoria_producto,
@@ -449,6 +488,23 @@ class ModalNewProducto extends Component {
                                             variant="filled"
                                         />
                                         <TextField
+                                            id="filled-unidad-medida"
+                                            select
+                                            label="Precio por defecto"
+                                            error={this.state.precio_por_defecto.length === 0}
+                                            value={this.state.precio_por_defecto}
+                                            onChange={event => this.setState({ precio_por_defecto: event.target.value })}
+                                            margin="normal"
+                                            variant="outlined"
+                                            style={styles.styleText}
+                                        >
+                                            {
+                                                this.state.precios.map(item => {
+                                                    return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre} = %${item.porcentaje}`}</MenuItem>
+                                                })
+                                            }
+                                        </TextField>
+                                        <TextField
                                             style={styles.styleText}
                                             id="standard-descripcion-producto"
                                             label="Descripcion del producto"
@@ -492,6 +548,7 @@ class ModalNewProducto extends Component {
                         </Grid>
                         <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
                             <Grid item xs={6}>
+
                                 <ContainerSelectPrecios
                                     precio_costo={this.state.precio_costo}
                                 />
@@ -526,7 +583,7 @@ class ModalNewProducto extends Component {
                                             label="Stock actual"
                                             error={this.state.stock_actual.length === 0}
                                             required
-                                            disabled={this.props.item}
+                                            disabled
                                             onChange={(event) => this.setState({ stock_actual: event.target.value })}
                                             value={this.state.stock_actual}
                                             margin="normal"
