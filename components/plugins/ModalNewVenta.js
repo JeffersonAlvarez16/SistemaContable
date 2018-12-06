@@ -245,10 +245,10 @@ class ModalNewVenta extends Component {
                 />
                 <div style={{ width: 'max-content', display: 'flex', alignItems: 'center', justifyContent: 'start', paddingLeft: 10 }}>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                        <div style={{display:'flex', flexDirection:'row'}}>
-                            en stock <div style={{color:colors.getColorPrymaryDark()}}>{Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}</div>
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            en stock <div style={{ color: colors.getColorPrymaryDark() }}>{Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}</div>
                         </div>
-                        <div style={{color: colors.getColorPrymary()}}>
+                        <div style={{ color: colors.getColorPrymary() }}>
                             {`${n.unidad_medida}`}
                         </div>
                     </div>
@@ -403,6 +403,13 @@ class ModalNewVenta extends Component {
                 this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
                 break
             }
+            case 'transferencia': {
+                this.updateDataProductos()
+                this.setOperacionStockEfectivo(listaProductosSeleccionadosEditados)
+                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta, item)
+                this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
+                break
+            }
             default: {
                 break
             }
@@ -446,6 +453,13 @@ class ModalNewVenta extends Component {
                 }
                 case 'cheque': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
+                    this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
+                    this.setState({ abrirModalFinalizarVenta: false })
+                    break
+                }
+                case 'transferencia': {
+                    jsonData = this.createJsonFacturaElectronicaTransferencia()
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -1229,6 +1243,101 @@ class ModalNewVenta extends Component {
 
         return json
     }
+
+    createJsonFacturaElectronicaTransferencia = () => {
+        const {
+            sumaSubTotal,
+            precioProductosSinIva,
+            precioProductosConIva,
+            sumaIva,
+            sumaTotal,
+            descuento,
+            clienteSeleccionado,
+            listaProductosSeleccionadosEditados,
+            listaProductosSeleccionados,
+            precioSeleccionado
+        } = this.state
+
+        var date = new Date()
+        var json = {
+            "ambiente": this.state.ambienteFacturacion,
+            "tipo_emision": 1,
+            "fecha_emision": date.toISOString(),
+            "emisor": {
+                "ruc": "",
+                "obligado_contabilidad": false,
+                "contribuyente_especial": "",
+                "nombre_comercial": "",
+                "razon_social": "",
+                "direccion": "",
+                "establecimiento": {
+                    "punto_emision": "",
+                    "codigo": "",
+                    "direccion": ""
+                }
+            },
+            "moneda": "USD",
+            "totales": {
+                "total_sin_impuestos": Number(sumaSubTotal),
+                "impuestos": [
+                    {
+                        "base_imponible": Number(precioProductosSinIva),
+                        "valor": 0.0,
+                        "codigo": "2",
+                        "codigo_porcentaje": "0"
+                    },
+                    {
+                        "base_imponible": Number(precioProductosConIva),
+                        "valor": Number(sumaIva),
+                        "codigo": "2",
+                        "codigo_porcentaje": "2"
+                    }
+                ],
+                "importe_total": Number(sumaTotal),
+                "propina": 0.0,
+                "descuento": descuento
+            },
+            "comprador": {
+                "email": clienteSeleccionado.email,
+                "identificacion": clienteSeleccionado.numero_identificacion,
+                "tipo_identificacion": clienteSeleccionado.tipo_identificacion,
+                "razon_social": clienteSeleccionado.nombre,
+                "direccion": clienteSeleccionado.direccion,
+                "telefono": clienteSeleccionado.celular
+            },
+            "items": listaProductosSeleccionadosEditados.map(item => {
+                return {
+                    cantidad: Number(item.cantidad),
+                    codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
+                    codigo_auxiliar: item.codigo,
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)).toFixed(2)),
+                    descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    impuestos: [
+                        {
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
+                            codigo: '2',
+                            codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
+                        }
+                    ],
+                    descuento: 0.0
+                }
+            })
+            ,
+            "valor_retenido_iva": 0.00,
+            "valor_retenido_renta": 0.00,
+            "pagos": [
+                {
+                    "medio": "transferencia",
+                    "total": Number(sumaTotal)
+                }
+            ]
+        }
+
+        return json
+    }
     ///////////////////////////
     onChangueSelecteccionarProducto = item => {
         var array = this.state.listaProductosSeleccionados
@@ -1458,6 +1567,12 @@ class ModalNewVenta extends Component {
                 }
                 break
             }
+            case 'transferencia': {
+                if (this.comprobarCamposLlenosCredito()) {
+                    this.setState({ estadoModalFinalizaPago: true })
+                }
+                break
+            }
             default: {
                 break
             }
@@ -1491,28 +1606,35 @@ class ModalNewVenta extends Component {
                     <Grid item xs={9} style={{ background: 'rgba(222, 239, 255)' }}>
                         <Grid container>
                             <Grid item xs={4}>
-                                <TextField
-                                    id="filled-tipo-venta"
-                                    select
-                                    label="Tipo de venta"
-                                    error={this.state.tipo_venta.length > 0 ? false : true}
-                                    value={this.state.tipo_venta}
-                                    onChange={event => this.setState({
-                                        tipo_venta: event.target.value
-                                    })}
-                                    margin="normal"
-                                    variant="outlined"
-                                    style={styles.styleText}
-                                >
-                                    <MenuItem value={'factura'}>Factura</MenuItem>
-                                    <MenuItem value={'final'}>Consumidor Final</MenuItem>
-                                </TextField>
+                                <div style={{ 
+                                    display: 'flex', 
+                                    paddingLeft: 16,
+                                    paddingRight: 16, 
+                                    flexDirection:'column',
+                                    }}>
+                                    <TextField
+                                        id="filled-tipo-venta"
+                                        select
+                                        label="Tipo de venta"
+                                        error={this.state.tipo_venta.length > 0 ? false : true}
+                                        value={this.state.tipo_venta}
+                                        onChange={event => this.setState({
+                                            tipo_venta: event.target.value
+                                        })}
+                                        margin="normal"
+                                        variant="outlined"
+                                        style={styles.styleText}
+                                    >
+                                        <MenuItem value={'factura'}>Factura</MenuItem>
+                                        <MenuItem value={'final'}>Consumidor Final</MenuItem>
+                                    </TextField>
 
-                                <AutoCompleteSelectedProducto
-                                    styleText={styles.styleText}
-                                    onChangue={this.onChangueSelecteccionarProducto}
-                                >
-                                </AutoCompleteSelectedProducto>
+                                    <AutoCompleteSelectedProducto
+                                        styleText={styles.styleText}
+                                        onChangue={this.onChangueSelecteccionarProducto}
+                                    >
+                                    </AutoCompleteSelectedProducto>
+                                </div>
 
                                 <ModalContainerNormal
                                     open={this.state.estadoModalGuardarVenta}
@@ -1628,6 +1750,7 @@ class ModalNewVenta extends Component {
                             </div>
                             <ContenedorSeleccionarTipoPago
                                 tipo_pago={this.state.tipo_pago}
+                                tipo_venta={this.state.tipo_venta}
                                 handleChangeSeleccionTipoPago={value => {
                                     this.setState({
                                         tipo_pago: value

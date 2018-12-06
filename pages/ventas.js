@@ -17,7 +17,12 @@ import InputIcon from '@material-ui/icons/Input';
 import FileCopy from '@material-ui/icons/FileCopy';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import CloseIcon from '@material-ui/icons/Close';
-import EditIcon from '@material-ui/icons/Edit';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import SubtitlesIcon from '@material-ui/icons/Subtitles';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
+import PaymentIcon from '@material-ui/icons/Payment';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import DoneIcon from '@material-ui/icons/Done';
 
@@ -38,12 +43,13 @@ import ModalContainerNormal from '../components/modals_container/ModalContainerN
 import EmitirFacturaModal from '../components/plugins/EmitirFacturaModal';
 import ModalCancelarVenta from '../components/modals_container/ventas/ModalCancelarVenta';
 import ModalEditarVenta from '../components/modals_container/ventas/ModalEditarVenta';
-import { CircularProgress } from '@material-ui/core';
+import { CircularProgress, Chip, Avatar } from '@material-ui/core';
 
 import ReactToPrint from "react-to-print";
 import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
 import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
 import ModalNewVenta from '../components/plugins/ModalNewVenta';
+import colors from '../utils/colors';
 
 class Ventas extends Component {
 
@@ -55,8 +61,8 @@ class Ventas extends Component {
         listaVentasTemporal: [],
 
         rowslistaVentas: [
-            { id: 'accions', numeric: false, disablePadding: true, label: 'Resivo' },
-            { id: 'factura_emitida', numeric: false, disablePadding: true, label: 'Estado Factura' },
+            { id: 'accions', numeric: false, disablePadding: true, label: '' },
+            { id: 'factura_emitida', numeric: false, disablePadding: true, label: 'Estado' },
             { id: 'cliente', numeric: true, disablePadding: false, label: 'Cliente' },
             { id: 'productos', numeric: true, disablePadding: false, label: 'Productos' },
             { id: 'tipo_pago', numeric: true, disablePadding: false, label: 'Tipo de pago' },
@@ -66,6 +72,7 @@ class Ventas extends Component {
             { id: 'descuento', numeric: true, disablePadding: false, label: 'Descuento' },
             { id: 'dinero_resibido', numeric: true, disablePadding: false, label: 'Dinero recibido' },
             { id: 'cambio', numeric: true, disablePadding: false, label: 'Cambio/Vuelto' },
+            { id: 'acreditado', numeric: true, disablePadding: false, label: 'Dinero acreditado' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
@@ -165,28 +172,6 @@ class Ventas extends Component {
                 })
             }
         })
-
-
-        /*    firebase.auth().onAuthStateChanged((user) => {
-              if (user) {
-                  var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
-                  operacionVentaRefCaja.once('value', (snap) => {
-                      if (snap.val()) {
-                          var lista = funtions.snapshotToArray(snap)
-                          var filterList = lista.sort((a, b) => {
-                              a = new Date(a.order);
-                              b = new Date(b.order);
-                              return a > b ? -1 : a < b ? 1 : 0;
-                          })
-                          var caja = filterList[0]
-                          this.setState({
-                              estadoCaja: caja.estado,
-                              cajaSeleccionada: caja
-                          })
-                      }
-                  })
-              }
-          }) */
     }
 
     handleGetData = (n, item) => {
@@ -227,21 +212,33 @@ class Ventas extends Component {
                     display: 'flex',
                     flexDirection: 'row'
                 }}>
-                    <div>{item.cantidad}</div>
-                    <div style={{ width: 10 }} />
-                    <ReturnTextTable
-                        referencia="productos"
-                        codigo={item.codigo}
-                        datoTraido="descripcion_producto"
-                        estado={true}
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                width: 'max-content',
+                                paddingLeft: 10,
+                                paddingRight: 10,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                height: 25
+                            }}>
+                                {item.cantidad}
+                            </Avatar>
+                        }
+                        label={
+                            <ReturnTextTable
+                                referencia="productos"
+                                codigo={item.codigo}
+                                datoTraido="descripcion_producto"
+                                estado={true}
+                            />
+                        }
+                        clickable
+                        color="inherit"
+                        style={{ margin: 1, height: 25 }}
                     />
                 </div>
             })
-            {/* <div style={{ width: 'max-content' }}>
-                    <IconButton>
-                        <FileCopy />
-                    </IconButton>
-            </div> */}
         }
 
         if (item.id === 'subtotal') {
@@ -249,7 +246,104 @@ class Ventas extends Component {
         }
 
         if (item.id === 'tipo_pago') {
-            return <div style={{ width: 'max-content' }}>{n.tipo_pago}</div>
+            return <div style={{ width: 'max-content' }}>
+                {
+                    n.tipo_pago === 'cheque' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkRed300()
+                            }}>
+                                <SubtitlesIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con cheque'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+                {
+                    n.tipo_pago === 'transferencia' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkDeepPurple300()
+                            }}>
+                                <SwapHorizIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Por transferencia bancaria'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+                {
+                    n.tipo_pago === 'efectivo' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDark()
+                            }}>
+                                <AttachMoneyIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'En efectivo'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+                {
+                    n.tipo_pago === 'credito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkAmber300()
+                            }}>
+                                <LocalAtmIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'A crédito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+                {
+                    n.tipo_pago === 'tarjeta-credito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkGreen300()
+                            }}>
+                                <CreditCardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con tarjeta de crédito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+                {
+                    n.tipo_pago === 'tarjeta-debito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkBlue300()
+                            }}>
+                                <PaymentIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con tarjeta de débito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                    />
+                }
+            </div>
         }
 
         if (item.id === 'factura_emitida') {
@@ -264,12 +358,8 @@ class Ventas extends Component {
                                 setTimeout(() => {
                                     this.comprobarUsuario(n)
                                 }, 100)
-                                /*   this.setState({
-                                      codigoEmitirFactura: n.codigo,
-                                      estadoModalCancelarVenta: true,
-                                  }) */
                             }}>
-                            <CloseIcon style={{ color: '#EF5350' }} />
+                            <CloseIcon style={{ color: '#EF5350' }} fontSize="small"/>
                         </IconButton>
                     </Tooltip>
                     <IconButton disabled>
@@ -283,7 +373,7 @@ class Ventas extends Component {
                         n.factura_emitida === 'emitida' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <IconButton disabled>
-                                <DoneAllIcon style={{ color: '#00c853' }} />
+                                <DoneAllIcon style={{ color: '#00c853' }} fontSize="small"/>
                             </IconButton>
                             <div style={{ color: '#00c853', display: 'flex', alignItems: 'center' }}>Emitida</div>
                         </div>
@@ -304,7 +394,7 @@ class Ventas extends Component {
                                         estadoModalCancelarVenta: true,
                                     }) */
                                 }}>
-                                    <CloseIcon style={{ color: '#EF5350' }} />
+                                    <CloseIcon style={{ color: '#EF5350' }} fontSize="small"/>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Emitir Factura">
@@ -320,7 +410,7 @@ class Ventas extends Component {
                                          estadoModalEmitirFactura: true,
                                      }) */
                                 }}>
-                                    <InputIcon color='primary' />
+                                    <InputIcon color='primary' fontSize="small"/>
                                 </IconButton>
                             </Tooltip>
                         </div>
@@ -331,14 +421,14 @@ class Ventas extends Component {
                             <IconButton disabled>
                                 <CircularProgress size={20} thickness={5} style={{ color: '#42A5F5' }} />
                             </IconButton>
-                            <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pendiente</div>
+                            <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Emitiendo...</div>
                         </div>
                     }
                     {
                         n.factura_emitida === 'error' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <IconButton disabled>
-                                <CloseIcon style={{ color: 'red' }} />
+                                <CloseIcon style={{ color: 'red' }} fontSize="small"/>
                             </IconButton>
                             <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error de emisión</div>
                         </div>
@@ -347,7 +437,13 @@ class Ventas extends Component {
         }
 
         if (item.id === 'total') {
-            return <div style={{ width: 'max-content' }}>{n.total}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.total}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymary() }}
+                />
+            </div>
         }
 
         if (item.id === 'iva') {
@@ -364,6 +460,10 @@ class Ventas extends Component {
 
         if (item.id === 'cambio') {
             return <div style={{ width: 'max-content' }}>{n.cambio}</div>
+        }
+
+        if (item.id === 'acreditado') {
+            return <div style={{ width: 'max-content' }}>{n.valor_acreditado}</div>
         }
 
         if (item.id === 'fecha_venta') {
@@ -448,7 +548,7 @@ class Ventas extends Component {
                                 if (Number(snap.val().valor_caja) < Number(snapshot.val().total)) {
                                     setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)
                                 } else {
-                                     snapshot.val().productos.forEach(element => {
+                                    snapshot.val().productos.forEach(element => {
                                         var productoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + element.codigo)
                                         productoRef.once('value', (snapshot) => {
                                             if (snapshot.val()) {
@@ -468,7 +568,7 @@ class Ventas extends Component {
                                         snapshot.val().cambio,
                                     )
                                     this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
-                                    setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300) 
+                                    setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
                                 }
                             }
                         })

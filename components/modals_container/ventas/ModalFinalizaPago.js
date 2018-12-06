@@ -117,6 +117,10 @@ class ModalFinalizaPago extends React.Component {
                 }
                 break
             }
+            case 'transferencia': {
+                this.props.handleAceptar({ tipo_pago: 'transferencia' })
+                break
+            }
             default: {
                 break
             }
@@ -147,6 +151,10 @@ class ModalFinalizaPago extends React.Component {
                 {
                     this.props.tipo_pago === 'cheque' &&
                     <DialogTitle >{`Pago con cheque`}</DialogTitle>
+                }
+                {
+                    this.props.tipo_pago === 'transferencia' &&
+                    <DialogTitle >{`Pago con transferencia bancaria`}</DialogTitle>
                 }
                 <DialogContent>
                     <Typography variant="title" gutterBottom>
@@ -291,6 +299,10 @@ class ModalFinalizaPago extends React.Component {
                             >
                             </TextField>
                         </>
+                    }
+                    {
+                        this.props.tipo_pago === 'transferencia' &&
+                        <></>
                     }
                 </DialogContent>
 

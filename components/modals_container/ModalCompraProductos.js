@@ -774,14 +774,10 @@ class ModalCompraProductos extends Component {
                             }
                         }}
                         handleEvitarCaja={() => {
-                            if (this.state.total_final <= this.state.dinero_en_caja) {
                                 this.setState({ operarEnCaja: false })
                                 setTimeout(() => {
                                     this.handleEvitarCaja()
                                 }, 100)
-                            } else {
-                                setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)
-                            }
                         }}
 
                     />
