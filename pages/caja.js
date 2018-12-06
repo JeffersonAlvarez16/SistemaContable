@@ -40,12 +40,16 @@ class Caja extends Component {
             { id: 'saldo_inicial', numeric: true, disablePadding: false, label: 'Saldo inicial' },
             { id: 'valor_caja', numeric: true, disablePadding: false, label: 'Valor actual de caja' },
             { id: 'saldo_final', numeric: true, disablePadding: false, label: 'Saldo final' },
-            { id: 'operaciones', numeric: true, disablePadding: false, label: 'Ventas' },
-            { id: 'lista_dinero_acreditado_venta_credito', numeric: true, disablePadding: false, label: 'Dinero acreditado - Venta a credito' },
+            { id: 'ventas_efectivo', numeric: true, disablePadding: false, label: 'Ventas - En efectivo' },
+            { id: 'ventas_devueltas', numeric: true, disablePadding: false, label: 'Ventas - Devueltas' },
+            { id: 'lista_dinero_acreditado_venta_credito', numeric: true, disablePadding: false, label: 'Ventas a credito - dinero acreditado' },
+            { id: 'lista_cuentas_pagadas', numeric: true, disablePadding: false, label: 'Cuentas pagadas' },
             { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero ingresado' },
             { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero retirado' },
-            { id: 'ventas_devueltas', numeric: true, disablePadding: false, label: 'Ventas devueltas' },
-            { id: 'compras_productos', numeric: true, disablePadding: false, label: 'Compra de productos' },
+            { id: 'compras_productos', numeric: true, disablePadding: false, label: 'Stock - Compra de productos' },
+            { id: 'ajustes_stock_entradas', numeric: true, disablePadding: false, label: 'Stock - Ajustes de entradas' },
+            { id: 'devoluciones_proveedores', numeric: true, disablePadding: false, label: 'Stock - Devoluciones a proveedores' },
+            { id: 'ajustes_stock_salidas', numeric: true, disablePadding: false, label: 'Stock - Ajustes de salidas' },
             { id: 'fecha_abrir', numeric: true, disablePadding: false, label: 'Caja abierta - Fecha' },
             { id: 'fecha_cerrar', numeric: true, disablePadding: false, label: 'Caja cerrada - Fecha' },
             { id: 'hora_abrir', numeric: true, disablePadding: false, label: 'Caja iniciada - Hora' },
@@ -90,7 +94,11 @@ class Caja extends Component {
                             sumaTotalDineroRetirado: [],
                             sumaTotalVentasDevueltas: [],
                             sumaTotalComprasProductos: [],
+                            sumaTotalAjustesEntradas: [],
+                            sumaTotalDevolucionesProveedores: [],
+                            sumaTotalAjustesSalidas: [],
                             sumaTotalVentasCreditoAcreditado: [],
+                            sumaTotalCuentasPagadas: [],
                         })
                         var lista = funtions.snapshotToArray(snapshot)
                         var filterList = lista.sort((a, b) => {
@@ -104,7 +112,11 @@ class Caja extends Component {
                             this.sumaDineroRetirado(item.retiro_dinero, item.codigo)
                             this.sumaVentasDevueltas(item.ventas_devueltas, item.codigo)
                             this.sumaComprasProductos(item.compras_productos, item.codigo)
+                            this.sumaTotalAjustesEntradas(item.ajustes_stock_entradas, item.codigo)
+                            this.sumaTotalDevolucionesProveedores(item.devoluciones_proveedores, item.codigo)
+                            this.sumaTotalAjustesSalidas(item.ajustes_stock_salidas, item.codigo)
                             this.sumaTotalVentasCreditoAcreditado(item.lista_dinero_acreditado_venta_credito, item.codigo)
+                            this.sumaTotalCuentasPagadas(item.lista_cuentas_pagadas, item.codigo)
                         })
 
                         this.setState({
@@ -195,7 +207,7 @@ class Caja extends Component {
         if (item.id === 'hora_cerrrar') {
             return n.hora_cerrrar
         }
-        if (item.id === 'operaciones') {
+        if (item.id === 'ventas_efectivo') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
                 {n.ventas != null ?
                     <div>
@@ -273,6 +285,46 @@ class Caja extends Component {
                             deleteIcon={<AttachMoneyIcon />}
                         />
 
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'lista_cuentas_pagadas') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.lista_cuentas_pagadas != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.lista_cuentas_pagadas).length}
+                                    total={this.state.sumaTotalCuentasPagadas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Cuentas pagadas'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.lista_cuentas_pagadas).length}
+                                    total={this.state.sumaTotalCuentasPagadas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Cuentas pagadas'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+                        }
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Cuentas pagadas"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
                     </div>
                 }
             </div>
@@ -449,6 +501,135 @@ class Caja extends Component {
                 }
             </div>
         }
+        if (item.id === 'ajustes_stock_entradas') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.ajustes_stock_entradas != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ajustes_stock_entradas).length}
+                                    total={this.state.sumaTotalAjustesEntradas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ajuste de entrada'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ajustes_stock_entradas).length}
+                                    total={this.state.sumaTotalAjustesEntradas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ajuste de entrada'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Ajuste de entrada"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'devoluciones_proveedores') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.devoluciones_proveedores != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.devoluciones_proveedores).length}
+                                    total={this.state.sumaTotalDevolucionesProveedores.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Devoluciones a proveedores'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.devoluciones_proveedores).length}
+                                    total={this.state.sumaTotalDevolucionesProveedores.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Devoluciones a proveedores'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Devoluciones a proveedores"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'ajustes_stock_salidas') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.ajustes_stock_salidas != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ajustes_stock_salidas).length}
+                                    total={this.state.sumaTotalAjustesSalidas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ajustes de salidas'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.ajustes_stock_salidas).length}
+                                    total={this.state.sumaTotalAjustesSalidas.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Ajustes de salidas'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Ajustes de salidas"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
         if (item.id === 'valor_caja') {
             return Boolean(n.estado) ?
                 <Chip
@@ -611,6 +792,57 @@ class Caja extends Component {
             })
         }
     }
+    sumaTotalAjustesEntradas = (ajustes_stock_entradas, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalAjustesEntradas
+        if (ajustes_stock_entradas != null) {
+            var array = Object.values(ajustes_stock_entradas)
+            array.forEach(element => {
+                suma = Number(Number(element.total_final) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalAjustesEntradas: newArray
+            })
+        }
+    }
+    sumaTotalDevolucionesProveedores = (devoluciones_proveedores, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalDevolucionesProveedores
+        if (devoluciones_proveedores != null) {
+            var array = Object.values(devoluciones_proveedores)
+            array.forEach(element => {
+                suma = Number(Number(element.total_final) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalDevolucionesProveedores: newArray
+            })
+        }
+    }
+    sumaTotalAjustesSalidas = (ajustes_stock_salidas, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalAjustesSalidas
+        if (ajustes_stock_salidas != null) {
+            var array = Object.values(ajustes_stock_salidas)
+            array.forEach(element => {
+                suma = Number(Number(element.total_final) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalAjustesSalidas: newArray
+            })
+        }
+    }
     sumaTotalVentasCreditoAcreditado = (lista_dinero_acreditado_venta_credito, codigo) => {
         var suma = 0
         var newArray = this.state.sumaTotalVentasCreditoAcreditado
@@ -625,6 +857,23 @@ class Caja extends Component {
             })
             this.setState({
                 sumaTotalVentasCreditoAcreditado: newArray
+            })
+        }
+    }
+    sumaTotalCuentasPagadas = (lista_cuentas_pagadas, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalCuentasPagadas
+        if (lista_cuentas_pagadas != null) {
+            var array = Object.values(lista_cuentas_pagadas)
+            array.forEach(element => {
+                suma = Number(Number(element.valor) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalCuentasPagadas: newArray
             })
         }
     }

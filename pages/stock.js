@@ -432,7 +432,7 @@ class Stock extends Component {
                             onClick={() => {
                                 if (this.state.cajaSeleccionada != null) {
                                     this.setState({
-                                        tipoAjuste: 'ajuste-stock-entrada',
+                                        tipoAjuste: 'ajuste_stock_entrada',
                                         estadoModalSimpleCompraProductos: true
                                     })
                                 } else {
@@ -463,7 +463,7 @@ class Stock extends Component {
                             onClick={() => {
                                 if (this.state.cajaSeleccionada != null) {
                                     this.setState({
-                                        tipoAjuste: 'devolucion-proveedor',
+                                        tipoAjuste: 'devolucion_proveedor',
                                         estadoModalSimpleCompraProductos: true
                                     })
                                 } else {
@@ -478,7 +478,7 @@ class Stock extends Component {
                             onClick={() => {
                                 if (this.state.cajaSeleccionada != null) {
                                     this.setState({
-                                        tipoAjuste: 'ajuste-stock-salida',
+                                        tipoAjuste: 'ajuste_stock_salida',
                                         estadoModalSimpleCompraProductos: true
                                     })
                                 } else {

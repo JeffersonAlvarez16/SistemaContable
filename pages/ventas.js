@@ -145,16 +145,16 @@ class Ventas extends Component {
                 operacionVentaRefCaja.once('value', (snap) => {
                     if (snap.val()) {
                         var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
-                        if(caja!=null){
+                        if (caja != null) {
                             this.setState({
-                                cajaSeleccionada:caja,
+                                cajaSeleccionada: caja,
                                 estadoCaja: caja.estado,
                             })
-                        }else{
+                        } else {
                             this.setState({
                                 cajaSeleccionada: null,
                                 estadoCaja: false,
-                            }) 
+                            })
                         }
                     } else {
                         this.setState({
@@ -165,28 +165,28 @@ class Ventas extends Component {
                 })
             }
         })
-     
 
-      /*    firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
-                operacionVentaRefCaja.once('value', (snap) => {
-                    if (snap.val()) {
-                        var lista = funtions.snapshotToArray(snap)
-                        var filterList = lista.sort((a, b) => {
-                            a = new Date(a.order);
-                            b = new Date(b.order);
-                            return a > b ? -1 : a < b ? 1 : 0;
-                        })
-                        var caja = filterList[0]
-                        this.setState({
-                            estadoCaja: caja.estado,
-                            cajaSeleccionada: caja
-                        })
-                    }
-                })
-            }
-        }) */
+
+        /*    firebase.auth().onAuthStateChanged((user) => {
+              if (user) {
+                  var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('usuario').equalTo(this.state.usuario.code)
+                  operacionVentaRefCaja.once('value', (snap) => {
+                      if (snap.val()) {
+                          var lista = funtions.snapshotToArray(snap)
+                          var filterList = lista.sort((a, b) => {
+                              a = new Date(a.order);
+                              b = new Date(b.order);
+                              return a > b ? -1 : a < b ? 1 : 0;
+                          })
+                          var caja = filterList[0]
+                          this.setState({
+                              estadoCaja: caja.estado,
+                              cajaSeleccionada: caja
+                          })
+                      }
+                  })
+              }
+          }) */
     }
 
     handleGetData = (n, item) => {
@@ -257,7 +257,6 @@ class Ventas extends Component {
                 <div style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}>
                     <Tooltip title="Devolver Venta">
                         <IconButton
-                            disabled={this.estate.permisoUsuario}
                             onClick={() => {
                                 this.setState({
                                     estadoacciones: 'devolver_venta'
@@ -433,29 +432,48 @@ class Ventas extends Component {
     updateDataProductos = codigoVenta => {
         var db = firebase.database();
         var ventaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+
         ventaRef.on('value', (snapshot) => {
             if (snapshot.val()) {
-                snapshot.val().productos.forEach(element => {
-                    var productoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + element.codigo)
-                    productoRef.once('value', (snapshot) => {
-                        if (snapshot.val()) {
-                            productoRef.update({
-                                stock_actual: Number(snapshot.val().stock_actual) + Number(element.cantidad)
-                            })
-                        }
-                    })
+
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+
+                        var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+
+                        cajaRefValorActual.once('value', (snap) => {
+                            if (snap.val()) {
+                                if (Number(snap.val().valor_caja) < Number(snapshot.val().total)) {
+                                    setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)
+                                } else {
+                                     snapshot.val().productos.forEach(element => {
+                                        var productoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + element.codigo)
+                                        productoRef.once('value', (snapshot) => {
+                                            if (snapshot.val()) {
+                                                productoRef.update({
+                                                    stock_actual: Number(snapshot.val().stock_actual) + Number(element.cantidad)
+                                                })
+                                            }
+                                        })
+                                    })
+                                    this.setOperacionStock(
+                                        snapshot.val().productos,
+                                        snapshot.val().cliente,
+                                        snapshot.val().dinero_resibido,
+                                        snapshot.val().total,
+                                        snapshot.val().subtotal,
+                                        snapshot.val().descuento,
+                                        snapshot.val().cambio,
+                                    )
+                                    this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
+                                    setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300) 
+                                }
+                            }
+                        })
+                    }
                 })
-                this.setOperacionStock(
-                    snapshot.val().productos,
-                    snapshot.val().cliente,
-                    snapshot.val().dinero_resibido,
-                    snapshot.val().total,
-                    snapshot.val().subtotal,
-                    snapshot.val().descuento,
-                    snapshot.val().cambio,
-                )
-                this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
-                setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
             }
         })
     }
@@ -469,12 +487,11 @@ class Ventas extends Component {
             if (snap.val()) {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    console.log(itemVenta.codigo)
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
                     var operacionVentaCajaEliminar = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
                     operacionVentaCajaEliminar.remove()
 
-                    var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
+                    var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
                     cajaRefValorAcreditado.remove()
 
                     operacionVentaCaja.set(itemVenta)
@@ -637,7 +654,7 @@ class Ventas extends Component {
                 this.setState({ openModalNewCliente: true })
             }
         } else {
-            if (this.state.estadoacciones === 'devolver_venta') { 
+            if (this.state.estadoacciones === 'devolver_venta') {
                 if (item.empleado === this.state.usuario.code) {
                     this.setState({
                         codigoEmitirFactura: item.codigo,
@@ -666,15 +683,16 @@ class Ventas extends Component {
                 setTimeout(() => {
                     this.obtenerDataBaseDatos()
                     this.obtenerPermisosusuarios()
+                    this.comprobarUsuario()
                 }, 100)
             }
             }>
                 {
                     this.state.estadoPermisos &&
                     <div>
-                    <MenuHerramientas>
-                        {
-                            Boolean(this.state.estadoCaja) === true ?
+                        <MenuHerramientas>
+                            {
+                                Boolean(this.state.estadoCaja) === true ?
 
                                     <>
                                         <Tooltip title="Estado de caja">
@@ -684,161 +702,161 @@ class Ventas extends Component {
                                         </Tooltip>
                                     </>
                                     :
-                                     <>
+                                    <>
                                         <Tooltip title="Estado de caja">
                                             <IconButton >
                                                 <MonetizationOn style={{ color: '#EF5350' }} />
                                             </IconButton>
                                         </Tooltip>
                                     </>
-                         }           
-
-                                <ItemMenuHerramienta
-                                        titleButton="Nueva Venta"
-                                        color="primary"
-                                        visible={true}
-                                        onClick={() => {
-                                            if (this.state.estadoCaja) {
-                                                this.setState({ itemEditar: null })
-                                                this.setState({ openModalNewVentaFinal: true })
-                                            } else {
-                                                setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
-                                            }
-                                        }}
-                                    />
-
-                                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                                        <TextField
-                                            id="datetime-local"
-                                            type="date"
-                                            margin='dense'
-                                            defaultValue={this.state.fechaActual}
-                                            InputLabelProps={{
-                                                shrink: true,
-                                            }}
-                                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                                        />
-                                    </div>
-
-                                    <div style={{ flex: 0.9 }}></div>
-
-                                    <Search
-                                        id='buscar-cliente-clientes'
-                                        textoSearch="Buscar..."
-                                        textoTooltip="Buscar Cliente"
-                                        handleSearch={this.handleSearch}
-                                    />
-                                </MenuHerramientas>
-
-                                <Divider />
-
-                                <TablaNormal
-                                    textoTitleP="Ventas"
-                                    textoTitleS="Venta"
-                                    selectedItems={true}
-                                    toolbar={false}
-                                    notTab={true}
-                                    data={this.state.listaVentas}
-                                    rows={this.state.rowslistaVentas}
-                                    handleGetData={this.handleGetData}
-                                    estadoTabla={this.state.estadoTabla}
-                                    itemsSeleccionados={items => {
-                                        this.setState({ itemsSeleccionados: items })
-                                    }}
-                                />
-
-                               <FullScreenDialog openModal={this.state.openModalNewVenta}>
-                                       <NuevaVenta
-                                           usuario={this.state.usuario}
-                                           handleClose={() => this.setState({ openModalNewVenta: false })}
-                                           item={this.state.itemEditar}
-                                       >
-                                       </NuevaVenta>
-                                   </FullScreenDialog>
-
-                                <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
-                                    <ModalNewVenta
-                                        usuario={this.state.usuario}
-                                        handleClose={() => this.setState({ openModalNewVentaFinal: false })}
-                                        item={this.state.itemEditar}
-                                    >
-                                    </ModalNewVenta>
-                                </FullScreenDialog>
-
-                                <FullScreenDialog openModal={this.state.estadoModalSimpleCompraProductos}>
-                                    <ModalCompraProductos
-                                        handleClose={() => this.setState({
-                                            estadoModalSimpleCompraProductos: false,
-                                        })}
-                                        usuario={this.state.usuario}
-                                        tipoAjuste='devolucion_cliente'
-                                    />
-                                </FullScreenDialog>
-
-                                <ModalContainerNormal
-                                    open={this.state.estadoModalEmitirFactura}
-                                    handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
-                                >
-                                    <EmitirFacturaModal
-                                        handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
-                                        handleEmitir={() => {
-                                            this.recuperarJsonFactura(this.state.codigoEmitirFactura)
-                                            this.setState({ estadoModalEmitirFactura: false })
-                                        }}
-                                    />
-                                </ModalContainerNormal>
-
-                                <ModalContainerNormal
-                                    open={this.state.estadoModalCancelarVenta}
-                                    handleClose={() => this.setState({ estadoModalCancelarVenta: false })}
-                                >
-                                    <ModalCancelarVenta
-                                        handleClose={() => this.setState({ estadoModalCancelarVenta: false })}
-                                        handleCancelarVenta={() => {
-                                            // this.recuperarJsonFactura(this.state.codigoEmitirFactura)
-                                            this.updateDataProductos(this.state.codigoEmitirFactura)
-                                            this.setState({ estadoModalCancelarVenta: false })
-                                        }}
-                                    />
-                                </ModalContainerNormal>
-
-                                <ModalContainerNormal
-                                    open={this.state.estadoModalEditarVenta}
-                                    handleClose={() => this.setState({ estadoModalEditarVenta: false })}
-                                >
-                                    <ModalEditarVenta
-                                        handleClose={() => this.setState({ estadoModalEditarVenta: false })}
-                                        handleEditarVenta={() => {
-                                            // this.recuperarJsonFactura(this.state.codigoEmitirFactura)
-                                            this.setState({ openModalNewVenta: true })
-                                            this.setState({ estadoModalEditarVenta: false })
-                                        }}
-                                    />
-                                </ModalContainerNormal>
-
-                                <ContainerPlantillas>
-                                    <ResivoVenta
-                                        item={this.state.itemFormateadoImprimir}
-                                        ref={el => (this.refImprimirResivo = el)}
-                                    />
-                                </ContainerPlantillas>
-                    </div>
                             }
-                {
-                            this.state.estadoPermisos === false &&
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
-                                <h3><strong>Usted no tiene permisos para <br />
-                                    esta seccion comuniquese con el administrador</strong></h3>
+
+                            <ItemMenuHerramienta
+                                titleButton="Nueva Venta"
+                                color="primary"
+                                visible={true}
+                                onClick={() => {
+                                    if (this.state.estadoCaja) {
+                                        this.setState({ itemEditar: null })
+                                        this.setState({ openModalNewVentaFinal: true })
+                                    } else {
+                                        setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
+                                    }
+                                }}
+                            />
+
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <TextField
+                                    id="datetime-local"
+                                    type="date"
+                                    margin='dense'
+                                    defaultValue={this.state.fechaActual}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                                />
                             </div>
-                        }
-                        {
-                            this.state.estadoPermisos === null &&
-                            <CircularProgress />
-                        }
+
+                            <div style={{ flex: 0.9 }}></div>
+
+                            <Search
+                                id='buscar-cliente-clientes'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar Cliente"
+                                handleSearch={this.handleSearch}
+                            />
+                        </MenuHerramientas>
+
+                        <Divider />
+
+                        <TablaNormal
+                            textoTitleP="Ventas"
+                            textoTitleS="Venta"
+                            selectedItems={true}
+                            toolbar={false}
+                            notTab={true}
+                            data={this.state.listaVentas}
+                            rows={this.state.rowslistaVentas}
+                            handleGetData={this.handleGetData}
+                            estadoTabla={this.state.estadoTabla}
+                            itemsSeleccionados={items => {
+                                this.setState({ itemsSeleccionados: items })
+                            }}
+                        />
+
+                        <FullScreenDialog openModal={this.state.openModalNewVenta}>
+                            <NuevaVenta
+                                usuario={this.state.usuario}
+                                handleClose={() => this.setState({ openModalNewVenta: false })}
+                                item={this.state.itemEditar}
+                            >
+                            </NuevaVenta>
+                        </FullScreenDialog>
+
+                        <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
+                            <ModalNewVenta
+                                usuario={this.state.usuario}
+                                handleClose={() => this.setState({ openModalNewVentaFinal: false })}
+                                item={this.state.itemEditar}
+                            >
+                            </ModalNewVenta>
+                        </FullScreenDialog>
+
+                        <FullScreenDialog openModal={this.state.estadoModalSimpleCompraProductos}>
+                            <ModalCompraProductos
+                                handleClose={() => this.setState({
+                                    estadoModalSimpleCompraProductos: false,
+                                })}
+                                usuario={this.state.usuario}
+                                tipoAjuste='devolucion_cliente'
+                            />
+                        </FullScreenDialog>
+
+                        <ModalContainerNormal
+                            open={this.state.estadoModalEmitirFactura}
+                            handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                        >
+                            <EmitirFacturaModal
+                                handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                                handleEmitir={() => {
+                                    this.recuperarJsonFactura(this.state.codigoEmitirFactura)
+                                    this.setState({ estadoModalEmitirFactura: false })
+                                }}
+                            />
+                        </ModalContainerNormal>
+
+                        <ModalContainerNormal
+                            open={this.state.estadoModalCancelarVenta}
+                            handleClose={() => this.setState({ estadoModalCancelarVenta: false })}
+                        >
+                            <ModalCancelarVenta
+                                handleClose={() => this.setState({ estadoModalCancelarVenta: false })}
+                                handleCancelarVenta={() => {
+                                    // this.recuperarJsonFactura(this.state.codigoEmitirFactura)
+                                    this.updateDataProductos(this.state.codigoEmitirFactura)
+                                    this.setState({ estadoModalCancelarVenta: false })
+                                }}
+                            />
+                        </ModalContainerNormal>
+
+                        <ModalContainerNormal
+                            open={this.state.estadoModalEditarVenta}
+                            handleClose={() => this.setState({ estadoModalEditarVenta: false })}
+                        >
+                            <ModalEditarVenta
+                                handleClose={() => this.setState({ estadoModalEditarVenta: false })}
+                                handleEditarVenta={() => {
+                                    // this.recuperarJsonFactura(this.state.codigoEmitirFactura)
+                                    this.setState({ openModalNewVenta: true })
+                                    this.setState({ estadoModalEditarVenta: false })
+                                }}
+                            />
+                        </ModalContainerNormal>
+
+                        <ContainerPlantillas>
+                            <ResivoVenta
+                                item={this.state.itemFormateadoImprimir}
+                                ref={el => (this.refImprimirResivo = el)}
+                            />
+                        </ContainerPlantillas>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
+                }
 
             </Layout>
         );
-                            }
-                        }
-                        
+    }
+}
+
 export default Ventas

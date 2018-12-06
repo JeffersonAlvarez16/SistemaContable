@@ -28,6 +28,7 @@ import ContenedorSeleccionarTipoPago from './ventas/ContenedorSeleccionarTipoPag
 import ContenedorBotonesVenta from './ventas/ContenedorBotonesVenta';
 import ModalFinalizaPago from '../modals_container/ventas/ModalFinalizaPago';
 import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
+import colors from '../../utils/colors';
 
 class ModalNewVenta extends Component {
 
@@ -50,7 +51,8 @@ class ModalNewVenta extends Component {
         cargaAutomatica: false,
 
         rowslistaProductos: [
-            { id: 'acciones', numeric: true, disablePadding: false, label: 'Acciones' },
+            { id: 'acciones', numeric: true, disablePadding: false, label: '' },
+            { id: 'precio_por_defecto', numeric: true, disablePadding: false, label: 'Precio' },
             { id: 'cantidad', numeric: true, disablePadding: false, label: 'Cantidad' },
             { id: 'descripcion_producto', numeric: true, disablePadding: false, label: 'Descripcion' },
             { id: 'precio_venta', numeric: true, disablePadding: false, label: 'Precio/U' },
@@ -59,13 +61,13 @@ class ModalNewVenta extends Component {
         clienteFacturacion: '',
         clienteSeleccionado: null,
 
-        //precio seleccionado
-        precioSeleccionado: null,
         //tipo de pago
         tipo_pago: 'efectivo',
         //estado de modals
         estadoModalFinalizaPago: false,
         estadoModalSimpleConfigurarPrecios: false,
+        //seleecionar producto por defecto
+        seleccionarProductoPordefecto: true,
         //
 
 
@@ -121,15 +123,12 @@ class ModalNewVenta extends Component {
                 var empresaRef = db.ref('users/' + user.uid + "/precios")
                 empresaRef.on('value', (snap) => {
                     if (snap.val()) {
-                        var array = funtions.snapshotToArray(snap)
-                        this.setState({
-                            precios: array,
-                            precioSeleccionado: array[0]
-                        })
+                        this.setState({ precios: funtions.snapshotToArray(snap) })
                     }
                 })
             }
         })
+        this.obtenerPreciosDefectoConfiguracion()
         if (this.props.item) {
             this.setState({
                 cambio: this.props.item.cambio,
@@ -153,14 +152,81 @@ class ModalNewVenta extends Component {
         }
     }
 
+    obtenerPreciosDefectoConfiguracion = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/configuracion/precio_por_defecto')
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.setState({
+                            precioSeleccionadoCargar: snapshot.val()
+                        })
+                    }
+                })
+            }
+        })
+    }
+
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
         }
+        if (item.id === 'precio_por_defecto') {
+            return <div style={{ width: 100, position: 'relative', left: -80 }}>
+                <TextField
+                    id={"filled-unidad-precio-defecto" + n.codigo}
+                    select
+                    label=""
+                    //error={this.state.precio_por_defecto.length === 0}
+                    value={n.precio_por_defecto}
+                    onChange={event => {
+                        var array = this.state.listaProductosSeleccionados
+                        array.forEach((it, i) => {
+                            if (it.codigo === n.codigo) {
+                                var item = it
+                                item.precio_por_defecto = event.target.value
+                                array[i] = item
+                                this.setState({
+                                    listaProductosSeleccionados: array
+                                })
+                            }
+                        })
+                        setTimeout(() => {
+                            var array2 = this.state.listaProductosSeleccionadosEditados
+                            array2.forEach((it, i) => {
+                                if (it.codigo === n.codigo) {
+                                    var item = it
+                                    item.precio_venta = Number(((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2))
+                                    array2[i] = item
+                                    this.setState({
+                                        listaProductosSeleccionadosEditados: array2
+                                    })
+                                }
+                            })
+
+                        }, 100)
+                        setTimeout(() => {
+                            this.calcularValoresTotales()
+                        }, 200)
+                    }}
+                    margin="normal"
+                    variant="standard"
+                    style={{ width: 'max-content', height: 30 }}
+                //disabled={!props.itemProductoCargado}
+                >
+                    {
+                        this.state.precios != null &&
+                        this.state.precios.map(item => {
+                            return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre} = %${item.porcentaje}`}</MenuItem>
+                        })
+                    }
+                </TextField>
+            </div>
+        }
         if (item.id === 'cantidad') {
 
             var restaRetorno = <div style={{ width: 'max-content', display: 'flex', flexDirection: 'row' }}>
-                <div style={{ display: 'flex', alignItems: 'center', paddingRight: 10 }}>{`${n.unidad_medida}`}</div>
                 <TextField
                     id="handle-precio-edit-cantidad"
                     margin="dense"
@@ -178,7 +244,14 @@ class ModalNewVenta extends Component {
                     style={{ width: 50 }}
                 />
                 <div style={{ width: 'max-content', display: 'flex', alignItems: 'center', justifyContent: 'start', paddingLeft: 10 }}>
-                    {`en stock ${Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}`}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{display:'flex', flexDirection:'row'}}>
+                            en stock <div style={{color:colors.getColorPrymaryDark()}}>{Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}</div>
+                        </div>
+                        <div style={{color: colors.getColorPrymary()}}>
+                            {`${n.unidad_medida}`}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -189,16 +262,14 @@ class ModalNewVenta extends Component {
         }
         if (item.id === 'precio_venta') {
             var precioR = 0
-            if (this.state.precioSeleccionado != null) {
-                precioR = ((Number(n.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(n.precio_costo)).toFixed(2)
-            }
+            precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
+
             return precioR
         }
         if (item.id === 'total') {
             var precioR = 0
-            if (this.state.precioSeleccionado != null) {
-                precioR = ((Number(n.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(n.precio_costo)).toFixed(2)
-            }
+            precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
+
             var itemValor = this.state.listaProductosSeleccionadosEditados.filter(item => item.codigo === n.codigo)[0]
             var sumaTotal = itemValor.cantidad * precioR
             return sumaTotal.toFixed(2)
@@ -236,22 +307,6 @@ class ModalNewVenta extends Component {
             this.props.handleClose()
         }
     }
-    /* 
-        getClienteDataBase = cliente => {
-            console.log("object")
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    var db = firebase.database();
-                    var productosRef = db.ref('users/' + user.uid + '/clientes/' + cliente);
-                    productosRef.on('value', (snapshot) => {
-                        console.log(snapshot.val())
-                        this.setState({
-                            clienteCargadoDB: snapshot.val()
-                        })
-                    })
-                }
-            })
-        } */
 
     getStatusUsuario = () => {
         if (this.state.usuario) {
@@ -639,11 +694,11 @@ class ModalNewVenta extends Component {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
-                    operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
                     if (tipo_pago === 'efectivo') {
                         cajaRefValorActual.once('value', (snap2) => {
                             if (snap2.val()) {
+                                operacionVentaCaja.set(itemVenta)
                                 cajaRefValorActual.update({
                                     valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
                                 })
@@ -656,8 +711,8 @@ class ModalNewVenta extends Component {
                         var configuracionMes = db.ref('users/' + firebase.auth().currentUser.uid + '/configuracion/dias_a_pagar_defecto/dias')
                         cuentaCobrarClienteRef.once('value', (snap) => {
                             if (snap.val()) {
-                                var aumentarDeudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/'+itemVenta.codigo)
-                                var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/'+itemVenta.codigo)
+                                var aumentarDeudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
+                                var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/' + itemVenta.codigo)
                                 aumentarDeudaRef.set({
                                     codigo: itemVenta.codigo,
                                     valor: this.state.sumaTotal,
@@ -665,8 +720,8 @@ class ModalNewVenta extends Component {
                                     hora_registro: funtions.obtenerHoraActual(),
                                     estado: true
                                 })
-                                var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
-                                        
+                                var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
+
                                 if (Number(item.valor_acreditado) > 0) {
                                     cajaRefValorAcreditado.set({
                                         codigo: itemVenta.codigo,
@@ -674,7 +729,7 @@ class ModalNewVenta extends Component {
                                         fecha_registro: funtions.obtenerFechaActual(),
                                         hora_registro: funtions.obtenerHoraActual(),
                                         estado: true,
-                                        tipo:'pago_venta_credito'
+                                        tipo: 'pago_venta_credito'
                                     })
                                     aumentarAcreditadoRef.set({
                                         codigo: itemVenta.codigo,
@@ -682,14 +737,14 @@ class ModalNewVenta extends Component {
                                         fecha_registro: funtions.obtenerFechaActual(),
                                         hora_registro: funtions.obtenerHoraActual(),
                                         estado: true,
-                                        tipo:'pago_venta_credito'
+                                        tipo: 'pago_venta_credito'
                                     })
                                     cajaRefValorActual.once('value', (snap2) => {
                                         if (snap2.val()) {
                                             cajaRefValorActual.update({
                                                 valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
                                             })
-            
+
                                         }
                                     })
                                 }
@@ -724,7 +779,7 @@ class ModalNewVenta extends Component {
                                             total: this.state.sumaTotal,
                                             usuario: this.props.usuario.code,
                                         })
-                                        
+
 
                                         var deudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
                                         deudaRef.set({
@@ -733,11 +788,11 @@ class ModalNewVenta extends Component {
                                             fecha_registro: funtions.obtenerFechaActual(),
                                             hora_registro: funtions.obtenerHoraActual(),
                                             estado: true,
-                                            tipo:'pago_venta_credito'
+                                            tipo: 'pago_venta_credito'
                                         })
 
-                                        var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/'+itemVenta.codigo)
-                                        var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/'+itemVenta.codigo)
+                                        var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
+                                        var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/' + itemVenta.codigo)
 
                                         if (Number(item.valor_acreditado) > 0) {
                                             cajaRefValorAcreditado.set({
@@ -746,7 +801,7 @@ class ModalNewVenta extends Component {
                                                 fecha_registro: funtions.obtenerFechaActual(),
                                                 hora_registro: funtions.obtenerHoraActual(),
                                                 estado: true,
-                                                tipo:'pago_venta_credito'
+                                                tipo: 'pago_venta_credito'
                                             })
                                             aumentarAcreditadoRef.set({
                                                 codigo: itemVenta.codigo,
@@ -754,14 +809,14 @@ class ModalNewVenta extends Component {
                                                 fecha_registro: funtions.obtenerFechaActual(),
                                                 hora_registro: funtions.obtenerHoraActual(),
                                                 estado: true,
-                                                tipo:'pago_venta_credito'
+                                                tipo: 'pago_venta_credito'
                                             })
                                             cajaRefValorActual.once('value', (snap2) => {
                                                 if (snap2.val()) {
                                                     cajaRefValorActual.update({
                                                         valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
                                                     })
-                    
+
                                                 }
                                             })
                                         }
@@ -894,6 +949,7 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
+            listaProductosSeleccionados,
             precioSeleccionado
         } = this.state
 
@@ -949,13 +1005,13 @@ class ModalNewVenta extends Component {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -987,6 +1043,7 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
+            listaProductosSeleccionados,
             precioSeleccionado
         } = this.state
 
@@ -1042,13 +1099,13 @@ class ModalNewVenta extends Component {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -1084,6 +1141,7 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
+            listaProductosSeleccionados,
             precioSeleccionado
         } = this.state
 
@@ -1139,13 +1197,13 @@ class ModalNewVenta extends Component {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(this.obtenerPorcentajePrecio(listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto)))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -1184,6 +1242,12 @@ class ModalNewVenta extends Component {
                     setSnackBars.openSnack('error', 'rootSnackBar', 'Producto vacío', 2000)
                 } else {
                     array.push(item)
+                    if (Boolean(!this.state.seleccionarProductoPordefecto)) {
+                        if (this.state.precioSeleccionadoCargar != null) {
+                            item.precio_por_defecto = this.state.precioSeleccionadoCargar
+                        }
+                    }
+
                     arrayValoresSelecionados.push({
                         codigo: item.codigo,
                         cantidad: '1',
@@ -1194,7 +1258,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2))
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.obtenerPorcentajePrecio(item.precio_por_defecto))) + Number(item.precio_costo)).toFixed(2)),
                     })
                     this.setState({
                         itemProductoCargado: null
@@ -1231,7 +1295,7 @@ class ModalNewVenta extends Component {
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                        precio_venta: Number(((Number(item.precio_costo) * Number(this.obtenerPorcentajePrecio(item.precio_por_defecto))) + Number(item.precio_costo)).toFixed(2)),
                     })
                     this.setState({
                         listaProductosSeleccionados: array,
@@ -1249,6 +1313,16 @@ class ModalNewVenta extends Component {
         }
     }
 
+    obtenerPorcentajePrecio = (precio_por_defecto) => {
+        var porcentaje = 0
+        this.state.precios.filter(it => {
+            if (it.codigo === precio_por_defecto) {
+                porcentaje = it.porcentaje
+            }
+        })
+        return porcentaje
+    }
+
     calcularValoresTotales = () => {
         var sumatotalConIVA = 0
         var sumatotal = 0
@@ -1257,7 +1331,7 @@ class ModalNewVenta extends Component {
         this.state.listaProductosSeleccionadosEditados.forEach(item => {
             var stock = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].cantidad
             var precioCosto = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].precio_costo
-            var reultado = (precioCosto * Number(this.state.precioSeleccionado.porcentaje)) + Number(precioCosto)
+            var reultado = (precioCosto * Number(this.obtenerPorcentajePrecio(this.state.listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))) + Number(precioCosto)
             var precio = reultado
 
             var precioIva = 0
@@ -1416,7 +1490,7 @@ class ModalNewVenta extends Component {
 
                     <Grid item xs={9} style={{ background: 'rgba(222, 239, 255)' }}>
                         <Grid container>
-                            <Grid item xs={6}>
+                            <Grid item xs={4}>
                                 <TextField
                                     id="filled-tipo-venta"
                                     select
@@ -1456,13 +1530,28 @@ class ModalNewVenta extends Component {
                                 </ModalContainerNormal>
 
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={8}>
                                 <ContenedorProductoVista
                                     itemProductoCargado={this.state.itemProductoCargado}
                                     cargaAutomatica={this.state.cargaAutomatica}
                                     cargaAutomaticaCambiar={() => this.setState({ cargaAutomatica: !this.state.cargaAutomatica })}
                                     agregarItemSeleccionadoVista={this.agregarItemSeleccionadoVista}
-                                    precioSeleccionado={this.state.precioSeleccionado}
+
+
+                                    precios={this.state.precios}
+                                    onChangePrecio={valor => {
+                                        var producto = this.state.itemProductoCargado
+                                        producto.precio_por_defecto = valor
+                                        this.setState({
+                                            itemProductoCargado: producto
+                                        })
+                                    }}
+
+                                    seleccionarProductoPordefecto={this.state.seleccionarProductoPordefecto}
+                                    seleccionarProductoPordefectoCambiar={() => this.setState({ seleccionarProductoPordefecto: !this.state.seleccionarProductoPordefecto })}
+
+                                    precioSeleccionadoCargar={this.state.precioSeleccionadoCargar}
+                                    precioSeleccionadoCargarCambiar={valor => this.setState({ precioSeleccionadoCargar: valor })}
                                 />
                             </Grid>
                         </Grid>
@@ -1513,7 +1602,7 @@ class ModalNewVenta extends Component {
                         />
                         <div style={{ marginLeft: 16, marginRight: 16 }}>
                             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <ContenedorSeleccionarTipoPrecio
+                                {/* <ContenedorSeleccionarTipoPrecio
                                     precioSeleccionado={this.state.precioSeleccionado}
                                     precios={this.state.precios}
                                     handleChangeSeleccion={codigo => {
@@ -1535,7 +1624,7 @@ class ModalNewVenta extends Component {
                                     }}>
                                         <SettingsIcon color='default' />
                                     </IconButton>
-                                </Tooltip>
+                                </Tooltip> */}
                             </div>
                             <ContenedorSeleccionarTipoPago
                                 tipo_pago={this.state.tipo_pago}
