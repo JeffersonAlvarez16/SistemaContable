@@ -14,9 +14,16 @@ class ItemMenuHerramienta extends Component {
                         color={color} onClick={onClick}
                         disabled={disabled}
                     >
-                        {
-                            titleButton
-                        }
+                        <div style={{ marginRight: 8, display: 'flex', alignItems: 'center' }}>
+                            {
+                                this.props.children
+                            }
+                        </div>
+                        <div>
+                            {
+                                titleButton
+                            }
+                        </div>
                     </Button>
                 }
 

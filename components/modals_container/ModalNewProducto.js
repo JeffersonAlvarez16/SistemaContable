@@ -276,16 +276,16 @@ class ModalNewProducto extends Component {
 
     checkFormProduc = () => {
         if (
-            this.state.codigo.length > 0 &&
-            this.state.proveedor.length > 0 &&
-            this.state.precio_costo.length > 0 &&
-            this.state.descripcion_producto.length > 0 &&
-            this.state.categoria_producto.length > 4 &&
-            this.state.marca_producto.length > 4 &&
-            this.state.unidad_medida.length > 0 &&
-            this.state.stock_actual.length > 0 &&
-            this.state.stock_minimo.length > 0 &&
-            this.state.stock_maximo.length > 0
+            this.state.codigo.toString().length > 0 &&
+            this.state.proveedor.toString().length > 0 &&
+            this.state.precio_costo.toString().length > 0 &&
+            this.state.descripcion_producto.toString().length > 0 &&
+            this.state.categoria_producto.toString().length > 4 &&
+            this.state.marca_producto.toString().length > 4 &&
+            this.state.unidad_medida.toString().length > 0 &&
+            this.state.stock_actual.toString().length > 0 &&
+            this.state.stock_minimo.toString().length > 0 &&
+            this.state.stock_maximo.toString().length > 0
         ) {
             var order = new Date()
             const item = {

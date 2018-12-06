@@ -4,6 +4,7 @@ import ItemMenuHerramienta from '../../../../components/components/menus/ItemMen
 import TablaNormal from '../../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
 
+import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
@@ -16,6 +17,7 @@ import 'firebase/database';
 import 'firebase/auth'
 
 import funtions from '../../../../utils/funtions';
+import colors from '../../../../utils/colors';
 
 //dialogs
 import FullScreenDialog from '../../../../components/components/FullScreenDialog';
@@ -27,6 +29,7 @@ import setSnackBars from '../../../plugins/setSnackBars';
 import AnadirVencimiento from '../../../plugins/anadirVencimiento';
 
 import Search from '../../Search';
+import { Chip } from '@material-ui/core';
 
 
 
@@ -39,16 +42,14 @@ class ListaProductos extends Component {
         listaProductosTemporal: [],
         //columnas de la tabla de productos
         rowsListaProductos: [
-            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
+            { id: 'acciones', numeric: false, disablePadding: true, label: '' },
             { id: 'descripcion_producto', numeric: true, disablePadding: false, label: 'Descripcion' },
             { id: 'codigo_barras', numeric: true, disablePadding: false, label: 'C. Barras' },
             { id: 'codigo_referencia', numeric: true, disablePadding: false, label: 'C. Referencia' },
             { id: 'stock_actual', numeric: true, disablePadding: false, label: 'Stock Actual' },
 
             { id: 'precio_costo', numeric: true, disablePadding: false, label: 'Precio Costo' },
-            { id: 'precio_venta_a', numeric: true, disablePadding: false, label: 'P. venta A' },
-            { id: 'precio_venta_b', numeric: true, disablePadding: false, label: 'P. venta B' },
-            { id: 'precio_venta_c', numeric: true, disablePadding: false, label: 'P. venta C' },
+            { id: 'tiene_iva', numeric: true, disablePadding: false, label: 'Tiene Iva' },
 
             { id: 'categoria_producto', numeric: true, disablePadding: false, label: 'Categoria' },
             { id: 'proveedor', numeric: true, disablePadding: false, label: 'Proveedor' },
@@ -68,7 +69,6 @@ class ListaProductos extends Component {
 
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
 
-            { id: 'tiene_iva', numeric: true, disablePadding: false, label: 'Tiene Iva' },
             { id: 'estado', numeric: true, disablePadding: false, label: 'Estado' },
             { id: 'usuario', numeric: true, disablePadding: false, label: 'Usuario' },
         ],
@@ -87,7 +87,7 @@ class ListaProductos extends Component {
     componentDidMount() {
         setTimeout(() => {
             if (this.props.usuario === null) {
-            } else {               
+            } else {
                 this.obtenerBaseDatos()
             }
         }, 100)
@@ -117,24 +117,14 @@ class ListaProductos extends Component {
                             listaProductosTemporal: filterList,
                             estadoTabla: 'llena'
                         })
-                        /* this.setState({
-                            categorias: funtions.categorieToKey(funtions.repeatTo(funtions.inventarioToCategories(snapshot))),
-                            proveedores: funtions.categorieToKey(funtions.repeatTo(funtions.inventarioToProveedores(snapshot)))
-                        }) */
                     } else {
                         this.setState({
                             listaProductos: [],
                             listaProductosTemporal: [],
-                            //categorias: [],
-                            //proveedores: [],
                             estadoTabla: 'vacio'
                         })
                     }
                 });
-                /*for(var i=0;i<400;i++){
-                    this.setNewProductosData()
-                } */
-
             }
         });
     }
@@ -183,7 +173,7 @@ class ListaProductos extends Component {
                         /*   this.setState({ itemSeleccionado: n })
                           this.setState({ openModalFullScreen: true }) */
                     }}>
-                        <EditIcon color='primary' />
+                        <EditIcon color='primary' fontSize="small" />
                     </IconButton>
                 </Tooltip>
                 {
@@ -199,7 +189,7 @@ class ListaProductos extends Component {
                                 /*  this.setState({ itemSeleccionado: n })
                                  this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' }) */
                             }}>
-                                <VisibilityOffIcon />
+                                <VisibilityOffIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                         :
@@ -214,7 +204,7 @@ class ListaProductos extends Component {
                                 /*  this.setState({ itemSeleccionado: n })
                                  this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' }) */
                             }}>
-                                <VisibilityIcon color='primary' />
+                                <VisibilityIcon color='primary' fontSize="small" />
                             </IconButton>
                         </Tooltip>
                 }
@@ -238,19 +228,13 @@ class ListaProductos extends Component {
         }
 
         if (item.id === 'precio_costo') {
-            return this.getColorActivadoDesactivado(n.estado, n.precio_costo)
-        }
-
-        if (item.id === 'precio_venta_a') {
-            return this.getColorActivadoDesactivado(n.estado, n.precio_venta_a)
-        }
-
-        if (item.id === 'precio_venta_b') {
-            return this.getColorActivadoDesactivado(n.estado, n.precio_venta_b)
-        }
-
-        if (item.id === 'precio_venta_c') {
-            return this.getColorActivadoDesactivado(n.estado, n.precio_venta_c)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={`$ ${Number(n.precio_costo).toFixed(2)}`}
+                    clickable
+                    color="default"
+                />
+            )
         }
 
         if (item.id === 'categoria_producto') {
@@ -301,7 +285,13 @@ class ListaProductos extends Component {
         }
 
         if (item.id === 'stock_actual') {
-            return this.getColorActivadoDesactivado(n.estado, n.stock_actual)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={n.stock_actual}
+                    clickable
+                    color="primary"
+                />
+            )
         }
 
         if (item.id === 'stock_minimo') {
@@ -329,7 +319,22 @@ class ListaProductos extends Component {
         }
 
         if (item.id === 'tiene_iva') {
-            return n.tiene_iva === true ? this.getColorActivadoDesactivado(n.estado, "Sí") : this.getColorActivadoDesactivado(n.estado, "No")
+            return n.tiene_iva === true ?
+                this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label={<div style={{ color: colors.getColorWhite() }}>{'Sí'}</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryDarkBlue300() }}
+                    />
+                )
+                :
+                this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label='No'
+                        clickable
+                        color="default"
+                    />
+                )
         }
 
         if (item.id === 'estado') {
@@ -429,14 +434,15 @@ class ListaProductos extends Component {
                         titleButton="Nuevo Producto"
                         color="primary"
                         visible={true}
-                        //disabled={this.state.itemsSeleccionados.length > 0}
                         onClick={() => {
                             this.setState({ itemSeleccionado: null })
                             this.setState({ openModalFullScreen: true })
                         }}
-                    />
+                    >
+                        <AddIcon/>
+                    </ItemMenuHerramienta>
 
-                    <div style={{ flex: 0.8 }}></div>
+                    <div style={{ flex: 0.95 }}></div>
 
                     <Search
                         id='buscar-producto'
@@ -460,6 +466,7 @@ class ListaProductos extends Component {
                     handleGetData={this.handleGetData}
                     estadoTabla={this.state.estadoTabla}
                     itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
+                    notTab={true}
                 />
 
                 <FullScreenDialog openModal={this.state.openModalFullScreen}>

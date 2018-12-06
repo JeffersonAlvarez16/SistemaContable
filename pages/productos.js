@@ -49,7 +49,7 @@ class Productos extends Component {
                             this.setState({
                                 estadoPermisos: true
                             })
-                        }else{
+                        } else {
                             this.setState({
                                 estadoPermisos: false
                             })
@@ -75,32 +75,33 @@ class Productos extends Component {
                 }, 100)
             }}>
 
-                {/* Tab bar */}
-                <AppBar position="static" color="inherit">
+                
+                {/* <AppBar position="static" color="inherit">
                     <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
                         <Tab label="Lista de productos" />
-                        {/* <Tab label="Stock" />
-                        <Tab label="Proveedores" /> */}
+                        <Tab label="Stock" />
+                        <Tab label="Proveedores" />
                     </Tabs>
                 </AppBar>
+                <div>
+                    {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario} />}
+                    {this.state.valueTab === 1 && <Stock usuario={this.state.usuario} />}
+                    {this.state.valueTab === 2 && <Proveedores usuario={this.state.usuario} />}
+                </div> */}
                 {
-                    this.state.estadoPermisos&&
-                    <div>
-                        {this.state.valueTab === 0 && <ListaProductos usuario={this.state.usuario} />}
-                        {/* this.state.valueTab === 1 && <Stock usuario={this.state.usuario}/> */}
-                        {/* this.state.valueTab === 2 && <Proveedores usuario={this.state.usuario}/> */}
-                    </div>
+                    this.state.estadoPermisos &&
+                    <ListaProductos usuario={this.state.usuario} />
                 }
                 {
-                       this.state.estadoPermisos===false&&
-                    <div style={{display:'flex',justifyContent:'center',alignItems:'center',textAlign:'center',height:'80vh'}}>
-                            <h3><strong>Usted no tiene permisos para <br/>
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
                             esta seccion comuniquese con el administrador</strong></h3>
                     </div>
                 }
                 {
-                    this.state.estadoPermisos===null&&
-                    <CircularProgress  />
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
                 }
             </Layout>
         );

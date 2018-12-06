@@ -177,7 +177,7 @@ class TablaNormal extends React.Component {
                         <div style={{
                             overflowX: 'auto',
                             overflowY: 'auto',
-                            height: notTab===true? '73vh':'66vh'
+                            height: notTab===true? '75vh':'66vh'
                         }}>
                             <Table aria-labelledby="tableTitle" style={{ minWidth: 300 }}>
                                 <TableNormalHead
