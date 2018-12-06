@@ -99,7 +99,7 @@ class Ventas extends Component {
         permisoUsuario: null,
         fechaActual: '',
         //estado decaja,
-        estadoCaja: false
+        estadoCaja: false,
     }
 
 
@@ -115,7 +115,7 @@ class Ventas extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(funtions.obtenerFechaActual())
+                var productosRef = db.ref('users/' + user.uid + '/ventas').orderByChild('caja').equalTo(this.state.cajaSeleccionada.codigo)
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -143,13 +143,16 @@ class Ventas extends Component {
                     }
                 });
             }
-        });
+        });        
+    }
+
+    obteberCajaSeleccionada=()=>{
         var db = firebase.database();
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
-                operacionVentaRefCaja.once('value', (snap) => {
+                operacionVentaRefCaja.on('value', (snap) => {
                     if (snap.val()) {
                         var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
                         if (caja != null) {
@@ -157,16 +160,19 @@ class Ventas extends Component {
                                 cajaSeleccionada: caja,
                                 estadoCaja: caja.estado,
                             })
+                            this.obtenerDataBaseDatos()
                         } else {
                             this.setState({
                                 cajaSeleccionada: null,
                                 estadoCaja: false,
+                                estadoTabla:'vacio'
                             })
                         }
                     } else {
                         this.setState({
                             cajaSeleccionada: null,
                             estadoCaja: false,
+                            estadoTabla:'vacio'
                         })
                     }
                 })
@@ -523,11 +529,6 @@ class Ventas extends Component {
         console.log(content) */
     }
 
-    cambiarListaPorFecha = fecha => {
-        this.setState({ fechaActual: fecha })
-        setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
-    }
-
     // actualizar el stock de los productos
     updateDataProductos = codigoVenta => {
         var db = firebase.database();
@@ -781,7 +782,7 @@ class Ventas extends Component {
             <Layout title="Ventas" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
                 setTimeout(() => {
-                    this.obtenerDataBaseDatos()
+                    this.obteberCajaSeleccionada()
                     this.obtenerPermisosusuarios()
                     this.comprobarUsuario()
                 }, 100)
@@ -825,19 +826,6 @@ class Ventas extends Component {
                                 }}
                             />
 
-                            <div style={{ display: 'flex', alignItems: 'center' }}>
-                                <TextField
-                                    id="datetime-local"
-                                    type="date"
-                                    margin='dense'
-                                    defaultValue={this.state.fechaActual}
-                                    InputLabelProps={{
-                                        shrink: true,
-                                    }}
-                                    onChange={e => this.cambiarListaPorFecha(e.target.value)}
-                                />
-                            </div>
-
                             <div style={{ flex: 0.9 }}></div>
 
                             <Search
@@ -865,20 +853,12 @@ class Ventas extends Component {
                             }}
                         />
 
-                        <FullScreenDialog openModal={this.state.openModalNewVenta}>
-                            <NuevaVenta
-                                usuario={this.state.usuario}
-                                handleClose={() => this.setState({ openModalNewVenta: false })}
-                                item={this.state.itemEditar}
-                            >
-                            </NuevaVenta>
-                        </FullScreenDialog>
-
                         <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
                             <ModalNewVenta
                                 usuario={this.state.usuario}
                                 handleClose={() => this.setState({ openModalNewVentaFinal: false })}
                                 item={this.state.itemEditar}
+                                cajaSeleccionada={this.state.cajaSeleccionada}
                             >
                             </ModalNewVenta>
                         </FullScreenDialog>

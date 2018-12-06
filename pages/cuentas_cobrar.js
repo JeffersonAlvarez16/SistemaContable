@@ -176,7 +176,7 @@ class DeudasCobrar extends Component {
             if (user) {
                 var db = firebase.database();
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
-                operacionVentaRefCaja.once('value', (snap) => {
+                operacionVentaRefCaja.on('value', (snap) => {
                     if (snap.val()) {
                         var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
                         if (caja != null) {

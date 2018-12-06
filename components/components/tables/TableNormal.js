@@ -116,7 +116,6 @@ class TablaNormal extends React.Component {
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
     componentDidMount() {
-        console.log(this.props.data)
         this.setState({
             data: this.props.data,
             estadoTabla: this.props.estadoTabla

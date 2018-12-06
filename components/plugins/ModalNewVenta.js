@@ -569,6 +569,8 @@ class ModalNewVenta extends Component {
             tipo_pago
         } = this.state
 
+        const { cajaSeleccionada } = this.props
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
@@ -596,6 +598,7 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '',
             fecha_a_pagar: '',
+            caja: cajaSeleccionada.codigo
         }
         this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
@@ -615,6 +618,8 @@ class ModalNewVenta extends Component {
             listaProductosSeleccionadosEditados,
             tipo_pago
         } = this.state
+
+        const { cajaSeleccionada } = this.props
 
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
@@ -643,6 +648,7 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: item.valor_acreditado,
             fecha_a_pagar: item.fecha_vencimiento,
+            caja: cajaSeleccionada.codigo
         }
 
         this.setVentaCaja(itemVenta, tipo_pago, item)
@@ -664,6 +670,8 @@ class ModalNewVenta extends Component {
             listaProductosSeleccionadosEditados,
             tipo_pago
         } = this.state
+
+        const { cajaSeleccionada } = this.props
 
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
@@ -692,6 +700,7 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '',
             fecha_a_pagar: '',
+            caja: cajaSeleccionada.codigo
         }
         this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
@@ -864,6 +873,8 @@ class ModalNewVenta extends Component {
     //opercacion stock
     setOperacionStockEfectivo = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+        
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -888,12 +899,15 @@ class ModalNewVenta extends Component {
             en_deuda: '',
             vuelto: cambio,
             acreditado: '',
-            order: order + ""
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
 
     setOperacionStockCredito = (listaProductos, valor_acreditado) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -918,11 +932,14 @@ class ModalNewVenta extends Component {
             en_deuda: (Number(sumaTotal) - Number(valor_acreditado)).toFixed(2),
             vuelto: '0.00',
             acreditado: valor_acreditado,
-            order: order + ""
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
     setOperacionStockTarjetaCredito = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+        
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -947,7 +964,8 @@ class ModalNewVenta extends Component {
             en_deuda: '0.00',
             vuelto: '0.00',
             acreditado: '0.00',
-            order: order + ""
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
     //////////////////////////////////
@@ -1586,6 +1604,8 @@ class ModalNewVenta extends Component {
                 width: '100%'
             }
         }
+
+        
         return <>
             <div style={{
                 zIndex: 30,
@@ -1606,12 +1626,12 @@ class ModalNewVenta extends Component {
                     <Grid item xs={9} style={{ background: 'rgba(222, 239, 255)' }}>
                         <Grid container>
                             <Grid item xs={4}>
-                                <div style={{ 
-                                    display: 'flex', 
+                                <div style={{
+                                    display: 'flex',
                                     paddingLeft: 16,
-                                    paddingRight: 16, 
-                                    flexDirection:'column',
-                                    }}>
+                                    paddingRight: 16,
+                                    flexDirection: 'column',
+                                }}>
                                     <TextField
                                         id="filled-tipo-venta"
                                         select
