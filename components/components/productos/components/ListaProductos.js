@@ -31,8 +31,6 @@ import AnadirVencimiento from '../../../plugins/anadirVencimiento';
 import Search from '../../Search';
 import { Chip } from '@material-ui/core';
 
-
-
 class ListaProductos extends Component {
 
     state = {

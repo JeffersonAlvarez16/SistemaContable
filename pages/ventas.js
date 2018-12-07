@@ -241,7 +241,7 @@ class Ventas extends Component {
                         }
                         clickable
                         color="inherit"
-                        style={{ margin: 1, height: 25 }}
+                        style={{ margin: 1, height: 25, background: colors.getColorPrymaryGrey200()}}
                     />
                 </div>
             })
@@ -266,7 +266,7 @@ class Ventas extends Component {
                         }
                         label={'Con cheque'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
                 {
@@ -282,7 +282,7 @@ class Ventas extends Component {
                         }
                         label={'Por transferencia bancaria'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
                 {
@@ -298,7 +298,7 @@ class Ventas extends Component {
                         }
                         label={'En efectivo'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
                 {
@@ -314,7 +314,7 @@ class Ventas extends Component {
                         }
                         label={'A crédito'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
                 {
@@ -330,7 +330,7 @@ class Ventas extends Component {
                         }
                         label={'Con tarjeta de crédito'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
                 {
@@ -346,7 +346,7 @@ class Ventas extends Component {
                         }
                         label={'Con tarjeta de débito'}
                         clickable
-                        style={{ background: colors.getColorPrymaryLightGrey500() }}
+                        style={{ background: colors.getColorPrymaryGrey200() }}
                     />
                 }
             </div>
@@ -567,6 +567,7 @@ class Ventas extends Component {
                                         snapshot.val().subtotal,
                                         snapshot.val().descuento,
                                         snapshot.val().cambio,
+                                        snapshot.val().tipo_pago,
                                     )
                                     this.setVentaCaja(snapshot.val(), snapshot.val().tipo_pago)
                                     setTimeout(() => { this.deleteVenta(snapshot.val().codigo) }, 300)
@@ -613,7 +614,7 @@ class Ventas extends Component {
 
 
     //opercacion stock
-    setOperacionStock = (listaProductos, cliente, dinero_resibido, total, subtotal, descuento, cambio) => {
+    setOperacionStock = (listaProductos, cliente, dinero_resibido, total, subtotal, descuento, cambio, tipo_pago) => {
         var codigoStock = funtions.guidGenerator()
         var arrayProductos = []
         listaProductos.forEach(item => {
@@ -633,19 +634,19 @@ class Ventas extends Component {
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: cliente,
             productos: arrayProductos,
-            total_final: total,
+            total_final: `${Number(total).toFixed(2)}`,
             empleado: this.state.usuario.code,
             observacion: '',
-            subtotal: subtotal,
-            descuento: descuento,
-            otros_gastos: '',
-            flete: '',
+            subtotal: `${Number(subtotal).toFixed(2)}`,
+            descuento: `${Number(descuento).toFixed(2)}`,
+            otros_gastos: '0.00',
+            flete: '0.00',
             valor_pagado: dinero_resibido,
-            medio_pago: '',
-            saldo_favor: '',
-            en_deuda: '',
+            medio_pago: tipo_pago,
+            saldo_favor: '0.00',
+            en_deuda: '0.00',
             vuelto: cambio,
-            acreditado: '',
+            acreditado: '0.00',
             order: order + ""
         });
     }

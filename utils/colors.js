@@ -91,6 +91,16 @@ class Print {
     getColorPrymaryLightGrey500=()=>{
         return '#cfcfcf'
     }
+    //grey  200
+    getColorPrymaryGrey200=()=>{
+        return '#eeeeee'
+    }
+    getColorPrymaryDarkGrey200=()=>{
+        return '#bcbcbc'
+    }
+    getColorPrymaryLightGrey200=()=>{
+        return '#ffffff'
+    }
 
     
 

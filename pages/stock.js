@@ -9,7 +9,15 @@ import MonetizationOn from '@material-ui/icons/MonetizationOn';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
+import ArrowDownwardIcon from '@material-ui/icons/ArrowDownward';
+import ArrowUpwardIcon from '@material-ui/icons/ArrowUpward';
 
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import SubtitlesIcon from '@material-ui/icons/Subtitles';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
+import PaymentIcon from '@material-ui/icons/Payment';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 
 import funtions from '../utils/funtions';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
@@ -20,8 +28,9 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import TablaNormal from '../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Layout from '../components/containers/Layout';
-import { TextField, IconButton, Tooltip, CircularProgress } from '@material-ui/core';
+import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
 import setSnackBars from '../components/plugins/setSnackBars';
+import colors from '../utils/colors';
 
 class Stock extends Component {
 
@@ -29,25 +38,25 @@ class Stock extends Component {
         listaStock: [],
         listaStockTemporal: [],
         rowslistaStock: [
-            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
-            { id: 'tipo_operacion', numeric: true, disablePadding: false, label: 'Tipo de operación' },
-            { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha' },
-            { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
             { id: 'cliente_proveedor', numeric: true, disablePadding: false, label: 'Cliente/Proveedor' },
+            { id: 'tipo_operacion', numeric: true, disablePadding: false, label: 'Tipo de operación' },
             { id: 'productos', numeric: true, disablePadding: false, label: 'Productos' },
-            { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'subtotal', numeric: true, disablePadding: false, label: 'Sub Total' },
             { id: 'total_final', numeric: true, disablePadding: false, label: 'Total final' },
+            { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
+            { id: 'medio_pago', numeric: true, disablePadding: false, label: 'Medio pago' },
+            { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha' },
             { id: 'descuento', numeric: true, disablePadding: false, label: 'Descuento' },
             { id: 'valor_pagado', numeric: true, disablePadding: false, label: 'Valor Pagado' },
             { id: 'vuelto', numeric: true, disablePadding: false, label: 'Vuelto' },
+            { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'otros_gastos', numeric: true, disablePadding: false, label: 'Otros Gastos' },
             { id: 'flete', numeric: true, disablePadding: false, label: 'Flete' },
-            { id: 'medio_pago', numeric: true, disablePadding: false, label: 'Medio pago' },
             { id: 'saldo_favor', numeric: true, disablePadding: false, label: 'Saldo a favor' },
             { id: 'en_deuda', numeric: true, disablePadding: false, label: 'En deuda' },
             { id: 'acreditado', numeric: true, disablePadding: false, label: 'Acreditado' },
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
         ],
         estadoTabla: 'llena',
         //items selecionados tabla
@@ -92,14 +101,14 @@ class Stock extends Component {
                 operacionVentaRefCaja.once('value', (snap) => {
                     if (snap.val()) {
                         var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
-                        if(caja!=null){
+                        if (caja != null) {
                             this.setState({
-                                cajaSeleccionada:caja
+                                cajaSeleccionada: caja
                             })
-                        }else{
+                        } else {
                             this.setState({
                                 cajaSeleccionada: null
-                            }) 
+                            })
                         }
                     } else {
                         this.setState({
@@ -113,13 +122,12 @@ class Stock extends Component {
     }
 
     obtenerPermisosUsuarios = () => {
-        console.log(this.state.usuario)
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
                 var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
                 usuariosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {                    
+                    if (snapshot.val()) {
                         if (snapshot.val().privilegios.stock.devolucion_cliente === true) {
                             this.setState({
                                 estadoPermisoDevolucionCliente: false,
@@ -216,7 +224,104 @@ class Stock extends Component {
         }
 
         if (item.id === 'tipo_operacion') {
-            return n.tipo_operacion
+            return <div>
+                {
+                    n.tipo_operacion === 'venta-producto' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkGreen300()
+                            }}>
+                                <ArrowUpwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Venta de productos'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.tipo_operacion === 'compra_producto' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkGrey500()
+                            }}>
+                                <ArrowDownwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Compra de productos'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.tipo_operacion === 'devolucion_cliente' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkRed300()
+                            }}>
+                                <ArrowDownwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Devolucion del cliente'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.tipo_operacion === 'ajuste_stock_entrada' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkAmber300()
+                            }}>
+                                <ArrowDownwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Ajuste de stock - Entrada'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.tipo_operacion === 'devolucion_proveedor' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkDeepPurple300()
+                            }}>
+                                <ArrowUpwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Devolución al proveedor'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.tipo_operacion === 'ajuste_stock_salida' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkLime300()
+                            }}>
+                                <ArrowUpwardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Ajuste de stock - Salida'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+            </div>
         }
 
         if (item.id === 'fecha') {
@@ -256,13 +361,29 @@ class Stock extends Component {
                     display: 'flex',
                     flexDirection: 'row'
                 }}>
-                    <div>{item.cantidad}</div>
-                    <div style={{ width: 10 }} />
-                    <ReturnTextTable
-                        referencia="productos"
-                        codigo={item.codigo}
-                        datoTraido="descripcion_producto"
-                        estado={true}
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                width: 'max-content',
+                                paddingLeft: 10,
+                                paddingRight: 10,
+                                paddingTop: 0,
+                                paddingBottom: 0,
+                                height: 25
+                            }}>
+                                {item.cantidad}
+                            </Avatar>
+                        }
+                        label={
+                            <ReturnTextTable
+                                referencia="productos"
+                                codigo={item.codigo}
+                                datoTraido="descripcion_producto"
+                                estado={true}
+                            />
+                        }
+                        clickable
+                        style={{ margin: 1, height: 25, background: colors.getColorPrymaryGrey200() }}
                     />
                 </div>
 
@@ -271,7 +392,11 @@ class Stock extends Component {
         }
 
         if (item.id === 'total_final') {
-            return n.total_final
+            return <Chip
+                label={<div style={{ color: colors.getColorWhite() }}>{n.total_final}</div>}
+                clickable
+                style={{ background: colors.getColorPrymary() }}
+            />
         }
 
         if (item.id === 'empleado') {
@@ -292,7 +417,11 @@ class Stock extends Component {
         }
 
         if (item.id === 'subtotal') {
-            return n.subtotal
+            return <Chip
+                label={<div>{n.subtotal}</div>}
+                clickable
+                style={{ background: colors.getColorPrymaryGrey200() }}
+            />
         }
 
         if (item.id === 'descuento') {
@@ -312,7 +441,104 @@ class Stock extends Component {
         }
 
         if (item.id === 'medio_pago') {
-            return n.medio_pago
+            return <div style={{ width: 'max-content' }}>
+                {
+                    n.medio_pago === 'cheque' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkRed300()
+                            }}>
+                                <SubtitlesIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con cheque'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.medio_pago === 'transferencia' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkDeepPurple300()
+                            }}>
+                                <SwapHorizIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Por transferencia bancaria'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.medio_pago === 'efectivo' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDark()
+                            }}>
+                                <AttachMoneyIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'En efectivo'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.medio_pago === 'credito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkAmber300()
+                            }}>
+                                <LocalAtmIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'A crédito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.medio_pago === 'tarjeta-credito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkGreen300()
+                            }}>
+                                <CreditCardIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con tarjeta de crédito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+                {
+                    n.medio_pago === 'tarjeta-debito' &&
+                    <Chip
+                        avatar={
+                            <Avatar style={{
+                                padding: 1,
+                                background: colors.getColorPrymaryDarkBlue300()
+                            }}>
+                                <PaymentIcon style={{ fontSize: 20, color: colors.getColorWhite() }} />
+                            </Avatar>
+                        }
+                        label={'Con tarjeta de débito'}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                }
+            </div>
         }
 
         if (item.id === 'saldo_favor') {
@@ -359,7 +585,7 @@ class Stock extends Component {
         return (
             <Layout title="Stock" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
-                setTimeout(() => {                   
+                setTimeout(() => {
                     this.obtenerPermisosUsuarios()
                     this.cargarCaja()
                 }, 100)
@@ -391,7 +617,9 @@ class Stock extends Component {
                         color="primary"
                         visible={true}
                         onClick={event => this.setState({ referenciaMenuEntrada: event.currentTarget })}
-                    />
+                    >
+                        <ArrowDownwardIcon />
+                    </ItemMenuHerramienta>
                     <Menu
                         id="simple-menu-entrada"
                         anchorEl={this.state.referenciaMenuEntrada}
@@ -450,7 +678,9 @@ class Stock extends Component {
                         color="primary"
                         visible={true}
                         onClick={event => this.setState({ referenciaMenuSalida: event.currentTarget })}
-                    />
+                    >
+                        <ArrowUpwardIcon />
+                    </ItemMenuHerramienta>
 
                     <Menu
                         id="simple-menu-salida"
@@ -501,7 +731,7 @@ class Stock extends Component {
                             onChange={e => this.cambiarListaPorFecha(e.target.value)}
                         />
                     </div>
-                    <div style={{ flex: 0.9 }}></div>
+                    <div style={{ flex: 0.93 }}></div>
 
                     <Search
                         id='buscar-producto'
