@@ -78,17 +78,16 @@ class Retencion extends Component {
 
 
     componentDidMount() {
-        this.obtenerDataBaseDatos()
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
     }
 
-    obtenerDataBaseDatos = () => {
+    obtenerDataBaseDatos = (fecha) => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(funtions.obtenerFechaActual())
+                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(fecha)
                 retencionesRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -120,8 +119,8 @@ class Retencion extends Component {
     }
 
     cambiarListaPorFecha = fecha => {
-        this.setState({ fechaActual: fecha })
-        setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
+        this.setState({ fechaActual: fecha, estadoTabla:'cargando' })
+        setTimeout(() => { this.obtenerDataBaseDatos(fecha) }, 200)
     }
 
     eliminarRetencionDB = codigo => {
@@ -325,6 +324,7 @@ class Retencion extends Component {
                 this.setState({ usuario: usuario })
                 setTimeout(() => {
                     this.obtenerPermisosusuarios()
+                    this.obtenerDataBaseDatos(funtions.obtenerFechaActual())
                 }, 100)
             }
             }>

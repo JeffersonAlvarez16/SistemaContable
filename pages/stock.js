@@ -86,7 +86,6 @@ class Stock extends Component {
 
 
     componentDidMount() {
-        this.cargarData()
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
@@ -183,11 +182,11 @@ class Stock extends Component {
         });
     }
 
-    cargarData = () => {
+    cargarData = fecha => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(funtions.obtenerFechaActual())
+                var productosRef = db.ref('users/' + user.uid + '/operaciones_stock').orderByChild('fecha').equalTo(fecha)
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -575,12 +574,16 @@ class Stock extends Component {
     }
 
     cambiarListaPorFecha = fecha => {
-        this.setState({ fechaActual: fecha })
-        setTimeout(() => { this.cargarData() }, 100)
+        this.setState({ 
+            fechaActual: fecha,
+            estadoTabla:'cargando'
+         })
+        setTimeout(() => {
+            this.cargarData(fecha)
+         }, 200)
     }
 
     render() {
-        console.log(this.state.cajaSeleccionada)
         const { titlep, estadoPermisoDevolucionCliente, estadoPermisoDevolucionProveedor, estadoPermisoAjusteStock, estadoPermisoCompraProductos, title } = this.state
         return (
             <Layout title="Stock" onChangueUserState={usuario => {
@@ -588,6 +591,7 @@ class Stock extends Component {
                 setTimeout(() => {
                     this.obtenerPermisosUsuarios()
                     this.cargarCaja()
+                    this.cargarData(funtions.obtenerFechaActual())
                 }, 100)
             }}>
                 <MenuHerramientas>
