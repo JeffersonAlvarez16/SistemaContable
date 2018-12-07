@@ -578,15 +578,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: Number(dinero_resibido).toFixed(2),
+            cambio: Number(cambio).toFixed(2),
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -596,7 +596,7 @@ class ModalNewVenta extends Component {
             numero_tarjeta: '',
             nombre_banco: '',
             tipo_pago,
-            valor_acreditado: '',
+            valor_acreditado: '0.00',
             fecha_a_pagar: '',
             caja: cajaSeleccionada.codigo
         }
@@ -628,15 +628,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: '0.00',
+            cambio: '0.00',
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -646,7 +646,7 @@ class ModalNewVenta extends Component {
             numero_tarjeta: '',
             nombre_banco: '',
             tipo_pago,
-            valor_acreditado: item.valor_acreditado,
+            valor_acreditado: Number(item.valor_acreditado).toFixed(2),
             fecha_a_pagar: item.fecha_vencimiento,
             caja: cajaSeleccionada.codigo
         }
@@ -680,15 +680,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: '0.00',
+            cambio: '0.00',
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -698,7 +698,7 @@ class ModalNewVenta extends Component {
             numero_tarjeta: item.propiedades_numero,
             nombre_banco: item.propiedades_banco,
             tipo_pago,
-            valor_acreditado: '',
+            valor_acreditado: '0.00',
             fecha_a_pagar: '',
             caja: cajaSeleccionada.codigo
         }
@@ -874,7 +874,7 @@ class ModalNewVenta extends Component {
     setOperacionStockEfectivo = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
         const { cajaSeleccionada } = this.props
-        
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -939,7 +939,7 @@ class ModalNewVenta extends Component {
     setOperacionStockTarjetaCredito = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
         const { cajaSeleccionada } = this.props
-        
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -1605,7 +1605,7 @@ class ModalNewVenta extends Component {
             }
         }
 
-        
+
         return <>
             <div style={{
                 zIndex: 30,
