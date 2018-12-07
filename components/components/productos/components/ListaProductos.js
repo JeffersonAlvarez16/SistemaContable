@@ -30,6 +30,7 @@ import AnadirVencimiento from '../../../plugins/anadirVencimiento';
 
 import Search from '../../Search';
 import { Chip } from '@material-ui/core';
+import Dolar from '../../../plugins/plugins/Dolar'
 
 class ListaProductos extends Component {
 
@@ -228,7 +229,7 @@ class ListaProductos extends Component {
         if (item.id === 'precio_costo') {
             return this.getColorActivadoDesactivado(n.estado,
                 <Chip
-                    label={`$ ${Number(n.precio_costo).toFixed(2)}`}
+                    label={<Dolar>{Number(n.precio_costo).toFixed(2)}</Dolar>}
                     clickable
                     color="default"
                 />

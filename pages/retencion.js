@@ -256,7 +256,7 @@ class Retencion extends Component {
                     {
                         Number(n.retencion.items[0].codigo) === 1 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Renta: $${n.retencion.items[0].valor_retenido}`}
+                            {`Retencion Renta: $ ${n.retencion.items[0].valor_retenido}`}
                         </div>
                     }
                 </div>
@@ -265,13 +265,13 @@ class Retencion extends Component {
                     {
                         Number(n.retencion.items[1].codigo) === 1 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Renta: $${n.retencion.items[0].valor_retenido}`}
+                            {`Retencion Renta: $ ${n.retencion.items[0].valor_retenido}`}
                         </div>
                     }
                     {
                         Number(n.retencion.items[0].codigo) === 2 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Iva: $${n.retencion.items[1].valor_retenido}`}
+                            {`Retencion Iva: $ ${n.retencion.items[1].valor_retenido}`}
                         </div>
                     }
                 </div>

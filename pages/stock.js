@@ -31,6 +31,7 @@ import Layout from '../components/containers/Layout';
 import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
 import setSnackBars from '../components/plugins/setSnackBars';
 import colors from '../utils/colors';
+import Dolar from '../components/plugins/plugins/Dolar'
 
 class Stock extends Component {
 
@@ -392,7 +393,7 @@ class Stock extends Component {
 
         if (item.id === 'total_final') {
             return <Chip
-                label={<div style={{ color: colors.getColorWhite() }}>{n.total_final}</div>}
+                label={<div style={{ color: colors.getColorWhite() }}><Dolar>{n.total_final}</Dolar></div>}
                 clickable
                 style={{ background: colors.getColorPrymary() }}
             />
@@ -417,26 +418,26 @@ class Stock extends Component {
 
         if (item.id === 'subtotal') {
             return <Chip
-                label={<div>{n.subtotal}</div>}
+                label={<Dolar>{n.subtotal}</Dolar>}
                 clickable
                 style={{ background: colors.getColorPrymaryGrey200() }}
             />
         }
 
         if (item.id === 'descuento') {
-            return n.descuento
+            return <Dolar>{n.descuento}</Dolar>
         }
 
         if (item.id === 'otros_gastos') {
-            return n.otros_gastos
+            return <Dolar>{n.otros_gastos}</Dolar>
         }
 
         if (item.id === 'flete') {
-            return n.flete
+            return <Dolar>{n.flete}</Dolar>
         }
 
         if (item.id === 'valor_pagado') {
-            return n.valor_pagado
+            return <Dolar>{n.valor_pagado}</Dolar>
         }
 
         if (item.id === 'medio_pago') {
@@ -541,19 +542,19 @@ class Stock extends Component {
         }
 
         if (item.id === 'saldo_favor') {
-            return n.saldo_favor
+            return <Dolar>{n.saldo_favor}</Dolar>
         }
 
         if (item.id === 'en_deuda') {
-            return n.en_deuda
+            return <Dolar>{n.en_deuda}</Dolar>
         }
 
         if (item.id === 'vuelto') {
-            return n.vuelto
+            return <Dolar>{n.vuelto}</Dolar>
         }
 
         if (item.id === 'acreditado') {
-            return n.acreditado
+            return <Dolar>{n.acreditado}</Dolar>
         }
     }
 

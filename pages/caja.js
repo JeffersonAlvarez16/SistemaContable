@@ -31,6 +31,7 @@ import RetirarDineroCaja from '../components/modals_container/caja/RetirarDinero
 import colors from '../utils/colors';
 import ChipTabla from '../components/modals_container/caja/ChipTabla';
 import VerTotales from '../components/modals_container/caja/VerTotales';
+import Dolar from '../components/plugins/plugins/Dolar';
 
 class Caja extends Component {
 
@@ -187,7 +188,7 @@ class Caja extends Component {
 
         if (item.id === 'saldo_inicial') {
             return <Chip
-                label={Number(n.saldo_inicial).toFixed(2)}
+                label={<Dolar>{Number(n.saldo_inicial).toFixed(2)}</Dolar>}
                 clickable
                 color="inherit"
 
@@ -195,7 +196,7 @@ class Caja extends Component {
         }
         if (item.id === 'saldo_final') {
             return <Chip
-                label={Number(n.saldo_final).toFixed(2)}
+                label={<Dolar>{Number(n.saldo_final).toFixed(2)}</Dolar>}
                 clickable
                 color="inherit"
             />
@@ -221,7 +222,7 @@ class Caja extends Component {
                                 <ChipTabla
                                     codigo={n.codigo}
                                     cantidad={Object.values(n.ventas).length}
-                                    total={this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}
+                                    total={<Dolar>{this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}</Dolar>}
                                     label={'Ventas'}
                                     background={colors.getColorPrymaryLightCajaActivada()}
                                     backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
@@ -640,7 +641,10 @@ class Caja extends Component {
                 <Chip
                     label={<div style={{
                         color: colors.getColorWhite()
-                    }}>{Number(n.valor_caja).toFixed(2)}</div>}
+                    }}>
+                        {<Dolar>{Number(n.valor_caja).toFixed(2)}</Dolar>}
+                    </div>
+                    }
                     clickable
                     style={{
                         background: colors.getColorPrymaryLightCajaActivada()
@@ -648,7 +652,7 @@ class Caja extends Component {
                 />
                 :
                 <Chip
-                    label={Number(n.valor_caja).toFixed(2)}
+                    label={<Dolar>{Number(n.valor_caja).toFixed(2)}</Dolar>}
                     clickable
                     color='primary'
                 />

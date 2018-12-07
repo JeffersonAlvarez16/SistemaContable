@@ -24,6 +24,7 @@ import ChipTabla from '../components/modals_container/caja/ChipTabla';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import PagarDeuda from '../components/modals_container/cuentas_por_cobrar/PagarDeuda';
 import setSnackBars from '../components/plugins/setSnackBars';
+import Dolar from '../components/plugins/plugins/Dolar';
 
 class DeudasCobrar extends Component {
 
@@ -161,10 +162,9 @@ class DeudasCobrar extends Component {
     sumaTotalListaDeudasPendientes = (codigo) => {
         var sumaTotalDeudas = this.state.sumaTotalListaDeudas.filter(it => it.codigo === codigo)[0].suma
         var sumaTotalDeudasAcreditado = 0
-        console.log(this.state.sumaTotalListaDeudasAcreditado)
         if (this.state.sumaTotalListaDeudasAcreditado != null) {
             if (this.state.sumaTotalListaDeudasAcreditado.length > 0) {
-                sumaTotalDeudasAcreditado = this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0].acreditado
+                sumaTotalDeudasAcreditado = this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0] != null ? this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0].acreditado : 0.00
             }
         }
         return Number(sumaTotalDeudas - sumaTotalDeudasAcreditado).toFixed(2)
@@ -289,14 +289,28 @@ class DeudasCobrar extends Component {
                 {
                     n.lista_acreditados != null ?
                         <Chip
-                            label={<div style={{ color: colors.getColorWhite() }}>{`Pendiente: ${this.sumaTotalListaDeudasPendientes(n.codigo)}`}</div>}
+                            label={
+                                <div style={{ color: colors.getColorWhite(), display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ marginRight: 8 }}>
+                                        Pendiente:
+                                    </div>
+                                    <Dolar>{this.sumaTotalListaDeudasPendientes(n.codigo)}</Dolar>
+                                </div>
+                            }
                             style={{
                                 background: colors.getColorPrymary()
                             }}
                         />
                         :
                         <Chip
-                            label={<div style={{ color: colors.getColorWhite() }}>Pendiente <strong>{0.00}</strong></div>}
+                            label={
+                                <div style={{ color: colors.getColorWhite(), display: 'flex', flexDirection: 'row' }}>
+                                    <div style={{ marginRight: 8 }}>
+                                        Pendiente:
+                                    </div>
+                                    <Dolar>{this.sumaTotalListaDeudasPendientes(n.codigo)}</Dolar>
+                                </div>
+                            }
                             style={{
                                 background: colors.getColorPrymary()
                             }}
