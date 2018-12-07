@@ -44,9 +44,7 @@ class AgregarDineroCaja extends Component {
                         })
 
                     }
-                })
-
-                handleClose()
+                })                
             }
         })
     }
@@ -100,9 +98,10 @@ class AgregarDineroCaja extends Component {
                     marginBottom: 16,
                     marginTop: 16,
                 }}>
-                    <Button color="primary" variant="contained" onClick={() =>
+                    <Button color="primary" variant="contained" onClick={() =>{
                         this.agregarDinero()
-                    }>
+                        this.props.handleClose()
+                    }}>
                         Agregar
                     </Button>
                     <Button color="primary" onClick={() =>

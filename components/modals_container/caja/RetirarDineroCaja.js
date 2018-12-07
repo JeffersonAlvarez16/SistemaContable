@@ -46,8 +46,6 @@ class RetirarDineroCaja extends Component {
 
                     }
                 })
-
-                handleClose()
             }
         })
     }
@@ -101,9 +99,10 @@ class RetirarDineroCaja extends Component {
                     marginBottom: 16,
                     marginTop: 16,
                 }}>
-                    <Button color="primary" variant="contained" onClick={() =>
+                    <Button color="primary" variant="contained" onClick={() =>{
                         this.retirarDinero()
-                    }>
+                        this.props.handleClose()
+                    }}>
                         Retirar
                     </Button>
                     <Button color="primary" onClick={() =>
