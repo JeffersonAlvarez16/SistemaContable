@@ -5,6 +5,11 @@ import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramie
 import Search from '../components/components/Search';
 import Divider from '@material-ui/core/Divider';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
+import CloseIcon from '@material-ui/icons/Close';
+import RemoveIcon from '@material-ui/icons/Remove';
+import BarChart from '@material-ui/icons/BarChart';
+import AddIcon from '@material-ui/icons/Add';
+import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import Tooltip from '@material-ui/core/Tooltip';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import Avatar from '@material-ui/core/Avatar';
@@ -884,7 +889,7 @@ class Caja extends Component {
                 item = this.state.sumaTotalVentas.filter(item => item.codigo === this.state.cajaSeleccionada.codigo)[0]
             }
         }
-        if (item != null) {         
+        if (item != null) {
             if (item.sumaEfectivo != null) {
                 return item.sumaEfectivo
             } else {
@@ -916,7 +921,7 @@ class Caja extends Component {
             }
         });
     }
-    render() {       
+    render() {
         return (
             <Layout title="Caja" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
@@ -953,7 +958,10 @@ class Caja extends Component {
                                             color="primary"
                                             visible={true}
                                             onClick={() => this.setState({ openModalCerrarCaja: true })}
-                                        />
+                                        >
+                                            <CloseIcon />
+                                        </ItemMenuHerramienta>
+
                                     </>
                                 }
                                 {
@@ -974,7 +982,9 @@ class Caja extends Component {
                                             color="primary"
                                             visible={true}
                                             onClick={() => this.setState({ openModalAbrirCaja: true })}
-                                        />
+                                        >
+                                            <OpenInBrowserIcon />
+                                        </ItemMenuHerramienta>
                                     </>
                                 }
 
@@ -989,7 +999,10 @@ class Caja extends Component {
                                             this.setState({ estadoModalSimple: true })
                                         }
                                     }}
-                                />
+                                >
+                                    <BarChart />
+                                </ItemMenuHerramienta>
+
                                 <ItemMenuHerramienta
                                     titleButton="Agregar dinero"
                                     color="primary"
@@ -1000,7 +1013,10 @@ class Caja extends Component {
                                             this.setState({ openModalDineroCajaAgregar: true })
                                         }
                                     }}
-                                />
+                                >
+                                    <AttachMoneyIcon />
+                                    <AddIcon />
+                                </ItemMenuHerramienta>
                                 <ItemMenuHerramienta
                                     titleButton="Retirar dinero"
                                     color="primary"
@@ -1011,14 +1027,17 @@ class Caja extends Component {
                                             this.setState({ openModalDineroCajaRetirar: true })
                                         }
                                     }}
-                                />
+                                >
+                                    <AttachMoneyIcon />
+                                    <RemoveIcon />
+                                </ItemMenuHerramienta>
 
-                                <div style={{ flex: 0.9 }}></div>
+                                <div style={{ flex: 0.84 }}></div>
 
                                 <Search
                                     id='buscar-cliente-clientes'
                                     textoSearch="Buscar..."
-                                    textoTooltip="Buscar Cliente"
+                                    textoTooltip="Buscar caja"
                                     handleSearch={this.handleSearch}
                                 />
                             </MenuHerramientas>
