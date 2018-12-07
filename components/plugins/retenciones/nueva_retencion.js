@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, CircularProgress, Input, FormControl, InputLabel } from '@material-ui/core';
+import { Grid, CircularProgress, Input, FormControl, InputLabel, InputAdornment } from '@material-ui/core';
 import Search from '../../components/Search';
 import AutoCompleteRetenciones from '../AutoCompleteRetenciones'
 import AutoCompleteSelectedProducto from '../AutoCompleteSelectedProducto';
@@ -17,6 +17,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 
 
+
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -25,37 +26,12 @@ import setSnackBars from '../setSnackBars';
 import funtions from '../../../utils/funtions';
 import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
 import MaskedInput from "react-text-mask";
+import NumberFormat from 'react-number-format';
 
-function TextMaskCustom(props) {
-    const { inputRef, ...other } = props;
-  
-    return (
-      <MaskedInput
-        {...other}
-        mask={[
-          /\d/,
-          /\d/,
-          /\d/,
-          "-",
-          /\d/,
-          /\d/,
-          /\d/,
-          "-",
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/,
-          /\d/
-        ]}
-        placeholderChar={"\u2000"}
-        showMask
-      />
-    );
-  }
+
+import SeleccionarFecha from '../plugins/SeleccionarFecha';
+import SeleccionarHora from '../plugins/SeleccionarHora';
+
 
 class NuevaRetencion extends Component {
     state = {
@@ -79,7 +55,11 @@ class NuevaRetencion extends Component {
     componentDidMount() {
         const fecha = new Date().toISOString().toString().split(':')
         var fechas = fecha[0] + ':' + fecha[1]
-        this.setState({ fecha_emision_documento_sustento: fechas })
+        var hora = new Date()
+        this.setState({
+            fecha_emision_documento_sustento: fechas,
+            hora_emision_documento_sustento: hora
+        })
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -118,7 +98,7 @@ class NuevaRetencion extends Component {
                 this.guardarRetencionBaseDatos(retencion, codigo)
 
                 this.setState({ estadoModalEmitirRetencion: false })
-                this.props.handleClose()
+                this.props.handleClose() 
             }
         })
     }
@@ -130,10 +110,10 @@ class NuevaRetencion extends Component {
                 var codigo = funtions.guidGenerator()
                 var retencion = this.generarRetencionRenta()
                 this.postSet(user.uid, retencion, codigo)
-                this.guardarRetencionBaseDatos(retencion, codigo)
-
-                this.setState({ estadoModalEmitirRetencion: false })
-                this.props.handleClose()
+                 this.guardarRetencionBaseDatos(retencion, codigo)
+ 
+                 this.setState({ estadoModalEmitirRetencion: false })
+                 this.props.handleClose()
             }
         })
     }
@@ -234,6 +214,12 @@ class NuevaRetencion extends Component {
     }
 
     generarRetencionRenta = () => {
+        var fecha = this.state.fecha_emision_documento_sustento.split('T')
+        var fechaSola = fecha[0]
+        var hora = String(this.state.hora_emision_documento_sustento).split(' ')
+        var horaForma = hora[4].split(':')
+        var horaLista = horaForma[0] + ':' + horaForma[1]
+
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
@@ -260,7 +246,7 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
                     "numero_documento_sustento": `${this.state.numero_documento}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
@@ -280,6 +266,12 @@ class NuevaRetencion extends Component {
     }
 
     generarRetencionIvaRenta = () => {
+        var fecha = this.state.fecha_emision_documento_sustento.split('T')
+        var fechaSola = fecha[0]
+        var hora = String(this.state.hora_emision_documento_sustento).split(' ')
+        var horaForma = hora[4].split(':')
+        var horaLista = horaForma[0] + ':' + horaForma[1]
+
         var retencionIvaRenta = {
             "ambiente": 1,
             "tipo_emision": 1,
@@ -306,7 +298,7 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "2",
                     "codigo_porcentaje": this.state.retencionIva.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
                     "numero_documento_sustento": `${this.state.numero_documento}`,
                     "porcentaje": this.getPorcentajeCodigo(this.state.retencionIva.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionIva.tipo_documento,
@@ -316,7 +308,7 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
                     "numero_documento_sustento": `${this.state.numero_documento}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
@@ -389,7 +381,6 @@ class NuevaRetencion extends Component {
 
 
     render() {
-        console.log(this.state.numero_documento)
         const styles = {
             styleText: {
                 width: '100%',
@@ -569,167 +560,195 @@ class NuevaRetencion extends Component {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <TextField
-                                            id="standard-fecha"
+                                        <div style={{ marginTop: 24 }}></div>
+                                        <SeleccionarFecha
                                             label="Fecha de emisión del documento en sustento"
                                             value={this.state.fecha_emision_documento_sustento}
-                                            type="datetime-local"
-                                            onChange={e => this.setState({ fecha_emision_documento_sustento: e.target.value })}
+                                            onChange={event => {
+                                                const fecha = new Date(event).toISOString().toString().split(':')
+                                                var fechas = fecha[0] + ':' + fecha[1]
+                                                this.setState({ fecha_emision_documento_sustento: fechas })
+                                            }}
+                                            width='100%'
+                                        />
+                                        <SeleccionarHora
+                                            label={"Hora"}
+                                            value={this.state.hora_emision_documento_sustento}
+                                            onChange={event => {
+                                                var hora = new Date(event)
+                                                this.setState({ hora_emision_documento_sustento: hora })
+                                            }}
+                                            width='100%'
+                                        />
+                                    </Grid>
+                                </Grid>
+                                <Grid container xs={6} spacing={8}>
+                                    <Grid item xs={6} style={{ display: 'flex', justifyContent: 'center' }} >
+                                        <TextField
+                                            id="formatted-text-mask-input"
+                                            label="Numero de documento"
+                                            error={this.state.numero_documento.length < 15 ? true : false}
+                                            value={this.state.numero_documento}
+                                            onChange={event => this.setState({
+                                                numero_documento: event.target.value
+                                            })}
+                                            margin="normal"
+                                            variant="outlined"
+                                            style={{ width: '100%' }}
+                                            autoComplete='off'
+                                            InputProps={{
+                                                inputComponent: NumberFormatCustomNumeroFactura,
+                                            }}
+                                        />
+                                    </Grid>
+                                    <Grid item xs={6} >
+                                        <TextField
+                                            id="standard-base-disponible"
+                                            label="Base Disponible"
+                                            value={this.state.base_disponible}
+                                            error={this.state.base_disponible.length > 0 ? false : true}
+                                            onChange={e => {
+                                                this.setState({ base_disponible: e.target.value })
+                                                setTimeout(() => { this.setValor() }, 100)
+                                                setTimeout(() => { this.setValorRenta() }, 100)
+                                            }}
                                             margin="normal"
                                             variant="filled"
                                             style={{ width: '100%' }}
                                         />
                                     </Grid>
                                 </Grid>
-                                <Grid container xs={6} spacing={8}>
-                                    <Grid item xs={6} style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }} >
-                                        {/*  <TextField
-                                            id="standard-numero-documento"
-                                            label="Número de documento"
-                                            value={this.state.numero_documento}
-                                            error={this.state.numero_documento.length > 0 ? false : true}
-                                            onChange={e => {
-                                                this.setState({ numero_documento: e.target.value })
-                                            }}
-                                            margin="normal"
-                                            variant="filled"
-                                            style={{ width: '100%' }}
-                                            
-                                        /> */}
-                                        <FormControl  style={{ width: '80%',height:100,marginTop:15 }} >
-                                            <InputLabel htmlFor="formatted-text-mask-input">
-                                            Número de documento
-                                            </InputLabel>
-                                            <Input
-                                                value={this.state.numero_documento}
-                                                variant="filled"
-                                                onChange={e => {
-                                                    this.setState({ numero_documento: e.target.value })
-                                                }}  
-                                                style={{height: 42}}                                              
-                                                id="formatted-text-mask-input"
-                                                inputComponent={TextMaskCustom} 
-                                            />
-                                             </FormControl>
-                                    </Grid>
-                                        <Grid item xs={6} >
-                                            <TextField
-                                                id="standard-base-disponible"
-                                                label="Base Disponible"
-                                                value={this.state.base_disponible}
-                                                error={this.state.base_disponible.length > 0 ? false : true}
-                                                onChange={e => {
-                                                    this.setState({ base_disponible: e.target.value })
-                                                    setTimeout(() => { this.setValor() }, 100)
-                                                    setTimeout(() => { this.setValorRenta() }, 100)
-                                                }}
-                                                margin="normal"
-                                                variant="filled"
-                                                style={{ width: '100%' }}
-                                            />
-                                        </Grid>
-                                    </Grid>
-                                </Grid>
+                            </Grid>
                         </>
-                            }
+                    }
 
                     <Grid container spacing={24}>
-                                {
-                                    this.state.estado_contabilidad === true &&
-                                    <>
-                                        <Grid item xs={6} >
-                                            <div style={{ padding: 16 }}>
-                                                <ImpuestoRetencion
-                                                    impuesto={2}
-                                                    changueData={data => {
-                                                        this.setState({ retencionIva: data })
-                                                        setTimeout(() => { this.setValor() }, 100)
-                                                    }}
-                                                    base_disponible={this.state.base_disponible}
-                                                    valor={this.state.valorIVA}
-                                                />
-                                            </div>
-                                        </Grid>
-                                        <Grid item xs={6} style={{ padding: 16 }}>
-                                            <div style={{ padding: 16 }}>
-                                                <ImpuestoRetencion
-                                                    impuesto={1}
-                                                    changueData={data => {
-                                                        this.setState({ retencionRenta: data })
-                                                        setTimeout(() => { this.setValorRenta() }, 100)
-                                                    }}
-                                                    base_disponible={this.state.base_disponible}
-                                                    valor={this.state.valorRenta}
-                                                />
-                                            </div>
-                                        </Grid>
+                        {
+                            this.state.estado_contabilidad === true &&
+                            <>
+                                <Grid item xs={6} >
+                                    <div style={{ padding: 16 }}>
+                                        <ImpuestoRetencion
+                                            impuesto={2}
+                                            changueData={data => {
+                                                this.setState({ retencionIva: data })
+                                                setTimeout(() => { this.setValor() }, 100)
+                                            }}
+                                            base_disponible={this.state.base_disponible}
+                                            valor={this.state.valorIVA}
+                                        />
+                                    </div>
+                                </Grid>
+                                <Grid item xs={6} style={{ padding: 16 }}>
+                                    <div style={{ padding: 16 }}>
+                                        <ImpuestoRetencion
+                                            impuesto={1}
+                                            changueData={data => {
+                                                this.setState({ retencionRenta: data })
+                                                setTimeout(() => { this.setValorRenta() }, 100)
+                                            }}
+                                            base_disponible={this.state.base_disponible}
+                                            valor={this.state.valorRenta}
+                                        />
+                                    </div>
+                                </Grid>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                disabled={this.state.base_disponible.length > 0 ? !this.state.numero_documento.length > 0 : true}
-                                                onClick={() => this.emitirRetencionIvaRenta()}
-                                            >
-                                                Emitir Retención
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={this.state.base_disponible.length > 0 ? !this.state.numero_documento.length > 0 : true}
+                                        onClick={() => this.emitirRetencionIvaRenta()}
+                                    >
+                                        Emitir Retención
                                     </Button>
-                                        </div>
-                                    </>
-                                }
+                                </div>
+                            </>
+                        }
 
-                                {
-                                    this.state.estado_contabilidad === false &&
-                                    <Grid item xs={12}>
-                                        <div style={{ padding: 16 }}>
-                                            <ImpuestoRetencion
-                                                impuesto={1}
-                                                changueData={data => {
-                                                    this.setState({ retencionRenta: data })
-                                                    setTimeout(() => { this.setValorRenta() }, 100)
-                                                }}
-                                                base_disponible={this.state.base_disponible}
-                                                valor={this.state.valorRenta}
-                                            />
-                                        </div>
+                        {
+                            this.state.estado_contabilidad === false &&
+                            <Grid item xs={12}>
+                                <div style={{ padding: 16 }}>
+                                    <ImpuestoRetencion
+                                        impuesto={1}
+                                        changueData={data => {
+                                            this.setState({ retencionRenta: data })
+                                            setTimeout(() => { this.setValorRenta() }, 100)
+                                        }}
+                                        base_disponible={this.state.base_disponible}
+                                        valor={this.state.valorRenta}
+                                    />
+                                </div>
 
-                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
-                                            <Button
-                                                variant="contained"
-                                                color="primary"
-                                                disabled={this.state.base_disponible.length > 0 ? !this.state.numero_documento.length > 0 : true}
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%' }}>
+                                    <Button
+                                        variant="contained"
+                                        color="primary"
+                                        disabled={this.state.base_disponible.length > 0 ? !this.state.numero_documento.length > 0 : true}
 
-                                                onClick={() => this.emitirRetencionRenta()}
-                                            >
-                                                Emitir Retención
+                                        onClick={() => this.emitirRetencionRenta()}
+                                    >
+                                        Emitir Retención
                                     </Button>
-                                        </div>
-                                    </Grid>
-                                }
-                                {
-                                    this.state.estado_contabilidad === null &&
-                                    <Grid item xs={6}>
-                                    </Grid>
-                                }
+                                </div>
                             </Grid>
-                        </Grid>
+                        }
+                        {
+                            this.state.estado_contabilidad === null &&
+                            <Grid item xs={6}>
+                            </Grid>
+                        }
+                    </Grid>
+                </Grid>
 
-                        <ModalContainerNormal
-                            open={this.state.estadoModalEmitirRetencion}
-                            handleClose={() => this.setState({ estadoModalEmitirRetencion: true })}
-                        >
-                            <div style={{
-                                width: 100,
-                                height: 100,
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center'
-                            }}>
-                                <CircularProgress />
-                            </div>
-                        </ModalContainerNormal>
+                <ModalContainerNormal
+                    open={this.state.estadoModalEmitirRetencion}
+                    handleClose={() => this.setState({ estadoModalEmitirRetencion: true })}
+                >
+                    <div style={{
+                        width: 100,
+                        height: 100,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center'
+                    }}>
+                        <CircularProgress />
+                    </div>
+                </ModalContainerNormal>
             </div>
-                        )
-                    }
-                }
-                
+        )
+    }
+}
+
+const NumberFormatCustomNumeroFactura = (props) => {
+    const { inputRef, onChange, ...other } = props;
+    return (
+        <NumberFormat
+            {...other}
+            getInputRef={inputRef}
+            onValueChange={values => {
+                onChange({
+                    target: {
+                        value: values.value,
+                    },
+                });
+            }}
+            thousandSeparator
+            format="###-###-#########"
+            mask="_"
+        />
+
+    );
+}
+
+const cardExpiry = (val) => {
+    let month = limit(val.substring(0, 2), '12');
+    let date = limit(val.substring(2, 4), '31');
+
+    return month + (date.length ? '/' + date : '');
+}
+
+
+
 export default NuevaRetencion;

@@ -9,6 +9,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 import setSnackBars from '../../plugins/setSnackBars';
+import NumberFormat from 'react-number-format';
 
 class ModalFinalizaPago extends React.Component {
     state = {
@@ -20,7 +21,7 @@ class ModalFinalizaPago extends React.Component {
         fecha_vencimiento: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
         monto: '',
 
-        valor_acreditado:''
+        valor_acreditado: ''
     }
 
     componentDidMount() {
@@ -202,7 +203,7 @@ class ModalFinalizaPago extends React.Component {
                                 id="filled-fecha-venta"
                                 helperText={this.state.propiedades_numero.length > 0 ? '' : 'Complete este campo'}
                                 label="Numero de la tarjeta de crédito"
-                                error={this.state.propiedades_numero.length > 0 ? false : true}
+                                error={this.state.propiedades_numero.length < 16 ? true : false}
                                 value={this.state.propiedades_numero}
                                 onChange={event => this.setState({
                                     propiedades_numero: event.target.value
@@ -211,6 +212,9 @@ class ModalFinalizaPago extends React.Component {
                                 variant="outlined"
                                 style={{ width: '100%' }}
                                 autoComplete='off'
+                                InputProps={{
+                                    inputComponent: NumberFormatCustomTarjeta,
+                                }}
                             >
                             </TextField>
                             <TextField
@@ -237,7 +241,7 @@ class ModalFinalizaPago extends React.Component {
                                 id="filled-fecha-venta"
                                 helperText={this.state.propiedades_numero.length > 0 ? '' : 'Complete este campo'}
                                 label="Numero de la tarjeta de débito"
-                                error={this.state.propiedades_numero.length > 0 ? false : true}
+                                error={this.state.propiedades_numero.length < 16 ? true : false}
                                 value={this.state.propiedades_numero}
                                 onChange={event => this.setState({
                                     propiedades_numero: event.target.value
@@ -246,6 +250,9 @@ class ModalFinalizaPago extends React.Component {
                                 variant="outlined"
                                 style={{ width: '100%' }}
                                 autoComplete='off'
+                                InputProps={{
+                                    inputComponent: NumberFormatCustomTarjeta,
+                                }}
                             >
                             </TextField>
                             <TextField
@@ -319,5 +326,27 @@ class ModalFinalizaPago extends React.Component {
 
     }
 }
+
+const NumberFormatCustomTarjeta = (props) => {
+    const { inputRef, onChange, ...other } = props;
+    return (
+        <NumberFormat
+            {...other}
+            getInputRef={inputRef}
+            onValueChange={values => {
+                onChange({
+                    target: {
+                        value: values.value,
+                    },
+                });
+            }}
+            thousandSeparator
+            format="####  ####  ####  ####"
+            mask="_"
+        />
+        
+    );
+}
+
 
 export default ModalFinalizaPago
