@@ -6,12 +6,14 @@ import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Search from '../components/components/Search';
-import { Divider, Tooltip, IconButton, ExpansionPanel, Typography, ExpansionPanelDetails, Chip } from '@material-ui/core';
+import { Divider, Tooltip, IconButton, ExpansionPanel, Typography, ExpansionPanelDetails } from '@material-ui/core';
 import TablaNormal from '../components/components/tables/TableNormal';
 import funtions from '../utils/funtions';
 import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import AddIcon from '@material-ui/icons/Add';
+import { TextField, Button, Chip } from '@material-ui/core';
 
 
 
@@ -25,6 +27,7 @@ import ModalContainerNormal from '../components/modals_container/ModalContainerN
 import ModalEliminarUsuario from '../components/modals_container/usuarios/ModalEliminarUsuario';
 import setSnackBars from '../components/plugins/setSnackBars';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
+import colors from '../utils/colors';
 
 
 class Usuarios extends Component {
@@ -36,20 +39,12 @@ class Usuarios extends Component {
         listaVentasTemporal: [],
 
         rowslistaUsuarios: [
-            { id: 'accions', numeric: false, disablePadding: true, label: 'Acciones' },
+            { id: 'accions', numeric: false, disablePadding: true, label: '' },
             { id: 'estado', numeric: false, disablePadding: true, label: 'Estado' },
             { id: 'nombre_usuario', numeric: false, disablePadding: true, label: 'Nombre Usuario' },
             { id: 'tipo_usuario', numeric: false, disablePadding: true, label: 'Tipo Usuario' },
             { id: 'privilegios', numeric: true, disablePadding: false, label: 'Privilegios' },
             { id: 'privilegiosGenerales', numeric: true, disablePadding: false, label: 'Privilegios Generales' },
-            /*  { id: 'valor', numeric: true, disablePadding: false, label: 'Valor de Retención' },
-             { id: 'tipo_retencion', numeric: true, disablePadding: false, label: 'Tipo de Retención' },
-             { id: 'telefono', numeric: true, disablePadding: false, label: 'Sujeto - Telefono' },
-             { id: 'identificacion', numeric: true, disablePadding: false, label: 'Sujeto - Identificación' },
-             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
-             { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha' },
-             { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
-             { id: 'empleado', numeric: true, disablePadding: false, label: 'Empleado' }, */
         ],
 
         openModalNewUsuario: false,
@@ -76,11 +71,6 @@ class Usuarios extends Component {
                             estadoTabla: 'cargando'
                         })
                         var lista = funtions.snapshotToArray(snapshot)
-                        /* var filterList = lista.sort((a, b) => {
-                            a = new Date(a.order);
-                            b = new Date(b.order);
-                            return a > b ? -1 : a < b ? 1 : 0;
-                        }) */
                         this.setState({
                             listaUsuarios: lista,
                             listaUsuariosTemporal: lista,
@@ -104,7 +94,7 @@ class Usuarios extends Component {
 
                 {
                     n.tipo_usuario === 'administrador' ?
-                        <strong style={{ textAlign: 'center' }}>No se puede Editar el usuario<br /> Administrador</strong>
+                        <div></div>
                         :
                         <div style={{ display: 'flex' }}>
                             <Tooltip title="Editar" placement="left">
@@ -139,7 +129,7 @@ class Usuarios extends Component {
                                         </IconButton>
                                     </Tooltip>
                                     :
-                                    <Tooltip title="Activar">
+                                    <Tooltip title="Activar" placement="right">
                                         <IconButton
                                             aria-label="Activar"
                                             onClick={() => {
@@ -164,18 +154,49 @@ class Usuarios extends Component {
 
         if (item.id === 'estado') {
             return <div style={{ width: 'max-content' }}>{
-                n.estado === true ?               
-                   <strong style={{ textAlign: 'center' }}>Activo</strong>
-                     :
-                   <strong style={{ textAlign: 'center' }}>Inactivo</strong>
+                n.estado === true ?
+                    <Chip
+                        label={<div style={{ color: colors.getColorWhite() }}>Activo</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGreen300(), marginRight: 8 }}
+                    />
+                    :
+                    <Chip
+                        label={<div style={{ color: colors.getColorWhite() }}>Inactivo</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryRed300(), marginRight: 8 }}
+                    />
             }</div>
         }
         if (item.id === 'nombre_usuario') {
-            return <div style={{ width: 'max-content' }}>{n.nombre}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.nombre}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200(), marginRight: 8 }}
+                />
+            </div>
         }
 
         if (item.id === 'tipo_usuario') {
-            return <div style={{ width: 'max-content' }}>{this.MaysPrimera(n.tipo_usuario)}</div>
+            return <div style={{ width: 'max-content' }}>
+                {
+                    n.tipo_usuario === 'administrador' &&
+                    <Chip
+                        label={<div style={{color:colors.getColorWhite()}}>{this.MaysPrimera(n.tipo_usuario)}</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymary(), marginRight: 8 }}
+                    />
+                }
+                {
+                    n.tipo_usuario === 'vendedor' &&
+                    <Chip
+                        label={<div style={{color:colors.getColorWhite()}}>{this.MaysPrimera(n.tipo_usuario)}</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryLight(), marginRight: 8 }}
+                    />
+                }
+            </div>
 
         }
 
@@ -183,90 +204,230 @@ class Usuarios extends Component {
 
         if (item.id === 'privilegios') {
             return <div style={{ width: 'max-content' }}>
-                <ExpansionPanel style={{ width: 350,backgroundColor:'#009688' }}>
+                <ExpansionPanel style={{ width: 'max-content', background: colors.getColorPrymaryBlue300() }}>
                     <ExpansionPanelSummary expandIcon={<ExpandMoreIcon />}>
-                        <Typography style={{color:'white'}}>Ver Privilegios</Typography>
+                        <Typography style={{ color: 'white' }}>Ver Privilegios</Typography>
                     </ExpansionPanelSummary>
                     <ExpansionPanelDetails>
-                        <div style={{ width: 'max-content' }}>
-                            <div>Acceso a Productos
-                {
-                                    n.privilegios.productos ?
-                                        <strong> Activado </strong>
+                        <div style={{ width: 400 }}>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Productos</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.productos) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Devolucion de Clientes
-                {
-                                    n.privilegios.stock.devolucion_cliente ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Devolucion de Clientes</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.stock.devolucion_cliente) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Compra de Productos
-                {
-                                    n.privilegios.stock.compra_productos ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Compra de Productos</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.stock.compra_productos) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Devolucion a Proveedores
-                {
-                                    n.privilegios.stock.devolucion_proveedor ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Devolucion a Proveedores</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.stock.devolucion_proveedor) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Ajustes de Stock
-                {
-                                    n.privilegios.stock.ajuste_stock ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Ajustes de Stock</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.stock.ajuste_stock) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Proveedores
-                {
-                                    n.privilegios.proveedores ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Proveedores</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.proveedores) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Clientes
-                {
-                                    n.privilegios.clientes ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Clientes</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.clientes) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Ventas
-                {
-                                    n.privilegios.ventas ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Ventas</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.ventas) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Retenciones
-                {
-                                    n.privilegios.retenciones ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Retenciones</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.retenciones) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
-                            <div>Acceso a Usuarios
-                {
-                                    n.privilegios.usuarios ?
-                                        <strong> Activado </strong>
+                            <div style={{ marginBottom: 6, display: 'flex', flexDirection: 'row' }}>
+                                <Chip
+                                    label={<div style={{ color: colors.getColorWhite() }}>Acceso a Usuarios</div>}
+                                    clickable
+                                    style={{ background: colors.getColorPrymaryDarkBlue300(), marginRight: 8 }}
+                                />
+                                <div style={{ flex: 1 }}></div>
+                                {
+                                    Boolean(n.privilegios.usuarios) ?
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Activado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkGreen300() }}
+                                        />
                                         :
-                                        <strong> Desactivado </strong>
+                                        <Chip
+                                            label={<div style={{ color: colors.getColorWhite() }}>Desactivado</div>}
+                                            clickable
+                                            style={{ background: colors.getColorPrymaryDarkRed300() }}
+                                        />
                                 }
                             </div>
                         </div>
@@ -346,7 +507,7 @@ class Usuarios extends Component {
 
     MaysPrimera(string) {
         return string.charAt(0).toUpperCase() + string.slice(1);
-      }
+    }
     render() {
         return (
             <Layout title="Usuarios" onChangueUserState={usuario => {
@@ -369,16 +530,10 @@ class Usuarios extends Component {
                                     this.setState({ itemEditar: null })
                                     this.setState({ openModalNewUsuario: true })
                                 }}
-                            />
+                            >
+                                <AddIcon />
+                            </ItemMenuHerramienta>
 
-                            <div style={{ flex: 0.9 }}></div>
-
-                            <Search
-                                id='buscar-cliente-clientes'
-                                textoSearch="Buscar..."
-                                textoTooltip="Buscar Usuario"
-                                handleSearch={this.handleSearch}
-                            />
                         </MenuHerramientas>
                         <Divider />
                         <TablaNormal

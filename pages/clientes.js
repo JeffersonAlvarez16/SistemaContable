@@ -6,8 +6,7 @@ import SimpleTable from '../components/components/TableList';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
+import AddIcon from '@material-ui/icons/Add';
 
 
 import firebase, { functions } from 'firebase/app';
@@ -25,7 +24,8 @@ import Divider from '@material-ui/core/Divider';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactivar';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
-import { CircularProgress } from '@material-ui/core';
+import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
+import colors from '../utils/colors';
 
 
 class Clientes extends Component {
@@ -38,20 +38,20 @@ class Clientes extends Component {
         itemCliente: null,
         itemsSeleccionados: [],
         rowslistaClientes: [
-            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
+            { id: 'acciones', numeric: false, disablePadding: true, label: '' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
             { id: 'identificacion', numeric: true, disablePadding: false, label: 'Numero de identificación' },
+            { id: 'celular', numeric: true, disablePadding: false, label: 'Telefono' },
+            { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
+            { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
+            { id: 'tipo_identificacion', numeric: true, disablePadding: false, label: 'Tipo de identificación' },
             { id: 'tipo_cliente', numeric: true, disablePadding: false, label: 'Tipo Cliente' },
             { id: 'fecha_nacimiento', numeric: true, disablePadding: false, label: 'Fecha Nacimiento' },
             { id: 'sexo', numeric: true, disablePadding: false, label: 'Sexo' },
             { id: 'telefono', numeric: true, disablePadding: false, label: 'Telefono' },
-            { id: 'celular', numeric: true, disablePadding: false, label: 'Telefono' },
-            { id: 'numero_identificacion', numeric: true, disablePadding: false, label: 'Numero identificación' },
-            { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
             { id: 'barrio', numeric: true, disablePadding: false, label: 'Barrio' },
             { id: 'ciudad', numeric: true, disablePadding: false, label: 'Ciudad' },
-            { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observación' },
             { id: 'limite_deuda', numeric: true, disablePadding: false, label: 'Límite deuda' },
             { id: 'credito', numeric: true, disablePadding: false, label: 'Crédito' },
@@ -159,10 +159,22 @@ class Clientes extends Component {
         }
 
         if (item.id === 'nombre') {
-            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.nombre)}</div>
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div>{n.nombre}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            )}</div>
         }
         if (item.id === 'identificacion') {
-            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.numero_identificacion)}</div>
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.numero_identificacion}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymary() }}
+                />
+            )}</div>
         }
 
         if (item.id === 'tipo_cliente') {
@@ -182,15 +194,38 @@ class Clientes extends Component {
         }
 
         if (item.id === 'celular') {
-            return this.getColorActivadoDesactivado(n.estado, n.celular)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div>{n.celular}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            )
         }
 
-        if (item.id === 'numero_identificacion') {
-            return this.getColorActivadoDesactivado(n.estado, n.numero_identificacion)
+        if (item.id === 'tipo_identificacion') {
+            return this.getColorActivadoDesactivado(n.estado, 
+                <div>
+                    {
+                        n.tipo_identificacion==='05'&&
+                        'Cedula'
+                    }
+                    {
+                        n.tipo_identificacion==='04'&&
+                        'Ruc'
+                    }
+                </div>
+                )
         }
 
         if (item.id === 'direccion') {
-            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado, n.direccion)}</div>
+            return <div style={{ width: 'max-content' }}>{this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div>{n.direccion}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            )}</div>
         }
 
         if (item.id === 'barrio') {
@@ -202,7 +237,13 @@ class Clientes extends Component {
         }
 
         if (item.id === 'email') {
-            return this.getColorActivadoDesactivado(n.estado, n.email)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div style={{color: colors.getColorWhite()}}>{n.email}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryDarkBlue300() }}
+                />
+            )
         }
 
         if (item.id === 'observacion') {
@@ -366,7 +407,7 @@ class Clientes extends Component {
                 }
             }
         }
-     }
+    }
 
     render() {
         return (
@@ -386,15 +427,17 @@ class Clientes extends Component {
                                 color="primary"
                                 visible={true}
                                 onClick={() => this.setState({ itemSeleccionado: null, openModalNewCliente: true })}
-                            />
+                            >
+                                <AddIcon />
+                            </ItemMenuHerramienta>
 
 
-                            <div style={{ flex: 0.9 }}></div>
+                            <div style={{ flex: 0.95 }}></div>
 
                             <Search
                                 id='buscar-cliente-clientes'
                                 textoSearch="Buscar..."
-                                textoTooltip="Buscar Cliente"
+                                textoTooltip="Buscar cliente"
                                 handleSearch={this.handleSearch}
                             />
                         </MenuHerramientas>

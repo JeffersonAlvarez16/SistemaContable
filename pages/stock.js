@@ -736,7 +736,7 @@ class Stock extends Component {
                     <Search
                         id='buscar-producto'
                         textoSearch="Buscar..."
-                        textoTooltip="Buscar producto"
+                        textoTooltip="Buscar en stock"
                         handleSearch={this.handleSearch}
                     />
                 </MenuHerramientas>

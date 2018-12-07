@@ -12,6 +12,7 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
+import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
 import FileCopy from '@material-ui/icons/FileCopy';
@@ -825,14 +826,16 @@ class Ventas extends Component {
                                         setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
                                     }
                                 }}
-                            />
+                            >
+                            <AddIcon />
+                            </ItemMenuHerramienta>
 
-                            <div style={{ flex: 0.9 }}></div>
+                            <div style={{ flex: 0.95 }}></div>
 
                             <Search
                                 id='buscar-cliente-clientes'
                                 textoSearch="Buscar..."
-                                textoTooltip="Buscar Cliente"
+                                textoTooltip="Buscar venta"
                                 handleSearch={this.handleSearch}
                             />
                         </MenuHerramientas>

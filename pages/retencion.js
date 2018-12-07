@@ -3,25 +3,20 @@ import Layout from '../components/containers/Layout';
 import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Search from '../components/components/Search';
-import { Divider, IconButton, TextField, Button } from '@material-ui/core';
+import { Divider, IconButton, TextField, Button, Chip } from '@material-ui/core';
 import TablaNormal from '../components/components/tables/TableNormal';
 import FullScreenDialog from '../components/components/FullScreenDialog';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import Tooltip from '@material-ui/core/Tooltip';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
-import InputIcon from '@material-ui/icons/Input';
+import AddIcon from '@material-ui/icons/Add';
 
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import LoopIcon from '@material-ui/icons/Loop';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
-//impresiones
-//import Print from 'print-js'
-
-//firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
@@ -34,6 +29,7 @@ import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
 import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import ModalEliminarRetencion from '../components/modals_container/retenciones/ModalEliminarRetencion';
+import colors from '../utils/colors';
 
 
 //librerias Imprimir
@@ -50,14 +46,14 @@ class Retencion extends Component {
         listaVentasTemporal: [],
 
         rowslistaRetenciones: [
-            { id: 'accions', numeric: false, disablePadding: true, label: 'Resivo' },
+            { id: 'accions', numeric: false, disablePadding: true, label: '' },
             { id: 'factura', numeric: false, disablePadding: true, label: 'Numero de fatura' },
             { id: 'estado', numeric: false, disablePadding: true, label: 'Estado Retencion' },
             { id: 'razon_social', numeric: true, disablePadding: false, label: 'Sujeto - Razon Social' },
-            { id: 'valor', numeric: true, disablePadding: false, label: 'Valor de Retención' },
-            { id: 'tipo_retencion', numeric: true, disablePadding: false, label: 'Tipo de Retención' },
-            { id: 'telefono', numeric: true, disablePadding: false, label: 'Sujeto - Telefono' },
             { id: 'identificacion', numeric: true, disablePadding: false, label: 'Sujeto - Identificación' },
+            { id: 'valor', numeric: true, disablePadding: false, label: 'Valor de Retención' },
+            { id: 'telefono', numeric: true, disablePadding: false, label: 'Sujeto - Telefono' },
+            { id: 'tipo_retencion', numeric: true, disablePadding: false, label: 'Tipo de Retención' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha' },
             { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
@@ -150,17 +146,17 @@ class Retencion extends Component {
         }
         if (item.id === 'accions') {
             return <>
-                {/*  <ReactToPrint
+                <ReactToPrint
                     ref={el => (this.refEventoImprimir = el)}
                     trigger={() => <></>}
                     content={() => this.refImprimirResivo}
                 />
                 <IconButton onClick={() => {
-                    this.enviarToPlantillaData(n)
+                    //this.enviarToPlantillaData(n)
                 }}
                 >
                     <LocalPrintshopIcon />
-                </IconButton> */}
+                </IconButton>
             </>
         }
         if (item.id === 'estado') {
@@ -214,16 +210,40 @@ class Retencion extends Component {
             </>
         }
         if (item.id === 'razon_social') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.razon_social}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.retencion.sujeto.razon_social}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryDarkBlue300() }}
+                />
+            </div>
         }
         if (item.id === 'factura') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.items[0].numero_documento_sustento}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.items[0].numero_documento_sustento}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            </div>
         }
         if (item.id === 'telefono') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.telefono}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.sujeto.telefono}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />                
+            </div>
         }
         if (item.id === 'identificacion') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.identificacion}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.sujeto.identificacion}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            </div>
         }
         if (item.id === 'fecha') {
             return <div style={{ width: 'max-content' }}>{n.fecha_registro}</div>
@@ -320,7 +340,9 @@ class Retencion extends Component {
                                     this.setState({ itemEditar: null })
                                     this.setState({ openModalNewRetencion: true })
                                 }}
-                            />
+                            >
+                                <AddIcon />
+                            </ItemMenuHerramienta>
 
                             <div style={{ display: 'flex', alignItems: 'center' }}>
                                 <TextField
@@ -335,12 +357,12 @@ class Retencion extends Component {
                             </div>
 
 
-                            <div style={{ flex: 0.9 }}></div>
+                            <div style={{ flex: 0.93 }}></div>
 
                             <Search
                                 id='buscar-retencion'
                                 textoSearch="Buscar..."
-                                textoTooltip="Buscar Retencion"
+                                textoTooltip="Buscar retencion"
                                 handleSearch={this.handleSearch}
                             />
 
@@ -348,17 +370,6 @@ class Retencion extends Component {
                         </MenuHerramientas>
 
                         <Divider />
-
-
-                       {/*  <ContainerPlantillas>
-                            <ResivoVenta
-                                item={this.state.itemFormateadoImprimir}
-                                ref={el => (this.refImprimirResivo = el)}
-                            />
-                        </ContainerPlantillas>
- */}
-
-
 
                         <TablaNormal
                             textoTitleP="Retenciones"
