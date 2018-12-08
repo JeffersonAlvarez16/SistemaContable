@@ -425,6 +425,7 @@ class ModalNewVenta extends Component {
             switch (item.tipo_pago) {
                 case 'efectivo': {
                     jsonData = this.createJsonFacturaElectronicaEfectivo()
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -432,6 +433,7 @@ class ModalNewVenta extends Component {
                 }
                 case 'credito': {
                     jsonData = this.createJsonFacturaElectronicaCredito(item)
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -439,6 +441,7 @@ class ModalNewVenta extends Component {
                 }
                 case 'tarjeta-credito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -446,6 +449,7 @@ class ModalNewVenta extends Component {
                 }
                 case 'tarjeta-debito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -453,6 +457,7 @@ class ModalNewVenta extends Component {
                 }
                 case 'cheque': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -460,6 +465,7 @@ class ModalNewVenta extends Component {
                 }
                 case 'transferencia': {
                     jsonData = this.createJsonFacturaElectronicaTransferencia()
+                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
@@ -489,7 +495,8 @@ class ModalNewVenta extends Component {
     }
 
     postSet = async (uidUser, jsonData, codigoRegistroVenta) => {
-        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+        //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+        const rawResponse = await fetch('http://192.168.1.97:5000/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -504,6 +511,17 @@ class ModalNewVenta extends Component {
         */ /* if (content != null) {
             this.setState({ estadoModalGuardarVenta: false })
         } */
+    }
+    postSetGeneratePdf = async (uidUser, jsonData, codigoRegistroVenta) => {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'id': uidUser,
+                'codigo': codigoRegistroVenta,
+            },
+            body: JSON.stringify(jsonData)
+        })
     }
 
     //comprobar campos llenos 
@@ -598,11 +616,13 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '0.00',
             fecha_a_pagar: '',
-            caja: cajaSeleccionada.codigo
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
         this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
     }
+
     setSaveRegistroVentaCredito = (codigoVenta, item) => {
         const {
             clienteSeleccionado,
@@ -648,7 +668,8 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: Number(item.valor_acreditado).toFixed(2),
             fecha_a_pagar: item.fecha_vencimiento,
-            caja: cajaSeleccionada.codigo
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
 
         this.setVentaCaja(itemVenta, tipo_pago, item)
@@ -700,14 +721,13 @@ class ModalNewVenta extends Component {
             tipo_pago,
             valor_acreditado: '0.00',
             fecha_a_pagar: '',
-            caja: cajaSeleccionada.codigo
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
         this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
-
-
     }
-
+////////////////////////
     setVentaCaja(itemVenta, tipo_pago, item) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
@@ -1151,7 +1171,7 @@ class ModalNewVenta extends Component {
             "valor_retenido_renta": 0.00,
             "credito": {
                 "fecha_vencimiento": `${item.fecha_vencimiento}`,
-                "monto": Number(item.monto) - Number(item.valor_acreditado)
+                "monto": Number((Number(item.monto) - Number(item.valor_acreditado)).toFixed(2))
             },
             "pagos": [
                 {

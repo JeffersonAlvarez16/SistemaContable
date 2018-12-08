@@ -2,11 +2,8 @@ import React from 'react';
 /* eslint-disable */
 import { MuiPickersUtilsProvider } from 'material-ui-pickers';
 // pick utils
-import MomentUtils from '@date-io/moment';
 import DateFnsUtils from '@date-io/date-fns';
-import LuxonUtils from '@date-io/luxon';
 import { InlineDatePicker } from 'material-ui-pickers';
-import { InlineTimePicker } from 'material-ui-pickers';
 import CalendarTodayIcon from '@material-ui/icons/CalendarToday';
 import colors from '../../../utils/colors';
 

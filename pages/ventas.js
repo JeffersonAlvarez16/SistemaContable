@@ -17,6 +17,7 @@ import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
 import FileCopy from '@material-ui/icons/FileCopy';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import CloseIcon from '@material-ui/icons/Close';
 import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
 import SubtitlesIcon from '@material-ui/icons/Subtitles';
@@ -51,6 +52,7 @@ import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
 import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
 import ModalNewVenta from '../components/plugins/ModalNewVenta';
 import colors from '../utils/colors';
+import ErrorEstado from '../components/plugins/plugins/ErrorEstado';
 
 class Ventas extends Component {
 
@@ -144,10 +146,10 @@ class Ventas extends Component {
                     }
                 });
             }
-        });        
+        });
     }
 
-    obteberCajaSeleccionada=()=>{
+    obteberCajaSeleccionada = () => {
         var db = firebase.database();
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -166,14 +168,14 @@ class Ventas extends Component {
                             this.setState({
                                 cajaSeleccionada: null,
                                 estadoCaja: false,
-                                estadoTabla:'vacio'
+                                estadoTabla: 'vacio'
                             })
                         }
                     } else {
                         this.setState({
                             cajaSeleccionada: null,
                             estadoCaja: false,
-                            estadoTabla:'vacio'
+                            estadoTabla: 'vacio'
                         })
                     }
                 })
@@ -187,19 +189,44 @@ class Ventas extends Component {
         }
 
         if (item.id === 'accions') {
-            return <>
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <ReactToPrint
                     ref={el => (this.refEventoImprimir = el)}
                     trigger={() => <></>}
                     content={() => this.refImprimirResivo}
                 />
-                <IconButton onClick={() => {
-                    this.enviarToPlantillaData(n)
-                }}
-                >
-                    <LocalPrintshopIcon />
-                </IconButton>
-            </>
+                <Tooltip title="Imprimir resivo">
+                    <IconButton onClick={() => {
+                        this.enviarToPlantillaData(n)
+                    }}
+                    >
+                        <LocalPrintshopIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
+                {
+                    n.urlpdf != 'genererando' &&
+                    <Tooltip title="Descargar pdf">
+                        <IconButton onClick={() => {
+                            window.open(
+                                n.urlpdf,
+                                '_blank'
+                            );
+                        }}
+                        >
+                            <PictureAsPdfIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                }
+                {
+                    n.urlpdf === 'genererando' &&
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <IconButton disabled>
+                            <CircularProgress size={20} thickness={5} style={{ color: colors.getColorPrymaryBlue300() }} />
+                        </IconButton>
+                        <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pdf...</div>
+                    </div>
+                }
+            </div>
         }
 
         if (item.id === 'cliente') {
@@ -242,7 +269,7 @@ class Ventas extends Component {
                         }
                         clickable
                         color="inherit"
-                        style={{ margin: 1, height: 25, background: colors.getColorPrymaryGrey200()}}
+                        style={{ margin: 1, height: 25, background: colors.getColorPrymaryGrey200() }}
                     />
                 </div>
             })
@@ -366,7 +393,7 @@ class Ventas extends Component {
                                     this.comprobarUsuario(n)
                                 }, 100)
                             }}>
-                            <CloseIcon style={{ color: '#EF5350' }} fontSize="small"/>
+                            <CloseIcon style={{ color: '#EF5350' }} fontSize="small" />
                         </IconButton>
                     </Tooltip>
                     <IconButton disabled>
@@ -375,12 +402,12 @@ class Ventas extends Component {
                     <div style={{ display: 'flex', alignItems: 'center' }}>Consumidor Final</div>
                 </div>
                 :
-                <div style={{ width: 'max-content' }}>
+                <div style={{ width: 'max-content', display:'flex', flexDirection:'row', alignItems:'center' }}>
                     {
                         n.factura_emitida === 'emitida' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <IconButton disabled>
-                                <DoneAllIcon style={{ color: '#00c853' }} fontSize="small"/>
+                                <DoneAllIcon style={{ color: '#00c853' }} fontSize="small" />
                             </IconButton>
                             <div style={{ color: '#00c853', display: 'flex', alignItems: 'center' }}>Emitida</div>
                         </div>
@@ -396,12 +423,8 @@ class Ventas extends Component {
                                     setTimeout(() => {
                                         this.comprobarUsuario(n)
                                     }, 100)
-                                    /* this.setState({
-                                        codigoEmitirFactura: n.codigo,
-                                        estadoModalCancelarVenta: true,
-                                    }) */
                                 }}>
-                                    <CloseIcon style={{ color: '#EF5350' }} fontSize="small"/>
+                                    <CloseIcon style={{ color: '#EF5350' }} fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="Emitir Factura">
@@ -417,7 +440,40 @@ class Ventas extends Component {
                                          estadoModalEmitirFactura: true,
                                      }) */
                                 }}>
-                                    <InputIcon color='primary' fontSize="small"/>
+                                    <InputIcon color='primary' fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    }
+                    {
+                        n.factura_emitida === 'reenviar' &&
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <Tooltip title="Devolver Venta">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        estadoacciones: 'devolver_venta'
+                                    })
+                                    setTimeout(() => {
+                                        this.comprobarUsuario(n)
+                                    }, 100)
+                                }}>
+                                    <CloseIcon style={{ color: '#EF5350' }} fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="Emitir Factura">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        estadoacciones: 'emitir_factura'
+                                    })
+                                    setTimeout(() => {
+                                        this.comprobarUsuario(n)
+                                    }, 100)
+                                    /*  this.setState({
+                                         codigoEmitirFactura: n.codigo,
+                                         estadoModalEmitirFactura: true,
+                                     }) */
+                                }}>
+                                    <InputIcon color='primary' fontSize="small" />
                                 </IconButton>
                             </Tooltip>
                         </div>
@@ -435,11 +491,12 @@ class Ventas extends Component {
                         n.factura_emitida === 'error' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <IconButton disabled>
-                                <CloseIcon style={{ color: 'red' }} fontSize="small"/>
+                                <CloseIcon style={{ color: 'red' }} fontSize="small" />
                             </IconButton>
                             <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error de emisión</div>
                         </div>
                     }
+                    <ErrorEstado>{n.error_factura_emitida}</ErrorEstado>
                 </div >
         }
 
@@ -827,7 +884,7 @@ class Ventas extends Component {
                                     }
                                 }}
                             >
-                            <AddIcon />
+                                <AddIcon />
                             </ItemMenuHerramienta>
 
                             <div style={{ flex: 0.95 }}></div>
