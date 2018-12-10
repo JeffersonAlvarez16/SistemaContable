@@ -77,11 +77,10 @@ const ContenedorProductoVista = (props) => {
                 {
                     Boolean(props.seleccionarProductoPordefecto) &&
                     <TextField
-                        id="filled-unidad-precio-defecto"
+                        id="filled-unidad-precio-defecto-asas"
                         select
                         label="Cargar precio por defecto"
-                        //error={this.state.precio_por_defecto.length === 0}
-                        value={props.itemProductoCargado ? props.itemProductoCargado.precio_por_defecto : ''}
+                        value={props.itemProductoCargado ? props.itemProductoCargado.precio_por_defecto : 'sa'}
                         onChange={event => props.onChangePrecio(event.target.value)}
                         margin="normal"
                         variant="outlined"
@@ -102,7 +101,6 @@ const ContenedorProductoVista = (props) => {
                         id="filled-unidad-precio-defecto-activar"
                         select
                         label="Cargar productos con este precio"
-                        //error={this.state.precio_por_defecto.length === 0}
                         value={props.precioSeleccionadoCargar ? props.precioSeleccionadoCargar : ''}
                         onChange={event => props.precioSeleccionadoCargarCambiar(event.target.value)}
                         margin="normal"

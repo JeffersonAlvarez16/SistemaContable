@@ -166,7 +166,7 @@ class TablaNormal extends React.Component {
                 {
                     this.state.estadoTabla === 'vacio' &&
                     <TablaVacia
-                        title={`Aún no hay ${textoTitleP}`}
+                        title={`${textoTitleP}: 0`}
                         titleButton={`AGREGAR ${textoTitleS}`}
                     />
                 }

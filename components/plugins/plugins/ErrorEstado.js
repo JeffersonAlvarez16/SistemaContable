@@ -8,7 +8,7 @@ const ErrorEstado = props => {
             color: colors.getColorPrymaryRed300(),
             fontStyle: 'italic',
             width: '100%',
-            textAlign:'center'
+            textAlign:'center',
         }}
         >
             {props.children}

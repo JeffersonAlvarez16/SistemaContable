@@ -29,6 +29,10 @@ import ContenedorBotonesVenta from './ventas/ContenedorBotonesVenta';
 import ModalFinalizaPago from '../modals_container/ventas/ModalFinalizaPago';
 import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
 import colors from '../../utils/colors';
+import ContenedorNumeroFactura from './ventas/ContenedorNumeroFactura';
+
+
+
 
 class ModalNewVenta extends Component {
 
@@ -97,7 +101,11 @@ class ModalNewVenta extends Component {
         tipo_venta: 'factura',
         // ambiente
         ambienteFacturacion: 0,
+        //numero de factura
+        numero_factura: ''
     }
+
+
 
     componentDidMount() {
         document.addEventListener("keydown", this.escFunction, false);
@@ -124,6 +132,54 @@ class ModalNewVenta extends Component {
                 empresaRef.on('value', (snap) => {
                     if (snap.val()) {
                         this.setState({ precios: funtions.snapshotToArray(snap) })
+                    }
+                })
+            }
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('users/' + user.uid + "/configuracion")
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_factura
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        const sumaFinal = `${cadenaFinal}${suma}`
+                        this.setState({
+                            numero_factura: sumaFinal,
+                        })
+                    }
+                })
+            }
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('users/' + user.uid + "/usuarios/" + this.props.usuario.code + '/punto_emision')
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({
+                            punto_emision: snap.val()
+                        })
+                    }
+                })
+            }
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('auth_admins/' + user.uid + '/establecimiento/codigo')
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({
+                            codigoEstablecimiento: snap.val()
+                        })
                     }
                 })
             }
@@ -175,7 +231,7 @@ class ModalNewVenta extends Component {
         if (item.id === 'precio_por_defecto') {
             return <div style={{ width: 100, position: 'relative', left: -80 }}>
                 <TextField
-                    id={"filled-unidad-precio-defecto" + n.codigo}
+                    id={"filled-unidad-precio-defecto" }
                     select
                     label=""
                     //error={this.state.precio_por_defecto.length === 0}
@@ -416,7 +472,29 @@ class ModalNewVenta extends Component {
         }
     }
 
-
+    sumarNumeroFactura = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var numeroFactura = db.ref('users/' + user.uid + "/configuracion")
+                numeroFactura.once('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_factura
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        numeroFactura.update({
+                            numero_factura: `${cadenaFinal}${suma}`
+                        })
+                    }
+                })
+            }
+        })
+    }
 
     enviarFacturaElectronica = (codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item) => {
         if (tipo_venta === 'factura') {
@@ -425,48 +503,50 @@ class ModalNewVenta extends Component {
             switch (item.tipo_pago) {
                 case 'efectivo': {
                     jsonData = this.createJsonFacturaElectronicaEfectivo()
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'credito': {
                     jsonData = this.createJsonFacturaElectronicaCredito(item)
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'tarjeta-credito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'tarjeta-debito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'cheque': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
+                    this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'transferencia': {
                     jsonData = this.createJsonFacturaElectronicaTransferencia()
-                    //this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
+                    this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
@@ -485,6 +565,8 @@ class ModalNewVenta extends Component {
     enviarFacturaElectrónica = (facturaElectronica, uidUser, jsonData, codigoRegistroVenta) => {
         if (Boolean(facturaElectronica)) {
             this.postSet(uidUser, jsonData, codigoRegistroVenta)
+        }else{
+            this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
         }
     }
 
@@ -513,7 +595,7 @@ class ModalNewVenta extends Component {
         } */
     }
     postSetGeneratePdf = async (uidUser, jsonData, codigoRegistroVenta) => {
-        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+        const rawResponse = await fetch('http://192.168.1.97:5000/facturaPdf', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -727,7 +809,7 @@ class ModalNewVenta extends Component {
         this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
     }
-////////////////////////
+    ////////////////////////
     setVentaCaja(itemVenta, tipo_pago, item) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
@@ -1002,13 +1084,17 @@ class ModalNewVenta extends Component {
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
             listaProductosSeleccionados,
-            precioSeleccionado
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -1018,8 +1104,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -1096,13 +1182,17 @@ class ModalNewVenta extends Component {
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
             listaProductosSeleccionados,
-            precioSeleccionado
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -1112,8 +1202,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -1194,13 +1284,17 @@ class ModalNewVenta extends Component {
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
             listaProductosSeleccionados,
-            precioSeleccionado
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -1210,8 +1304,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -1293,13 +1387,17 @@ class ModalNewVenta extends Component {
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
             listaProductosSeleccionados,
-            precioSeleccionado
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -1309,8 +1407,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -1625,7 +1723,6 @@ class ModalNewVenta extends Component {
             }
         }
 
-
         return <>
             <div style={{
                 zIndex: 30,
@@ -1636,6 +1733,7 @@ class ModalNewVenta extends Component {
                 width: '100vw',
                 height: '100vh'
             }}>
+
                 <Grid container
                     variant="permanent"
                     style={{
@@ -1693,6 +1791,7 @@ class ModalNewVenta extends Component {
 
                             </Grid>
                             <Grid item xs={8}>
+
                                 <ContenedorProductoVista
                                     itemProductoCargado={this.state.itemProductoCargado}
                                     cargaAutomatica={this.state.cargaAutomatica}
@@ -1734,6 +1833,11 @@ class ModalNewVenta extends Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3} style={{ overflowY: 'auto', height: '100vh' }}>
+                        <ContenedorNumeroFactura
+                            numero_factura={this.state.numero_factura}
+                            punto_emision={this.state.punto_emision}
+                            codigoEstablecimiento={this.state.codigoEstablecimiento}
+                        />
                         {
                             this.state.tipo_venta === 'factura' &&
                             <ContenedorClienteVista

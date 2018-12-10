@@ -80,7 +80,7 @@ export const mailFolderListItems = (
                 <ListItemText primary="Contactos" />
             </ListItem>
         </Link>
-        <Link prefetch href="/ventas">
+        <Link prefetch href="/ventasFac">
             <ListItem button>
                 <Tooltip title="Ventas" placement="right">
                     <ListItemIcon>

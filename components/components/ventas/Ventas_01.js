@@ -1,13 +1,13 @@
 import React, { Component } from 'react';
-import Layout from '../components/containers/Layout';
+import Layout from '../../containers/Layout';
 import Grid from '@material-ui/core/Grid';
-import SectionFactura from '../components/components/SectionFactura';
-import SectionContentFactura from '../components/components/SectionContentFactura';
-import MenuHerramientas from '../components/components/menus/MenuHerramientas';
-import Search from '../components/components/Search';
-import TablaNormal from '../components/components/tables/TableNormal';
+import SectionFactura from '../SectionFactura';
+import SectionContentFactura from '../SectionContentFactura';
+import MenuHerramientas from '../menus/MenuHerramientas';
+import Search from '../Search';
+import TablaNormal from '../tables/TableNormal';
 import Divider from '@material-ui/core/Divider';
-import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
+import ItemMenuHerramienta from '../menus/ItemMenuHerramienta';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
@@ -35,29 +35,29 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 
-import ReturnTextTable from '../components/components/tables/ReturnTextTable';
-import FullScreenDialog from '../components/components/FullScreenDialog';
-import NuevaVenta from '../components/plugins/nueva_venta';
-import funtions from '../utils/funtions';
-import ModalCompraProductos from '../components/modals_container/ModalCompraProductos';
-import setSnackBars from '../components/plugins/setSnackBars';
-import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
-import EmitirFacturaModal from '../components/plugins/EmitirFacturaModal';
-import ModalCancelarVenta from '../components/modals_container/ventas/ModalCancelarVenta';
-import ModalEditarVenta from '../components/modals_container/ventas/ModalEditarVenta';
+import ReturnTextTable from '../tables/ReturnTextTable';
+import FullScreenDialog from '../FullScreenDialog';
+import NuevaVenta from '../../plugins/nueva_venta';
+import funtions from '../../../utils/funtions';
+import ModalCompraProductos from '../../modals_container/ModalCompraProductos';
+import setSnackBars from '../../plugins/setSnackBars';
+import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
+import EmitirFacturaModal from '../../plugins/EmitirFacturaModal';
+import ModalCancelarVenta from '../../modals_container/ventas/ModalCancelarVenta';
+import ModalEditarVenta from '../../modals_container/ventas/ModalEditarVenta';
 import { CircularProgress, Chip, Avatar } from '@material-ui/core';
 
 import ReactToPrint from "react-to-print";
-import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
-import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
-import ModalNewVenta from '../components/plugins/ModalNewVenta';
-import colors from '../utils/colors';
-import ErrorEstado from '../components/plugins/plugins/ErrorEstado';
+import ResivoVenta from '../../plugins/plantillas/resivo_venta';
+import ContainerPlantillas from '../../plugins/plantillas/container_plantillas';
+import ModalNewVenta from '../../plugins/ModalNewVenta';
+import colors from '../../../utils/colors';
+import ErrorEstado from '../../plugins/plugins/ErrorEstado';
 
-import ViewPDF from '../components/plugins/plugins/ViewPDF'
+import ViewPDF from '../../plugins/plugins/ViewPDF'
 
 
-class Ventas extends Component {
+class Ventas_01 extends Component {
 
     state = {
 
@@ -115,6 +115,9 @@ class Ventas extends Component {
             fechaActual: funtions.obtenerFechaActual()
         })
         //setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
+        this.obteberCajaSeleccionada()
+        this.obtenerPermisosusuarios()
+        this.comprobarUsuario()
 
     }
 
@@ -161,7 +164,7 @@ class Ventas extends Component {
                 var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
                 operacionVentaRefCaja.on('value', (snap) => {
                     if (snap.val()) {
-                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                         if (caja != null) {
                             this.setState({
                                 cajaSeleccionada: caja,
@@ -586,7 +589,7 @@ class Ventas extends Component {
 
                 operacionVentaRefCaja.once('value', (snap) => {
                     if (snap.val()) {
-                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
 
                         var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
 
@@ -634,7 +637,7 @@ class Ventas extends Component {
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
-                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
                     var operacionVentaCajaEliminar = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
@@ -665,10 +668,11 @@ class Ventas extends Component {
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
-                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.state.usuario.code)[0]
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaDevuelta = db.ref('users/' + firebase.auth().currentUser.uid + '/lista_ventas/ventas_devueltas/'+ itemVenta.codigo)
-                    itemVenta.caja=caja.codigo
+                    var operacionVentaDevuelta = db.ref('users/' + firebase.auth().currentUser.uid + '/lista_ventas/ventas_devueltas/' + itemVenta.codigo)
+                    itemVenta.caja = caja.codigo
+                    itemVenta.factura_emitida = 'devuelta'
                     operacionVentaDevuelta.set(itemVenta)
                 }
             }
@@ -698,7 +702,7 @@ class Ventas extends Component {
             cliente_proveedor: cliente,
             productos: arrayProductos,
             total_final: `${Number(total).toFixed(2)}`,
-            empleado: this.state.usuario.code,
+            empleado: this.props.usuario.code,
             observacion: '',
             subtotal: `${Number(subtotal).toFixed(2)}`,
             descuento: `${Number(descuento).toFixed(2)}`,
@@ -800,7 +804,7 @@ class Ventas extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.props.usuario.code}`)
                 usuariosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         if (snapshot.val().privilegios.ventas === true) {
@@ -819,7 +823,7 @@ class Ventas extends Component {
     }
 
     comprobarUsuario = (item) => {
-        if (this.state.usuario.tipo_usuario === 'administrador') {
+        if (this.props.usuario.tipo_usuario === 'administrador') {
             if (this.state.estadoacciones === 'devolver_venta') {
                 this.setState({
                     codigoEmitirFactura: item.codigo,
@@ -836,22 +840,22 @@ class Ventas extends Component {
             }
         } else {
             if (this.state.estadoacciones === 'devolver_venta') {
-                if (item.empleado === this.state.usuario.code) {
+                if (item.empleado === this.props.usuario.code) {
                     this.setState({
                         codigoEmitirFactura: item.codigo,
                         estadoModalCancelarVenta: true,
                     })
                 } else {
-                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.state.usuario.nombre} no registro esta Venta`, 2000)
+                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.props.usuario.nombre} no registro esta Venta`, 2000)
                 }
             } else if (this.state.estadoacciones === 'emitir_factura') {
-                if (item.empleado === this.state.usuario.code) {
+                if (item.empleado === this.props.usuario.code) {
                     this.setState({
                         codigoEmitirFactura: item.codigo,
                         estadoModalEmitirFactura: true,
                     })
                 } else {
-                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.state.usuario.nombre} no registro esta Venta`, 2000)
+                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.props.usuario.nombre} no registro esta Venta`, 2000)
                 }
             }
         }
@@ -859,15 +863,7 @@ class Ventas extends Component {
 
     render() {
         return (
-            <Layout title="Ventas" onChangueUserState={usuario => {
-                this.setState({ usuario: usuario })
-                setTimeout(() => {
-                    this.obteberCajaSeleccionada()
-                    this.obtenerPermisosusuarios()
-                    this.comprobarUsuario()
-                }, 100)
-            }
-            }>
+            <div >
                 {/*  <ViewPDF
             /> */}
                 {
@@ -927,7 +923,7 @@ class Ventas extends Component {
                             textoTitleS="Venta"
                             selectedItems={true}
                             toolbar={false}
-                            notTab={true}
+                            notTab={false}
                             data={this.state.listaVentas}
                             rows={this.state.rowslistaVentas}
                             handleGetData={this.handleGetData}
@@ -939,7 +935,7 @@ class Ventas extends Component {
 
                         <FullScreenDialog openModal={this.state.openModalNewVentaFinal}>
                             <ModalNewVenta
-                                usuario={this.state.usuario}
+                                usuario={this.props.usuario}
                                 handleClose={() => this.setState({ openModalNewVentaFinal: false })}
                                 item={this.state.itemEditar}
                                 cajaSeleccionada={this.state.cajaSeleccionada}
@@ -952,7 +948,7 @@ class Ventas extends Component {
                                 handleClose={() => this.setState({
                                     estadoModalSimpleCompraProductos: false,
                                 })}
-                                usuario={this.state.usuario}
+                                usuario={this.props.usuario}
                                 tipoAjuste='devolucion_cliente'
                             />
                         </FullScreenDialog>
@@ -1019,9 +1015,9 @@ class Ventas extends Component {
                     <CircularProgress />
                 }
 
-            </Layout>
+            </div>
         );
     }
 }
 
-export default Ventas
+export default Ventas_01

@@ -21,7 +21,8 @@ class ModalFinalizaPago extends React.Component {
         fecha_vencimiento: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
         monto: '',
 
-        valor_acreditado: ''
+        valor_acreditado: '',
+        buttonEstadoAceptar:false,
     }
 
     componentDidMount() {
@@ -67,13 +68,18 @@ class ModalFinalizaPago extends React.Component {
 
     }
 
-    finalizarPago = () => {
+    finalizarPago = (event) => {
+       
         switch (this.props.tipo_pago) {
             case 'efectivo': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
                 this.props.handleAceptar({ tipo_pago: 'efectivo' })
                 break
             }
             case 'credito': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
                 this.props.handleAceptar({
                     tipo_pago: 'credito',
                     fecha_vencimiento: this.state.fecha_vencimiento,
@@ -84,6 +90,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-credito': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-credito',
                         medio: 'Tarjeta de crédito',
@@ -96,6 +104,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-debito': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-debito',
                         medio: 'Tarjeta de débito',
@@ -108,6 +118,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'cheque': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'cheque',
                         medio: 'Cheque',
@@ -119,6 +131,8 @@ class ModalFinalizaPago extends React.Component {
                 break
             }
             case 'transferencia': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
                 this.props.handleAceptar({ tipo_pago: 'transferencia' })
                 break
             }
@@ -314,7 +328,7 @@ class ModalFinalizaPago extends React.Component {
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => this.finalizarPago()} color="primary" >
+                    <Button disabled={this.state.buttonEstadoAceptar} onClick={event => this.finalizarPago(event)} color="primary" >
                         Aceptar
                 </Button>
                     <Button onClick={() => this.props.handleClose()} color="primary" >
