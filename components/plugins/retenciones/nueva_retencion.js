@@ -106,7 +106,7 @@ class NuevaRetencion extends Component {
                 this.guardarRetencionBaseDatos(retencion, codigo)
 
                 this.setState({ estadoModalEmitirRetencion: false })
-                this.props.handleClose() 
+                this.props.handleClose()
             }
         })
     }
@@ -118,10 +118,10 @@ class NuevaRetencion extends Component {
                 var codigo = funtions.guidGenerator()
                 var retencion = this.generarRetencionRenta()
                 this.postSet(user.uid, retencion, codigo)
-                 this.guardarRetencionBaseDatos(retencion, codigo)
- 
-                 this.setState({ estadoModalEmitirRetencion: false })
-                 this.props.handleClose()
+                this.guardarRetencionBaseDatos(retencion, codigo)
+
+                this.setState({ estadoModalEmitirRetencion: false })
+                this.props.handleClose()
             }
         })
     }
@@ -150,7 +150,8 @@ class NuevaRetencion extends Component {
 
     postSet = async (uidUser, jsonData, codigo) => {
         //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
-        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
+        // const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
+        const rawResponse = await fetch('http://192.168.1.97:5000/retensincontabilidad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -159,14 +160,6 @@ class NuevaRetencion extends Component {
             },
             body: JSON.stringify(jsonData)
         })
-
-        const content = await rawResponse.json();
-        //console.log(content)
-        //setSnackBars.openSnack('success', 'rootSnackBar', 'Retención emitida con exito: ' + content.estado, 2000)
-        /* if(content!=null){
-            this.setState({estadoModalEmitirRetencion:false})
-            this.props.handleClose()
-        } */
     }
 
 
@@ -228,6 +221,16 @@ class NuevaRetencion extends Component {
         var horaForma = hora[4].split(':')
         var horaLista = horaForma[0] + ':' + horaForma[1]
 
+        var numero_documento = this.state.numero_documento
+        var numeroRecorrido = numero_documento.toString().length
+        var numeroFinal = ''
+        for (var i = 0; i < Number(numeroRecorrido); i++) {
+            numeroFinal = numeroFinal + numero_documento.charAt(i)
+            if (i === 2 || i == 5) {
+                numeroFinal = numeroFinal + '-'
+            }
+        }
+
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
@@ -255,7 +258,7 @@ class NuevaRetencion extends Component {
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
                     "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
                     "valor_retenido": Number(this.state.valorRenta)
@@ -307,7 +310,7 @@ class NuevaRetencion extends Component {
                     "codigo": "2",
                     "codigo_porcentaje": this.state.retencionIva.tipo_porcentaje,
                     "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigo(this.state.retencionIva.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionIva.tipo_documento,
                     "valor_retenido": Number(this.state.valorIVA)
@@ -317,7 +320,7 @@ class NuevaRetencion extends Component {
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
                     "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
                     "valor_retenido": Number(this.state.valorRenta)
@@ -597,9 +600,11 @@ class NuevaRetencion extends Component {
                                             label="Numero de documento"
                                             error={this.state.numero_documento.length < 15 ? true : false}
                                             value={this.state.numero_documento}
-                                            onChange={event => this.setState({
-                                                numero_documento: event.target.value
-                                            })}
+                                            onChange={event => {
+                                                this.setState({
+                                                    numero_documento: event.target.value
+                                                })
+                                            }}
                                             margin="normal"
                                             variant="outlined"
                                             style={{ width: '100%' }}

@@ -225,7 +225,7 @@ class Caja extends Component {
                                 <ChipTabla
                                     codigo={n.codigo}
                                     cantidad={Object.values(n.ventas).length}
-                                    total={<Dolar>{this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}</Dolar>}
+                                    total={this.state.sumaTotalVentas.filter(item => item.codigo === n.codigo)[0].sumaEfectivo}
                                     label={'Ventas'}
                                     background={colors.getColorPrymaryLightCajaActivada()}
                                     backgroundDark={colors.getColorPrymaryDarkCajaActivada()}

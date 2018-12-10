@@ -649,14 +649,36 @@ class Ventas_01 extends Component {
                     operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
 
-                    cajaRefValorActual.once('value', (snap2) => {
+                    var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/').orderByChild('cliente/codigo').equalTo(itemVenta.cliente.codigo)
+                    cuentaCobrarDeudaQuitarRef.once('value', (snap2) => {
                         if (snap2.val()) {
-                            cajaRefValorActual.update({
-                                valor_caja: Number(Number(snap2.val().valor_caja) - Number(itemVenta.total)).toFixed(2)
-                            })
+                            var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + funtions.snapshotToArray(snap2)[0].cliente.codigo + '/lista_deudas/' + itemVenta.codigo)
+                            cuentaCobrarDeudaQuitarRef.remove()
 
                         }
                     })
+
+                    if (Number(itemVenta.valor_acreditado) > 0) {
+                        var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/').orderByChild('cliente/codigo').equalTo(itemVenta.cliente.codigo)
+                        cuentaCobrarDeudaQuitarRef.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + funtions.snapshotToArray(snap2)[0].cliente.codigo + '/lista_acreditados/' + itemVenta.codigo)
+                                cuentaCobrarDeudaQuitarRef.remove()
+                            }
+                        })
+                    }
+
+                    if (itemVenta.tipo_pago === 'efectivo') {
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                cajaRefValorActual.update({
+                                    valor_caja: Number(Number(snap2.val().valor_caja) - Number(itemVenta.total)).toFixed(2)
+                                })
+
+                            }
+                        })
+                    }
+
                 }
             }
         })
@@ -674,6 +696,19 @@ class Ventas_01 extends Component {
                     itemVenta.caja = caja.codigo
                     itemVenta.factura_emitida = 'devuelta'
                     operacionVentaDevuelta.set(itemVenta)
+                    if (Number(itemVenta.valor_acreditado) > 0) {
+                        var operacionAcreditadoDevueltoCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/ventas_devueltas/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
+                        operacionAcreditadoDevueltoCaja.remove()
+
+                        var operacionValorTotalCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                        operacionValorTotalCaja.once('value', (snap) => {
+                            if (snap.val()) {
+                                operacionValorTotalCaja.update({
+                                    valor_caja: Number(snap.val().valor_caja) - Number(itemVenta.valor_acreditado)
+                                })
+                            }
+                        })
+                    }
                 }
             }
         })

@@ -255,14 +255,26 @@ class DeudasCobrar extends Component {
 
         if (item.id === 'lista_deudas') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <ChipTabla
-                    codigo={n.codigo}
-                    cantidad={Object.values(n.lista_deudas).length}
-                    total={Number(this.state.sumaTotalListaDeudas.filter(item => item.codigo === n.codigo)[0].suma).toFixed(2)}
-                    label={'Deuda total'}
-                    background={colors.getColorPrymary()}
-                    backgroundDark={colors.getColorPrymaryDark()}
-                />
+                {
+                    n.lista_acreditados != null ?
+                        <ChipTabla
+                            codigo={n.codigo}
+                            cantidad={Object.values(n.lista_deudas).length}
+                            total={Number(this.state.sumaTotalListaDeudas.filter(item => item.codigo === n.codigo)[0].suma).toFixed(2)}
+                            label={'Deuda total'}
+                            background={colors.getColorPrymary()}
+                            backgroundDark={colors.getColorPrymaryDark()}
+                        />
+                        :
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                            </Avatar>}
+                            label="Deuda total"
+                            clickable
+                            color="inherit"
+                        />
+                }
             </div>
         }
 
