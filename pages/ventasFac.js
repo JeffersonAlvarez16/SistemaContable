@@ -25,6 +25,7 @@ import { CircularProgress } from '@material-ui/core';
 
 import Ventas_01 from '../components/components/ventas/Ventas_01'
 import VentasDevueltas_01 from '../components/components/ventas/VentasDevueltas_01'
+import HistorialVentas_01 from '../components/components/ventas/HistorialVentas_01'
 
 class VentasFac extends Component {
 
@@ -85,11 +86,13 @@ class VentasFac extends Component {
                             <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
                                 <Tab label="Ventas" />
                                 <Tab label="Ventas canceladas" />
+                                <Tab label="Historial de ventas" />
                             </Tabs>
                         </AppBar>
                         <div>
                             {this.state.valueTab === 0 && <Ventas_01 usuario={this.state.usuario} />}
                             {this.state.valueTab === 1 && <VentasDevueltas_01 usuario={this.state.usuario} />}
+                            {this.state.valueTab === 2 && <HistorialVentas_01 usuario={this.state.usuario} />}
                         </div>
                     </>
                 }

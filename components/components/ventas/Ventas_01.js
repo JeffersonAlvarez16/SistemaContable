@@ -564,7 +564,7 @@ class Ventas_01 extends Component {
     }
 
     postSet = async (uidUser, jsonData, codigo) => {
-        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
+        const rawResponse = await fetch('http://192.168.1.97:5000/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -19,6 +19,8 @@ import PaymentIcon from '@material-ui/icons/Payment';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import DoneIcon from '@material-ui/icons/Done';
+import TextField from '@material-ui/core/TextField';
+
 
 //firebase 
 import firebase from 'firebase/app';
@@ -38,7 +40,10 @@ import ReactToPrint from "react-to-print";
 import colors from '../../../utils/colors';
 import ErrorEstado from '../../plugins/plugins/ErrorEstado';
 
-class VentasDevueltas_01 extends Component {
+import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
+import EmitirFacturaModal from '../../plugins/EmitirFacturaModal';
+
+class HistorialVentas_01 extends Component {
 
     state = {
         listaVentas: [],
@@ -74,46 +79,49 @@ class VentasDevueltas_01 extends Component {
     }
 
     componentDidMount() {
+        var fehca = funtions.obtenerFechaActual().toString().split('-')
+        var fechaNueva = `${fehca[2]}-${fehca[1]}-${fehca[0]}`
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
-        //setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
         this.obteberCajaSeleccionada()
-        this.obtenerPermisosusuarios()
-        this.comprobarUsuario()
-
     }
 
-    obtenerDataBaseDatos = () => {
+    obtenerDataBaseDatos = (fecha) => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/lista_ventas/ventas_devueltas').orderByChild('caja').equalTo(this.state.cajaSeleccionada.codigo)
-                productosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                        this.setState({
-                            listaVentas: [],
-                            listaVentasTemporal: [],
-                            estadoTabla: 'cargando'
-                        })
-                        var lista = funtions.snapshotToArray(snapshot)
-                        var filterList = lista.sort((a, b) => {
-                            a = new Date(a.order);
-                            b = new Date(b.order);
-                            return a > b ? -1 : a < b ? 1 : 0;
-                        })
-                        this.setState({
-                            listaVentas: filterList,
-                            listaVentasTemporal: filterList,
-                            estadoTabla: 'llena'
-                        })
-                    } else {
-                        this.setState({
-                            listaVentas: [],
-                            listaVentasTemporal: [],
-                            estadoTabla: 'vacio'
-                        })
-                    }
+                var ventasRef = db.ref('users/' + user.uid + '/ventas').orderByChild('fecha_venta').equalTo(fecha)
+                var vetasReDevueltas = db.ref('users/' + user.uid + '/lista_ventas/ventas_devueltas').orderByChild('fecha_venta').equalTo(fecha)
+                ventasRef.on('value', (snapshot) => {
+                    vetasReDevueltas.on('value', (snap) => {
+                        if (snapshot.val() || snap.val()) {
+                            this.setState({
+                                listaVentas: [],
+                                listaVentasTemporal: [],
+                                estadoTabla: 'cargando'
+                            })
+                            var listaVentas = funtions.snapshotToArray(snapshot)
+                            var listaVentasDevueltas = funtions.snapshotToArray(snap)
+                            var listaFinal = listaVentas.concat(listaVentasDevueltas)
+                            var filterList = listaFinal.sort((a, b) => {
+                                a = new Date(a.order);
+                                b = new Date(b.order);
+                                return a > b ? -1 : a < b ? 1 : 0;
+                            })
+                            this.setState({
+                                listaVentas: filterList,
+                                listaVentasTemporal: filterList,
+                                estadoTabla: 'llena'
+                            })
+                        } else {
+                            this.setState({
+                                listaVentas: [],
+                                listaVentasTemporal: [],
+                                estadoTabla: 'vacio'
+                            })
+                        }
+                    })
                 });
             }
         });
@@ -133,7 +141,7 @@ class VentasDevueltas_01 extends Component {
                                 cajaSeleccionada: caja,
                                 estadoCaja: caja.estado,
                             })
-                            this.obtenerDataBaseDatos()
+                            this.obtenerDataBaseDatos(this.state.fechaActual)
                         } else {
                             this.setState({
                                 cajaSeleccionada: null,
@@ -153,65 +161,15 @@ class VentasDevueltas_01 extends Component {
         })
     }
 
-    obtenerPermisosusuarios = () => {
-        firebase.auth().onAuthStateChanged((user) => {
-            if (user) {
-                var db = firebase.database();
-                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.props.usuario.code}`)
-                usuariosRef.on('value', (snapshot) => {
-                    if (snapshot.val()) {
-                        if (snapshot.val().privilegios.ventas === true) {
-                            this.setState({
-                                estadoPermisos: true
-                            })
-                        } else {
-                            this.setState({
-                                estadoPermisos: false
-                            })
-                        }
-                    }
-                });
-            }
-        });
-    }
 
-    comprobarUsuario = (item) => {
-        if (this.props.usuario.tipo_usuario === 'administrador') {
-            if (this.state.estadoacciones === 'devolver_venta') {
-                this.setState({
-                    codigoEmitirFactura: item.codigo,
-                    estadoModalCancelarVenta: true,
-                })
-            } else if (this.state.estadoacciones === 'emitir_factura') {
-                this.setState({
-                    codigoEmitirFactura: item.codigo,
-                    estadoModalEmitirFactura: true,
-                })
-            } else {
-                this.setState({ itemSeleccionado: item })
-                this.setState({ openModalNewCliente: true })
-            }
-        } else {
-            if (this.state.estadoacciones === 'devolver_venta') {
-                if (item.empleado === this.props.usuario.code) {
-                    this.setState({
-                        codigoEmitirFactura: item.codigo,
-                        estadoModalCancelarVenta: true,
-                    })
-                } else {
-                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.props.usuario.nombre} no registro esta Venta`, 2000)
-                }
-            } else if (this.state.estadoacciones === 'emitir_factura') {
-                if (item.empleado === this.props.usuario.code) {
-                    this.setState({
-                        codigoEmitirFactura: item.codigo,
-                        estadoModalEmitirFactura: true,
-                    })
-                } else {
-                    setSnackBars.openSnack('warning', 'rootSnackBar', `Usted ${this.props.usuario.nombre} no registro esta Venta`, 2000)
-                }
-            }
-        }
+    cambiarListaPorFecha = fecha => {
+        this.setState({
+            fechaActual: fecha,
+            estadoTabla: 'cargando'
+        })
+        setTimeout(() => {
+            this.obtenerDataBaseDatos(fecha)
+        }, 200)
     }
 
     handleGetData = (n, item) => {
@@ -398,31 +356,51 @@ class VentasDevueltas_01 extends Component {
         if (item.id === 'factura_emitida') {
             return n.cliente === 'Consumidor Final' ?
                 <div style={{ display: 'flex', flexDirection: 'row', width: 'max-content' }}>
-                    <Tooltip title="Devolver Venta">
-                        <IconButton
-                            onClick={() => {
-                                this.setState({
-                                    estadoacciones: 'devolver_venta'
-                                })
-                                setTimeout(() => {
-                                    this.comprobarUsuario(n)
-                                }, 100)
-                            }}>
-                            <CloseIcon style={{ color: '#EF5350' }} fontSize="small" />
-                        </IconButton>
-                    </Tooltip>
-                    <IconButton disabled>
-                        <DoneIcon />
-                    </IconButton>
                     <div style={{ display: 'flex', alignItems: 'center' }}>Consumidor Final</div>
                 </div>
                 :
                 <div style={{ width: 'max-content', display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                     {
+                        n.factura_emitida === 'emitida' &&
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            <IconButton disabled>
+                                <DoneAllIcon style={{ color: '#00c853' }} fontSize="small" />
+                            </IconButton>
+                            <div style={{ color: '#00c853', display: 'flex', alignItems: 'center' }}>Emitida</div>
+                        </div>
+                    }
+                    {
                         n.factura_emitida === 'devuelta' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
                             <div style={{ color: colors.getColorPrymaryRed300(), display: 'flex', alignItems: 'center' }}>cancelada</div>
                         </div>
+                    }
+                    {
+                        n.factura_emitida === 'no_emitida' &&
+                        <Tooltip title="Emitir Factura">
+                            <IconButton onClick={() => {
+                                this.setState({
+                                    estadoacciones: 'emitir_factura'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+                            }}>
+                                <InputIcon color='primary' fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
+                    }
+                    {
+                        n.factura_emitida === 'reenviar' &&
+                        <div style={{ display: 'flex', alignItems: 'center' }}>Reenviar</div>
+                    }
+                    {
+                        n.factura_emitida === 'pendiente' &&
+                        <div style={{ display: 'flex', alignItems: 'center' }}>Pendiente</div>
+                    }
+                    {
+                        n.factura_emitida === 'error' &&
+                        <div style={{ display: 'flex', alignItems: 'center' }}>Error al emitir</div>
                     }
                 </div >
         }
@@ -488,6 +466,43 @@ class VentasDevueltas_01 extends Component {
             </div>
             : texto
 
+    comprobarUsuario = (item) => {
+        this.setState({
+            codigoEmitirFactura: item.codigo,
+            estadoModalEmitirFactura: true,
+        })
+    }
+
+    recuperarJsonFactura = codigo => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/facturas_ventas/' + codigo);
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.postSet(user.uid, snapshot.val(), codigo)
+                        var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
+                        venteRef.update({
+                            factura_emitida: 'pendiente'
+                        })
+                        //setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
+                    }
+                })
+            }
+        })
+    }
+
+    postSet = async (uidUser, jsonData, codigo) => {
+        const rawResponse = await fetch('http://192.168.1.97:5000/generarfactura', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'id': uidUser,
+                'codigo': codigo,
+            },
+            body: JSON.stringify(jsonData)
+        })
+    }
 
     handleSearch = (codigo) => {
         this.setState({ listaVentas: [], estadoTabla: 'cargando' })
@@ -509,12 +524,38 @@ class VentasDevueltas_01 extends Component {
     render() {
         return (
             <div>
+                <MenuHerramientas>
+
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <TextField
+                            id="datetime-local"
+                            type="date"
+                            defaultValue={funtions.obtenerFechaActual()}
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                        />
+                    </div>
+
+                    <div style={{ flex: 0.95 }}></div>
+
+                    <Search
+                        id='buscar-cliente-clientes'
+                        textoSearch="Buscar..."
+                        textoTooltip="Buscar venta"
+                        handleSearch={this.handleSearch}
+                    />
+                </MenuHerramientas>
+
+                <Divider />
+
                 <TablaNormal
                     textoTitleP="Ventas Canceladas"
                     textoTitleS="Venta"
                     selectedItems={true}
                     toolbar={false}
-                    notTab={true}
+                    notTab={false}
                     data={this.state.listaVentas}
                     rows={this.state.rowslistaVentas}
                     handleGetData={this.handleGetData}
@@ -522,9 +563,21 @@ class VentasDevueltas_01 extends Component {
                     itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
                 />
 
+                <ModalContainerNormal
+                    open={this.state.estadoModalEmitirFactura}
+                    handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                >
+                    <EmitirFacturaModal
+                        handleClose={() => this.setState({ estadoModalEmitirFactura: false })}
+                        handleEmitir={() => {
+                            this.recuperarJsonFactura(this.state.codigoEmitirFactura)
+                            this.setState({ estadoModalEmitirFactura: false })
+                        }}
+                    />
+                </ModalContainerNormal>
             </div>
         );
     }
 }
 
-export default VentasDevueltas_01;
+export default HistorialVentas_01;
