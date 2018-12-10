@@ -47,6 +47,7 @@ class HistorialVentas_01 extends Component {
 
     state = {
         listaVentas: [],
+        estadoTabla: 'cargando',
         rowslistaVentas: [
             { id: 'accions', numeric: false, disablePadding: true, label: '' },
             { id: 'factura_emitida', numeric: false, disablePadding: true, label: 'Estado' },

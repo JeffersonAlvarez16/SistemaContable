@@ -52,6 +52,7 @@ class Caja extends Component {
             { id: 'lista_cuentas_pagadas', numeric: true, disablePadding: false, label: 'Cuentas pagadas' },
             { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero ingresado' },
             { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero retirado' },
+            { id: 'devoluciones_clientes', numeric: true, disablePadding: false, label: 'Stock - Devolucion de clientes' },
             { id: 'compras_productos', numeric: true, disablePadding: false, label: 'Stock - Compra de productos' },
             { id: 'ajustes_stock_entradas', numeric: true, disablePadding: false, label: 'Stock - Ajustes de entradas' },
             { id: 'devoluciones_proveedores', numeric: true, disablePadding: false, label: 'Stock - Devoluciones a proveedores' },
@@ -102,6 +103,7 @@ class Caja extends Component {
                             sumaTotalComprasProductos: [],
                             sumaTotalAjustesEntradas: [],
                             sumaTotalDevolucionesProveedores: [],
+                            sumaTotalDevolucionesClientes: [],
                             sumaTotalAjustesSalidas: [],
                             sumaTotalVentasCreditoAcreditado: [],
                             sumaTotalCuentasPagadas: [],
@@ -120,6 +122,7 @@ class Caja extends Component {
                             this.sumaComprasProductos(item.compras_productos, item.codigo)
                             this.sumaTotalAjustesEntradas(item.ajustes_stock_entradas, item.codigo)
                             this.sumaTotalDevolucionesProveedores(item.devoluciones_proveedores, item.codigo)
+                            this.sumaTotalDevolucionesClientes(item.devoluciones_clientes, item.codigo)
                             this.sumaTotalAjustesSalidas(item.ajustes_stock_salidas, item.codigo)
                             this.sumaTotalVentasCreditoAcreditado(item.lista_dinero_acreditado_venta_credito, item.codigo)
                             this.sumaTotalCuentasPagadas(item.lista_cuentas_pagadas, item.codigo)
@@ -455,6 +458,49 @@ class Caja extends Component {
                                 0
                         </Avatar>}
                             label="Ventas devueltas"
+                            clickable
+                            color="inherit"
+                            deleteIcon={<AttachMoneyIcon />}
+                        />
+
+                    </div>
+                }
+            </div>
+        }
+        if (item.id === 'devoluciones_clientes') {
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                {n.devoluciones_clientes != null ?
+                    <div>
+                        {
+                            Boolean(n.estado) ?
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.devoluciones_clientes).length}
+                                    total={this.state.sumaTotalDevolucionesClientes.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Devolucion de cliente'}
+                                    background={colors.getColorPrymaryLightCajaActivada()}
+                                    backgroundDark={colors.getColorPrymaryDarkCajaActivada()}
+                                />
+                                :
+                                <ChipTabla
+                                    codigo={n.codigo}
+                                    cantidad={Object.values(n.devoluciones_clientes).length}
+                                    total={this.state.sumaTotalDevolucionesClientes.filter(item => item.codigo === n.codigo)[0].suma}
+                                    label={'Devolucion de cliente'}
+                                    background={colors.getColorPrymary()}
+                                    backgroundDark={colors.getColorPrymaryDark()}
+                                />
+
+                        }
+
+                    </div>
+                    :
+                    <div>
+                        <Chip
+                            avatar={<Avatar style={{ width: 'max-content', paddingLeft: 15, paddingRight: 15, paddingTop: 3, paddingBottom: 3 }}>
+                                0
+                        </Avatar>}
+                            label="Devolucion de cliente"
                             clickable
                             color="inherit"
                             deleteIcon={<AttachMoneyIcon />}
@@ -832,6 +878,23 @@ class Caja extends Component {
             })
             this.setState({
                 sumaTotalDevolucionesProveedores: newArray
+            })
+        }
+    }
+    sumaTotalDevolucionesClientes = (devoluciones_clientes, codigo) => {
+        var suma = 0
+        var newArray = this.state.sumaTotalDevolucionesClientes
+        if (devoluciones_clientes != null) {
+            var array = Object.values(devoluciones_clientes)
+            array.forEach(element => {
+                suma = Number(Number(element.total_final) + Number(suma)).toFixed(2)
+            });
+            newArray.push({
+                suma,
+                codigo
+            })
+            this.setState({
+                sumaTotalDevolucionesClientes: newArray
             })
         }
     }

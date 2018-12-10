@@ -122,7 +122,7 @@ class ModalNewProducto extends Component {
                 order: this.props.item.order
             })
         } else {
-            this.obtenerPreciosDefectoConfiguracion()            
+            this.obtenerPreciosDefectoConfiguracion()
             this.setState({
                 usuario: this.props.usuario.code,
                 porcentaje_iva: '12',
@@ -197,7 +197,7 @@ class ModalNewProducto extends Component {
             ...producto
         });
 
-        if (producto.stock_actual != this.state.cantidad_actual_temporal) {
+        /* if (producto.stock_actual != this.state.cantidad_actual_temporal) {
             var order = new Date()
             var codigoStock = funtions.guidGenerator()
             var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
@@ -229,7 +229,7 @@ class ModalNewProducto extends Component {
                 acreditado: '',
                 order: order + ''
             });
-        }
+        } */
     }
 
     setNewProducto = (producto) => {
@@ -238,38 +238,38 @@ class ModalNewProducto extends Component {
         productosRef.set({
             ...producto
         });
-
-        var order = new Date()
-        var codigoStock = funtions.guidGenerator()
-        var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
-        operacionStockRef.set({
-            codigo: codigoStock,
-            tipo_operacion: 'registro-producto',
-            fecha: funtions.obtenerFechaActual(),
-            hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
-            cliente_proveedor: producto.proveedor,
-            productos: [
-                {
-                    codigo: producto.codigo,
-                    cantidad: producto.stock_actual
-                }
-            ],
-            total_final: '',
-            empleado: producto.usuario,
-            precio_por_defecto: producto.precio_por_defecto,
-            observacion: '',
-            subtotal: '',
-            descuento: '',
-            otros_gastos: '',
-            flete: '',
-            valor_pagado: '',
-            medio_pago: '',
-            saldo_favor: '',
-            en_deuda: '',
-            vuelto: '',
-            acreditado: '',
-            order: order + ''
-        });
+        /* 
+                var order = new Date()
+                var codigoStock = funtions.guidGenerator()
+                var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
+                operacionStockRef.set({
+                    codigo: codigoStock,
+                    tipo_operacion: 'registro-producto',
+                    fecha: funtions.obtenerFechaActual(),
+                    hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+                    cliente_proveedor: producto.proveedor,
+                    productos: [
+                        {
+                            codigo: producto.codigo,
+                            cantidad: producto.stock_actual
+                        }
+                    ],
+                    total_final: '',
+                    empleado: producto.usuario,
+                    precio_por_defecto: producto.precio_por_defecto,
+                    observacion: '',
+                    subtotal: '',
+                    descuento: '',
+                    otros_gastos: '',
+                    flete: '',
+                    valor_pagado: '',
+                    medio_pago: '',
+                    saldo_favor: '',
+                    en_deuda: '',
+                    vuelto: '',
+                    acreditado: '',
+                    order: order + ''
+                }); */
     }
 
 
