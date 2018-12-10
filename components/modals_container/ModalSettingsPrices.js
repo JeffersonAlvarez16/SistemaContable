@@ -121,7 +121,7 @@ class ModalSettingsPrices extends Component {
                     {
                         this.state.precios.map((item, i) => {
                             return (
-                                <ListItem style={{ background: Number(i) === 0 ||Number(i) === 1||Number(i) === 2||Number(i) === 3 ? 'rgba(41, 121, 255,0.2)' : 'white', paddingBottom:0 }}>
+                                <ListItem >
                                     <div style={{
                                         display: 'flex',
                                         flexDirection: 'row',
@@ -160,7 +160,6 @@ class ModalSettingsPrices extends Component {
                                                     id={`${item.codigo}_nombre`}
                                                     value={item.nombre}
                                                     label='Nombre del precio'
-                                                    disabled={Number(i) === 0 ||Number(i) === 1||Number(i) === 2||Number(i) === 3 ? true : false}
                                                     variant='filled'
                                                     style={{ width: '100%' }}
                                                     onChange={(event => {
@@ -181,15 +180,15 @@ class ModalSettingsPrices extends Component {
                                                     item.estado === true ?
                                                         <IconButton
                                                             color="primary"
-                                                            disabled={Number(i) === 0 ||Number(i) === 1||Number(i) === 2||Number(i) === 3 ? true : false}
                                                             onClick={() => this.desactivar(item.codigo)}
+                                                            disabled={Number(i) === 0  ? true : false}
                                                             aria-label="Add">
-                                                            <Visibility style={{color:Number(i) === 0 ||Number(i) === 1||Number(i) === 2||Number(i) === 3?'gray':'#f44336'}}/>
+                                                            <Visibility style={{color:Number(i) === 0 ?'gray':'#f44336'}}/>
                                                         </IconButton>
                                                         :
                                                         <IconButton
                                                             color="primary"
-                                                            disabled={Number(i) === 0 ||Number(i) === 1||Number(i) === 2||Number(i) === 3 ? true : false}
+                                                            disabled={Number(i) === 0  ? true : false}
                                                             onClick={() => this.activar(item.codigo)}
                                                             aria-label="Add">
                                                             <VisibilityOff />
