@@ -90,7 +90,7 @@ const ContenedorProductoVista = (props) => {
                         {
                             props.precios != null &&
                             props.precios.map(item => {
-                                return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre} = %${item.porcentaje}`}</MenuItem>
+                                return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
                             })
                         }
                     </TextField>

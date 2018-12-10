@@ -91,16 +91,16 @@ class ContainerSelectPrecios extends Component {
                                     <TextField
                                         id={item.codigo}
                                         variant="filled"
-                                        label={<div style={{ marginLeft: 80 }}>{item.nombre}</div>}
+                                        label={<div>{item.nombre}</div>}
                                         value={((Number(this.props.precio_costo) * Number(item.porcentaje) + Number(this.props.precio_costo)).toFixed(2))}
                                         style={{ width: '100%' }}
-                                        InputProps={{
+                                        /* InputProps={{
                                             startAdornment: (
                                                 <InputAdornment position="start">
                                                     <div style={{ marginTop: 17, width: 'max-content', color: 'rgba(0,0,0,0.4)' }}> {`+ %${item.porcentaje}`} =</div>
                                                 </InputAdornment>
                                             ),
-                                        }}
+                                        }} */
                                     />
                                 </ListItem>
                             }

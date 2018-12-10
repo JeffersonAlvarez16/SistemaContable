@@ -500,7 +500,7 @@ class ModalNewProducto extends Component {
                                         >
                                             {
                                                 this.state.precios.map(item => {
-                                                    return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre} = %${item.porcentaje}`}</MenuItem>
+                                                    return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
                                                 })
                                             }
                                         </TextField>

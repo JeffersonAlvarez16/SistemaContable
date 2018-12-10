@@ -274,7 +274,7 @@ class ModalNewVenta extends Component {
                     {
                         this.state.precios != null &&
                         this.state.precios.map(item => {
-                            return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre} = %${item.porcentaje}`}</MenuItem>
+                            return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
                         })
                     }
                 </TextField>
@@ -1797,7 +1797,6 @@ class ModalNewVenta extends Component {
                                     cargaAutomatica={this.state.cargaAutomatica}
                                     cargaAutomaticaCambiar={() => this.setState({ cargaAutomatica: !this.state.cargaAutomatica })}
                                     agregarItemSeleccionadoVista={this.agregarItemSeleccionadoVista}
-
 
                                     precios={this.state.precios}
                                     onChangePrecio={valor => {
