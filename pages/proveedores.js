@@ -114,11 +114,9 @@ class Proveedores extends Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                console.log(this.state.usuario.code)
                 var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
                 usuariosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
-                        console.log(snapshot.val())
                         if (snapshot.val().privilegios.proveedores === true) {
                             this.setState({
                                 estadoPermisos: true

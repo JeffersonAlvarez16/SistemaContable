@@ -38,7 +38,6 @@ class AgregarDineroCaja extends Component {
                 var cajaRefValorActual = db.ref('users/' + user.uid + '/caja/cajas_normales/' + caja.codigo)
                 cajaRefValorActual.once('value', (snap) => {
                     if (snap.val()) {
-                        console.log(snap.val().valor_caja)
                         cajaRefValorActual.update({
                             valor_caja: Number(Number(snap.val().valor_caja) + Number(saldoAgregado)).toFixed(2)
                         })
