@@ -160,14 +160,20 @@ class DeudasCobrar extends Component {
     }
 
     sumaTotalListaDeudasPendientes = (codigo) => {
-        var sumaTotalDeudas = this.state.sumaTotalListaDeudas.filter(it => it.codigo === codigo)[0].suma
-        var sumaTotalDeudasAcreditado = 0
-        if (this.state.sumaTotalListaDeudasAcreditado != null) {
-            if (this.state.sumaTotalListaDeudasAcreditado.length > 0) {
-                sumaTotalDeudasAcreditado = this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0] != null ? this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0].acreditado : 0.00
+        if (this.state.sumaTotalListaDeudas != null) {
+            if (this.state.sumaTotalListaDeudas.length > 0) {
+                var sumaTotalDeudas = this.state.sumaTotalListaDeudas.filter(it => it.codigo === codigo)[0].suma
+                var sumaTotalDeudasAcreditado = 0
+                if (this.state.sumaTotalListaDeudasAcreditado != null) {
+                    if (this.state.sumaTotalListaDeudasAcreditado.length > 0) {
+                        sumaTotalDeudasAcreditado = this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0] != null ? this.state.sumaTotalListaDeudasAcreditado.filter(it => it.codigo === codigo)[0].acreditado : 0.00
+                    }
+                }
+                return Number(sumaTotalDeudas - sumaTotalDeudasAcreditado).toFixed(2)
             }
+        } else {
+            return 0.00
         }
-        return Number(sumaTotalDeudas - sumaTotalDeudasAcreditado).toFixed(2)
     }
 
     obtenerEstadoDeCaja = () => {
