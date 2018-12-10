@@ -1128,7 +1128,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": Number(descuento).toFixed(2)
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1226,7 +1226,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": Number(descuento).toFixed(2)
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1328,7 +1328,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": Number(descuento).toFixed(2)
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1431,7 +1431,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": Number(descuento).toFixed(2)
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1806,7 +1806,7 @@ class ModalNewVenta extends Component {
                                             itemProductoCargado: producto
                                         })
                                     }}
-
+                                    
                                     seleccionarProductoPordefecto={this.state.seleccionarProductoPordefecto}
                                     seleccionarProductoPordefectoCambiar={() => this.setState({ seleccionarProductoPordefecto: !this.state.seleccionarProductoPordefecto })}
 
