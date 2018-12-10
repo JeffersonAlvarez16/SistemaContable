@@ -221,19 +221,6 @@ class VentasDevueltas_01 extends Component {
 
         if (item.id === 'accions') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <ReactToPrint
-                    ref={el => (this.refEventoImprimir = el)}
-                    trigger={() => <></>}
-                    content={() => this.refImprimirResivo}
-                />
-                <Tooltip title="Imprimir resivo">
-                    <IconButton onClick={() => {
-                        this.enviarToPlantillaData(n)
-                    }}
-                    >
-                        <LocalPrintshopIcon fontSize="small" />
-                    </IconButton>
-                </Tooltip>
                 {
                     n.urlpdf != 'genererando' &&
                     <Tooltip title="Descargar pdf">
