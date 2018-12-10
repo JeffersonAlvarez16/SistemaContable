@@ -326,7 +326,9 @@ class ModalCompraProductos extends Component {
             }
         }
         if (this.props.tipoAjuste === 'devolucion_cliente') {
-
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
         }
         if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
             if (Boolean(this.state.operarEnCaja)) {

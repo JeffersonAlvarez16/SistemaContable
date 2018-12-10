@@ -53,6 +53,8 @@ class NuevaRetencion extends Component {
     }
 
     componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+
         const fecha = new Date().toISOString().toString().split(':')
         var fechas = fecha[0] + ':' + fecha[1]
         var hora = new Date()
@@ -73,6 +75,12 @@ class NuevaRetencion extends Component {
             }
         })
 
+    }
+
+    escFunction = (event) => {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
+        }
     }
 
     onChangueSelectedProveedor = (item) => {

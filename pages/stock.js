@@ -352,6 +352,12 @@ class Stock extends Component {
                     datoTraido="nombre"
                     estado={true}
                 />
+                <ReturnTextTable
+                    referencia="clientes"
+                    codigo={n.cliente_proveedor}
+                    datoTraido="nombre"
+                    estado={true}
+                />
             </>
         }
 
