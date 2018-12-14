@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "heroku-postbuild": "next start && npm run build"
   },
   "keywords": [],
   "author": "Darwin Alvarez",
