@@ -4,12 +4,12 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start"
+    "dev": "next dev",    
+    "build": "./node_modules/next/dist/bin/next build", 
+    "heroku-postbuild": "./node_modules/next/dist/ bin / next build"
   },
   "keywords": [],
-  "author": "",
+  "author": "Darwin Alvarez",
   "license": "ISC",
   "dependencies": {
     "@date-io/date-fns": "0.0.2",
