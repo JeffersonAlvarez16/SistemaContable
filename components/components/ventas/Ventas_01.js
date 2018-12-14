@@ -564,7 +564,7 @@ class Ventas_01 extends Component {
     }
 
     postSet = async (uidUser, jsonData, codigo) => {
-        const rawResponse = await fetch('http://192.168.1.97:5000/generarfactura', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -639,14 +639,18 @@ class Ventas_01 extends Component {
             if (snap.val()) {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
+
+                    if(itemVenta.tipo_pago==='efectivo'){
+                        var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
+                        operacionVentaCaja.set(itemVenta)
+                    }
+
                     var operacionVentaCajaEliminar = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
                     operacionVentaCajaEliminar.remove()
 
                     var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
                     cajaRefValorAcreditado.remove()
 
-                    operacionVentaCaja.set(itemVenta)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
 
                     var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/').orderByChild('cliente/codigo').equalTo(itemVenta.cliente.codigo)

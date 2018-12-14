@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "next",
+    "dev": "next dev",
     "build": "next build",
     "start": "next start"
   },
@@ -31,7 +31,7 @@
     "react": "16.6.3",
     "react-dom": "16.6.3",
     "react-number-format": "3.6.0",
-    "react-pdf-js": "^4.0.2",
+    "react-pdf-js": "4.0.2",
     "react-text-mask": "5.4.3",
     "react-to-print": "2.0.0-alpha-4"
   }

@@ -49,7 +49,7 @@ class Caja extends Component {
             { id: 'ventas_efectivo', numeric: true, disablePadding: false, label: 'Ventas - En efectivo' },
             { id: 'ventas_devueltas', numeric: true, disablePadding: false, label: 'Ventas - Devueltas' },
             { id: 'lista_dinero_acreditado_venta_credito', numeric: true, disablePadding: false, label: 'Ventas a credito - dinero acreditado' },
-            { id: 'lista_cuentas_pagadas', numeric: true, disablePadding: false, label: 'Cuentas pagadas' },
+            { id: 'lista_cuentas_pagadas', numeric: true, disablePadding: false, label: ' Cuentas por cobrar - Cuentas pagadas' },
             { id: 'dinero_ingresado', numeric: true, disablePadding: false, label: 'Dinero ingresado' },
             { id: 'dinero_retirado', numeric: true, disablePadding: false, label: 'Dinero retirado' },
             { id: 'devoluciones_clientes', numeric: true, disablePadding: false, label: 'Stock - Devolucion de clientes' },
@@ -1177,7 +1177,16 @@ class Caja extends Component {
                                 sumaTotalDineroRetirado={this.state.sumaTotalDineroRetirado}
                                 sumaTotalVentasDevueltas={this.state.sumaTotalVentasDevueltas}
                                 sumaTotalComprasProductos={this.state.sumaTotalComprasProductos}
-                                cajaSelecionada={this.state.cajaSeleccionada} handleClose={() => this.setState({ estadoModalSimple: false })}>
+                                
+                                sumaTotalAjustesEntradas={this.state.sumaTotalAjustesEntradas}
+                                sumaTotalDevolucionesProveedores={this.state.sumaTotalDevolucionesProveedores}
+                                sumaTotalDevolucionesClientes={this.state.sumaTotalDevolucionesClientes}
+                                sumaTotalAjustesSalidas={this.state.sumaTotalAjustesSalidas}
+                                sumaTotalVentasCreditoAcreditado={this.state.sumaTotalVentasCreditoAcreditado}
+                                sumaTotalCuentasPagadas={this.state.sumaTotalCuentasPagadas}
+
+                                cajaSelecionada={this.state.cajaSeleccionada} 
+                                handleClose={() => this.setState({ estadoModalSimple: false })}>
                             </VerTotales>
                         </ModalContainerNormal>
                     </div>

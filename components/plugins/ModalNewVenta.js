@@ -578,7 +578,7 @@ class ModalNewVenta extends Component {
 
     postSet = async (uidUser, jsonData, codigoRegistroVenta) => {
         //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
-        const rawResponse = await fetch('http://192.168.1.97:5000/generarfactura', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -595,7 +595,7 @@ class ModalNewVenta extends Component {
         } */
     }
     postSetGeneratePdf = async (uidUser, jsonData, codigoRegistroVenta) => {
-        const rawResponse = await fetch('http://192.168.1.97:5000/facturaPdf', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/facturaPdf', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
