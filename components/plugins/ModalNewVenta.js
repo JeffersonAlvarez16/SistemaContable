@@ -28,6 +28,9 @@ import ContenedorSeleccionarTipoPago from './ventas/ContenedorSeleccionarTipoPag
 import ContenedorBotonesVenta from './ventas/ContenedorBotonesVenta';
 import ModalFinalizaPago from '../modals_container/ventas/ModalFinalizaPago';
 import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
+import colors from '../../utils/colors';
+import ContenedorNumeroFactura from './ventas/ContenedorNumeroFactura';
+import { async } from '@firebase/util';
 
 class ModalNewVenta extends Component {
 
@@ -50,7 +53,8 @@ class ModalNewVenta extends Component {
         cargaAutomatica: false,
 
         rowslistaProductos: [
-            { id: 'acciones', numeric: true, disablePadding: false, label: 'Acciones' },
+            { id: 'acciones', numeric: true, disablePadding: false, label: '' },
+            { id: 'precio_por_defecto', numeric: true, disablePadding: false, label: 'Precio' },
             { id: 'cantidad', numeric: true, disablePadding: false, label: 'Cantidad' },
             { id: 'descripcion_producto', numeric: true, disablePadding: false, label: 'Descripcion' },
             { id: 'precio_venta', numeric: true, disablePadding: false, label: 'Precio/U' },
@@ -59,13 +63,13 @@ class ModalNewVenta extends Component {
         clienteFacturacion: '',
         clienteSeleccionado: null,
 
-        //precio seleccionado
-        precioSeleccionado: null,
         //tipo de pago
         tipo_pago: 'efectivo',
         //estado de modals
         estadoModalFinalizaPago: false,
         estadoModalSimpleConfigurarPrecios: false,
+        //seleecionar producto por defecto
+        seleccionarProductoPordefecto: true,
         //
 
 
@@ -95,7 +99,11 @@ class ModalNewVenta extends Component {
         tipo_venta: 'factura',
         // ambiente
         ambienteFacturacion: 0,
+        //numero de factura
+        numero_factura: ''
     }
+
+
 
     componentDidMount() {
         document.addEventListener("keydown", this.escFunction, false);
@@ -121,15 +129,60 @@ class ModalNewVenta extends Component {
                 var empresaRef = db.ref('users/' + user.uid + "/precios")
                 empresaRef.on('value', (snap) => {
                     if (snap.val()) {
-                        var array = funtions.snapshotToArray(snap)
+                        this.setState({ precios: funtions.snapshotToArray(snap) })
+                    }
+                })
+            }
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('users/' + user.uid + "/configuracion")
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_factura
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        const sumaFinal = `${cadenaFinal}${suma}`
                         this.setState({
-                            precios: array,
-                            precioSeleccionado: array[0]
+                            numero_factura: sumaFinal,
                         })
                     }
                 })
             }
         })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('users/' + user.uid + "/usuarios/" + this.props.usuario.code + '/punto_emision')
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({
+                            punto_emision: snap.val()
+                        })
+                    }
+                })
+            }
+        })
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('auth_admins/' + user.uid + '/establecimiento/codigo')
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        this.setState({
+                            codigoEstablecimiento: snap.val()
+                        })
+                    }
+                })
+            }
+        })
+        this.obtenerPreciosDefectoConfiguracion()
         if (this.props.item) {
             this.setState({
                 cambio: this.props.item.cambio,
@@ -153,14 +206,130 @@ class ModalNewVenta extends Component {
         }
     }
 
+    obtenerPreciosDefectoConfiguracion = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/configuracion/precio_por_defecto')
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.setState({
+                            precioSeleccionadoCargar: snapshot.val()
+                        })
+                    }
+                })
+            }
+        })
+    }
+
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
         }
+        if (item.id === 'precio_por_defecto') {
+            return <div style={{ width: 100, position: 'relative', left: -80 }}>
+                {
+                    Boolean(n.tipo_precio_seleccionado) == false &&
+                    <TextField
+                        id={"filled-unidad-precio-defecto"}
+                        select
+                        label="P.G"
+                        value={n.precio_por_defecto}
+                        onChange={event => {
+                            var array = this.state.listaProductosSeleccionados
+                            array.forEach((it, i) => {
+                                if (it.codigo === n.codigo) {
+                                    var item = it
+                                    item.precio_por_defecto = event.target.value
+                                    array[i] = item
+                                    this.setState({
+                                        listaProductosSeleccionados: array
+                                    })
+                                }
+                            })
+                            setTimeout(() => {
+                                var array2 = this.state.listaProductosSeleccionadosEditados
+                                array2.forEach((it, i) => {
+                                    if (it.codigo === n.codigo) {
+                                        var item = it
+                                        item.precio_venta = Number(((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2))
+                                        array2[i] = item
+                                        this.setState({
+                                            listaProductosSeleccionadosEditados: array2
+                                        })
+                                    }
+                                })
+
+                            }, 100)
+                            setTimeout(() => {
+                                this.calcularValoresTotales()
+                            }, 200)
+                        }}
+                        margin="normal"
+                        variant="standard"
+                        style={{ width: 'max-content', height: 30 }}
+                    >
+                        {
+                            this.state.precios != null &&
+                            this.state.precios.map(item => {
+                                return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
+                            })
+                        }
+                    </TextField>
+                }
+                {
+                    Boolean(n.tipo_precio_seleccionado) &&
+                    <TextField
+                        id={"filled-unidad-precio-defecto"}
+                        select
+                        label="P.P"
+                        value={n.precio_por_defecto}
+                        onChange={event => {
+                            var array = this.state.listaProductosSeleccionados
+                            array.forEach((it, i) => {
+                                if (it.codigo === n.codigo) {
+                                    var item = it
+                                    item.precio_por_defecto = event.target.value
+                                    array[i] = item
+                                    this.setState({
+                                        listaProductosSeleccionados: array
+                                    })
+                                }
+                            })
+                            setTimeout(() => {
+                                var array2 = this.state.listaProductosSeleccionadosEditados
+                                array2.forEach((it, i) => {
+                                    if (it.codigo === n.codigo) {
+                                        var item = it
+                                        item.precio_venta = Number(((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecioPerzonalizado(this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === n.codigo)[0].precios_perzonalizados, n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2))
+                                        array2[i] = item
+                                        this.setState({
+                                            listaProductosSeleccionadosEditados: array2
+                                        })
+                                    }
+                                })
+
+                            }, 100)
+                            setTimeout(() => {
+                                this.calcularValoresTotales()
+                            }, 200)
+                        }}
+                        margin="normal"
+                        variant="standard"
+                        style={{ width: 'max-content', height: 30 }}
+                    >
+                        {
+                            this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === n.codigo)[0].precios_perzonalizados.map(item => {
+                                return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
+                            })
+                        }
+                    </TextField>
+                }
+            </div>
+        }
         if (item.id === 'cantidad') {
 
             var restaRetorno = <div style={{ width: 'max-content', display: 'flex', flexDirection: 'row' }}>
-                <div style={{ display: 'flex', alignItems: 'center', paddingRight: 10 }}>{`${n.unidad_medida}`}</div>
                 <TextField
                     id="handle-precio-edit-cantidad"
                     margin="dense"
@@ -178,7 +347,14 @@ class ModalNewVenta extends Component {
                     style={{ width: 50 }}
                 />
                 <div style={{ width: 'max-content', display: 'flex', alignItems: 'center', justifyContent: 'start', paddingLeft: 10 }}>
-                    {`en stock ${Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}`}
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                        <div style={{ display: 'flex', flexDirection: 'row' }}>
+                            en stock <div style={{ color: colors.getColorPrymaryDark() }}>{Number(n.stock_actual) - Number(this.state.listaProductosSeleccionadosEditados.filter(item => n.codigo === item.codigo)[0].cantidad)}</div>
+                        </div>
+                        <div style={{ color: colors.getColorPrymary() }}>
+                            {`${n.unidad_medida}`}
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -189,15 +365,20 @@ class ModalNewVenta extends Component {
         }
         if (item.id === 'precio_venta') {
             var precioR = 0
-            if (this.state.precioSeleccionado != null) {
-                precioR = ((Number(n.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(n.precio_costo)).toFixed(2)
+            if (Boolean(n.tipo_precio_seleccionado)) {
+                precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecioPerzonalizado(this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === n.codigo)[0].precios_perzonalizados, n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
+            } else {
+                precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
             }
+
             return precioR
         }
         if (item.id === 'total') {
             var precioR = 0
-            if (this.state.precioSeleccionado != null) {
-                precioR = ((Number(n.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(n.precio_costo)).toFixed(2)
+            if (Boolean(n.tipo_precio_seleccionado)) {
+                precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecioPerzonalizado(this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === n.codigo)[0].precios_perzonalizados, n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
+            } else {
+                precioR = ((Number(n.precio_costo) * Number(this.obtenerPorcentajePrecio(n.precio_por_defecto))) + Number(n.precio_costo)).toFixed(2)
             }
             var itemValor = this.state.listaProductosSeleccionadosEditados.filter(item => item.codigo === n.codigo)[0]
             var sumaTotal = itemValor.cantidad * precioR
@@ -236,22 +417,6 @@ class ModalNewVenta extends Component {
             this.props.handleClose()
         }
     }
-    /* 
-        getClienteDataBase = cliente => {
-            console.log("object")
-            firebase.auth().onAuthStateChanged((user) => {
-                if (user) {
-                    var db = firebase.database();
-                    var productosRef = db.ref('users/' + user.uid + '/clientes/' + cliente);
-                    productosRef.on('value', (snapshot) => {
-                        console.log(snapshot.val())
-                        this.setState({
-                            clienteCargadoDB: snapshot.val()
-                        })
-                    })
-                }
-            })
-        } */
 
     getStatusUsuario = () => {
         if (this.state.usuario) {
@@ -316,7 +481,7 @@ class ModalNewVenta extends Component {
             case 'efectivo': {
                 this.updateDataProductos()
                 this.setOperacionStockEfectivo(listaProductosSeleccionadosEditados)
-                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta)
+                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta, item)
                 this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
                 break
             }
@@ -348,13 +513,42 @@ class ModalNewVenta extends Component {
                 this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
                 break
             }
+            case 'transferencia': {
+                this.updateDataProductos()
+                this.setOperacionStockEfectivo(listaProductosSeleccionadosEditados)
+                this.setSaveRegistroVentaEfectivo(codigoRegistroVenta, item)
+                this.enviarFacturaElectronica(codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item)
+                break
+            }
             default: {
                 break
             }
         }
     }
 
-
+    sumarNumeroFactura = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var numeroFactura = db.ref('users/' + user.uid + "/configuracion")
+                numeroFactura.once('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_factura
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        numeroFactura.update({
+                            numero_factura: `${cadenaFinal}${suma}`
+                        })
+                    }
+                })
+            }
+        })
+    }
 
     enviarFacturaElectronica = (codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item) => {
         if (tipo_venta === 'factura') {
@@ -364,6 +558,7 @@ class ModalNewVenta extends Component {
                 case 'efectivo': {
                     jsonData = this.createJsonFacturaElectronicaEfectivo()
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
@@ -371,6 +566,7 @@ class ModalNewVenta extends Component {
                 case 'credito': {
                     jsonData = this.createJsonFacturaElectronicaCredito(item)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
@@ -378,6 +574,7 @@ class ModalNewVenta extends Component {
                 case 'tarjeta-credito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
@@ -385,13 +582,25 @@ class ModalNewVenta extends Component {
                 case 'tarjeta-debito': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
                 }
                 case 'cheque': {
                     jsonData = this.createJsonFacturaElectronicaTarjetaCredito(item)
+                    this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
                     this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
+                    this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
+                    this.setState({ abrirModalFinalizarVenta: false })
+                    break
+                }
+                case 'transferencia': {
+                    jsonData = this.createJsonFacturaElectronicaTransferencia()
+                    this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
+                    this.saveFacturasJson(jsonData, codigoRegistroVenta)
+                    this.sumarNumeroFactura()
                     this.enviarFacturaElectrónica(facturaElectronica, uidUser, jsonData, codigoRegistroVenta)
                     this.setState({ abrirModalFinalizarVenta: false })
                     break
@@ -410,6 +619,8 @@ class ModalNewVenta extends Component {
     enviarFacturaElectrónica = (facturaElectronica, uidUser, jsonData, codigoRegistroVenta) => {
         if (Boolean(facturaElectronica)) {
             this.postSet(uidUser, jsonData, codigoRegistroVenta)
+        } else {
+            this.postSetGeneratePdf(uidUser, jsonData, codigoRegistroVenta)
         }
     }
 
@@ -420,6 +631,7 @@ class ModalNewVenta extends Component {
     }
 
     postSet = async (uidUser, jsonData, codigoRegistroVenta) => {
+        //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
         const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/generarfactura', {
             method: 'POST',
             headers: {
@@ -435,6 +647,17 @@ class ModalNewVenta extends Component {
         */ /* if (content != null) {
             this.setState({ estadoModalGuardarVenta: false })
         } */
+    }
+    postSetGeneratePdf = async (uidUser, jsonData, codigoRegistroVenta) => {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/facturaPdf', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'id': uidUser,
+                'codigo': codigoRegistroVenta,
+            },
+            body: JSON.stringify(jsonData)
+        })
     }
 
     //comprobar campos llenos 
@@ -484,7 +707,7 @@ class ModalNewVenta extends Component {
     }
 
     //Registra la venta 
-    setSaveRegistroVentaEfectivo = codigoVenta => {
+    setSaveRegistroVentaEfectivo = (codigoVenta, item) => {
         const {
             clienteSeleccionado,
             descuento,
@@ -500,6 +723,8 @@ class ModalNewVenta extends Component {
             tipo_pago
         } = this.state
 
+        const { cajaSeleccionada } = this.props
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
@@ -507,15 +732,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: Number(dinero_resibido).toFixed(2),
+            cambio: Number(cambio).toFixed(2),
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -525,12 +750,15 @@ class ModalNewVenta extends Component {
             numero_tarjeta: '',
             nombre_banco: '',
             tipo_pago,
-            valor_acreditado: '',
+            valor_acreditado: '0.00',
             fecha_a_pagar: '',
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
     }
+
     setSaveRegistroVentaCredito = (codigoVenta, item) => {
         const {
             clienteSeleccionado,
@@ -547,6 +775,8 @@ class ModalNewVenta extends Component {
             tipo_pago
         } = this.state
 
+        const { cajaSeleccionada } = this.props
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
@@ -554,15 +784,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: '0.00',
+            cambio: '0.00',
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -572,11 +802,13 @@ class ModalNewVenta extends Component {
             numero_tarjeta: '',
             nombre_banco: '',
             tipo_pago,
-            valor_acreditado: item.valor_acreditado,
+            valor_acreditado: Number(item.valor_acreditado).toFixed(2),
             fecha_a_pagar: item.fecha_vencimiento,
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
 
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
 
         operacionVentaRef.set(itemVenta)
     }
@@ -596,6 +828,8 @@ class ModalNewVenta extends Component {
             tipo_pago
         } = this.state
 
+        const { cajaSeleccionada } = this.props
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
@@ -603,15 +837,15 @@ class ModalNewVenta extends Component {
         var itemVenta = {
             codigo: codigoVenta,
             cliente: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
-            descuento: descuento,
+            descuento: Number(descuento).toFixed(2),
             tipo_venta,
             factura_emitida: Boolean(facturaElectronica) ? 'pendiente' : 'no_emitida',
             observacion: observacion,
-            dinero_resibido: dinero_resibido,
-            cambio: cambio,
-            subtotal: sumaSubTotal,
-            iva: sumaIva,
-            total: sumaTotal,
+            dinero_resibido: '0.00',
+            cambio: '0.00',
+            subtotal: Number(sumaSubTotal).toFixed(2),
+            iva: Number(sumaIva).toFixed(2),
+            total: Number(sumaTotal).toFixed(2),
             productos: listaProductosSeleccionadosEditados,
             fecha_venta: funtions.obtenerFechaActual(),
             hora_venta: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
@@ -621,33 +855,152 @@ class ModalNewVenta extends Component {
             numero_tarjeta: item.propiedades_numero,
             nombre_banco: item.propiedades_banco,
             tipo_pago,
-            valor_acreditado: '',
+            valor_acreditado: '0.00',
             fecha_a_pagar: '',
+            caja: cajaSeleccionada.codigo,
+            urlpdf: 'genererando',
         }
-        this.setVentaCaja(itemVenta, tipo_pago)
+        this.setVentaCaja(itemVenta, tipo_pago, item)
         operacionVentaRef.set(itemVenta)
-
-
     }
-
-    setVentaCaja(itemVenta, tipo_pago) {
+    ////////////////////////
+    setVentaCaja(itemVenta, tipo_pago, item) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
-        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales').orderByChild('order').limitToLast(1);
+        var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
-                var caja = funtions.snapshotToArray(snap)[0]
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + codigoVentaCaja)
-                    operacionVentaCaja.set(itemVenta)
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas/' + itemVenta.codigo)
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
                     if (tipo_pago === 'efectivo') {
                         cajaRefValorActual.once('value', (snap2) => {
                             if (snap2.val()) {
+                                operacionVentaCaja.set(itemVenta)
                                 cajaRefValorActual.update({
                                     valor_caja: Number(Number(snap2.val().valor_caja) + Number(itemVenta.total)).toFixed(2)
                                 })
 
+                            }
+                        })
+                    }
+                    if (tipo_pago === 'credito') {
+                        var cuentaCobrarClienteRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo)
+                        var configuracionMes = db.ref('users/' + firebase.auth().currentUser.uid + '/configuracion/dias_a_pagar_defecto/dias')
+                        cuentaCobrarClienteRef.once('value', (snap) => {
+                            if (snap.val()) {
+                                var aumentarDeudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
+                                var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/' + itemVenta.codigo)
+                                aumentarDeudaRef.set({
+                                    codigo: itemVenta.codigo,
+                                    valor: this.state.sumaTotal,
+                                    fecha_registro: funtions.obtenerFechaActual(),
+                                    hora_registro: funtions.obtenerHoraActual(),
+                                    estado: true
+                                })
+                                var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
+
+                                if (Number(item.valor_acreditado) > 0) {
+                                    cajaRefValorAcreditado.set({
+                                        codigo: itemVenta.codigo,
+                                        valor: item.valor_acreditado,
+                                        fecha_registro: funtions.obtenerFechaActual(),
+                                        hora_registro: funtions.obtenerHoraActual(),
+                                        estado: true,
+                                        tipo: 'pago_venta_credito'
+                                    })
+                                    aumentarAcreditadoRef.set({
+                                        codigo: itemVenta.codigo,
+                                        valor: item.valor_acreditado,
+                                        fecha_registro: funtions.obtenerFechaActual(),
+                                        hora_registro: funtions.obtenerHoraActual(),
+                                        estado: true,
+                                        tipo: 'pago_venta_credito'
+                                    })
+                                    cajaRefValorActual.once('value', (snap2) => {
+                                        if (snap2.val()) {
+                                            cajaRefValorActual.update({
+                                                valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
+                                            })
+
+                                        }
+                                    })
+                                }
+                            } else {
+                                Date.prototype.addDays = function (days) {
+                                    var date = new Date(this.valueOf())
+                                    date.setDate(date.getDate() + days)
+                                    var dayDate = date.getDate()
+                                    var mes = date.getMonth() + 1
+                                    if (dayDate.toString().length === 1) {
+                                        dayDate = '0' + dayDate
+                                    }
+                                    if (mes.toString().length === 1) {
+                                        mes = '0' + mes
+                                    }
+                                    return `${date.getFullYear()}-${mes}-${dayDate}`;
+                                }
+                                var date = new Date();
+                                configuracionMes.once('value', (snapp) => {
+                                    if (snapp.val()) {
+
+                                        cuentaCobrarClienteRef.set({
+                                            cliente: this.state.clienteSeleccionado,
+                                            codigo: this.state.clienteSeleccionado.codigo,
+                                            estado: true,
+                                            estado_cuenta: 'deuda',
+                                            fecha_registro: funtions.obtenerFechaActual(),
+                                            fecha_pago: date.addDays(Number(snap.val())),
+                                            hora_registro: funtions.obtenerHoraActual(),
+                                            order: '' + new Date(),
+                                            tipo_cuenta: 'venta_credito',
+                                            total: this.state.sumaTotal,
+                                            usuario: this.props.usuario.code,
+                                        })
+
+
+                                        var deudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
+                                        deudaRef.set({
+                                            codigo: itemVenta.codigo,
+                                            valor: this.state.sumaTotal,
+                                            fecha_registro: funtions.obtenerFechaActual(),
+                                            hora_registro: funtions.obtenerHoraActual(),
+                                            estado: true,
+                                            tipo: 'pago_venta_credito'
+                                        })
+
+                                        var cajaRefValorAcreditado = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/lista_dinero_acreditado_venta_credito/' + itemVenta.codigo)
+                                        var aumentarAcreditadoRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_acreditados/' + itemVenta.codigo)
+
+                                        if (Number(item.valor_acreditado) > 0) {
+                                            cajaRefValorAcreditado.set({
+                                                codigo: itemVenta.codigo,
+                                                valor: item.valor_acreditado,
+                                                fecha_registro: funtions.obtenerFechaActual(),
+                                                hora_registro: funtions.obtenerHoraActual(),
+                                                estado: true,
+                                                tipo: 'pago_venta_credito'
+                                            })
+                                            aumentarAcreditadoRef.set({
+                                                codigo: itemVenta.codigo,
+                                                valor: item.valor_acreditado,
+                                                fecha_registro: funtions.obtenerFechaActual(),
+                                                hora_registro: funtions.obtenerHoraActual(),
+                                                estado: true,
+                                                tipo: 'pago_venta_credito'
+                                            })
+                                            cajaRefValorActual.once('value', (snap2) => {
+                                                if (snap2.val()) {
+                                                    cajaRefValorActual.update({
+                                                        valor_caja: Number(Number(snap2.val().valor_caja) + Number(item.valor_acreditado)).toFixed(2)
+                                                    })
+
+                                                }
+                                            })
+                                        }
+                                    }
+                                })
                             }
                         })
                     }
@@ -676,6 +1029,8 @@ class ModalNewVenta extends Component {
     //opercacion stock
     setOperacionStockEfectivo = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -687,25 +1042,28 @@ class ModalNewVenta extends Component {
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
-            total_final: sumaTotal,
+            total_final: `${Number(sumaTotal).toFixed(2)}`,
             empleado: this.props.usuario.code,
             observacion: observacion,
-            subtotal: sumaSubTotal,
-            descuento: descuento,
-            otros_gastos: '',
-            flete: '',
-            valor_pagado: dinero_resibido,
+            subtotal: `${Number(sumaSubTotal).toFixed(2)}`,
+            descuento: `${Number(descuento).toFixed(2)}`,
+            otros_gastos: '0.00',
+            flete: '0.00',
+            valor_pagado: `${Number(dinero_resibido).toFixed(2)}`,
             medio_pago: tipo_pago,
-            saldo_favor: '',
-            en_deuda: '',
+            saldo_favor: '0.00',
+            en_deuda: '0.00',
             vuelto: cambio,
-            acreditado: '',
-            order: order + ""
+            acreditado: '0.00',
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
 
     setOperacionStockCredito = (listaProductos, valor_acreditado) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -717,24 +1075,27 @@ class ModalNewVenta extends Component {
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
-            total_final: sumaTotal,
+            total_final: `${Number(sumaTotal).toFixed(2)}`,
             empleado: this.props.usuario.code,
             observacion: observacion,
-            subtotal: sumaSubTotal,
-            descuento: descuento,
+            subtotal: `${Number(sumaSubTotal).toFixed(2)}`,
+            descuento: `${Number(descuento).toFixed(2)}`,
             otros_gastos: '0.00',
             flete: '0.00',
             valor_pagado: '0.00',
             medio_pago: tipo_pago,
             saldo_favor: '0.00',
-            en_deuda: (Number(sumaTotal) - Number(valor_acreditado)).toFixed(2),
+            en_deuda: Number(Number(sumaTotal) - Number(valor_acreditado)).toFixed(2),
             vuelto: '0.00',
-            acreditado: valor_acreditado,
-            order: order + ""
+            acreditado: `${Number(valor_acreditado).toFixed(2)}`,
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
     setOperacionStockTarjetaCredito = (listaProductos) => {
         const { clienteSeleccionado, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio, tipo_pago } = this.state
+        const { cajaSeleccionada } = this.props
+
         var codigoStock = funtions.guidGenerator()
         var order = new Date()
         var db = firebase.database();
@@ -746,11 +1107,11 @@ class ModalNewVenta extends Component {
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: tipo_venta === 'final' ? 'Consumidor Final' : clienteSeleccionado,
             productos: listaProductos,
-            total_final: sumaTotal,
+            total_final: `${Number(sumaTotal).toFixed(2)}`,
             empleado: this.props.usuario.code,
             observacion: observacion,
-            subtotal: sumaSubTotal,
-            descuento: descuento,
+            subtotal: `${Number(sumaSubTotal).toFixed(2)}`,
+            descuento: `${Number(descuento).toFixed(2)}`,
             otros_gastos: '0.00',
             flete: '0.00',
             valor_pagado: '0.00',
@@ -759,7 +1120,8 @@ class ModalNewVenta extends Component {
             en_deuda: '0.00',
             vuelto: '0.00',
             acreditado: '0.00',
-            order: order + ""
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         })
     }
     //////////////////////////////////
@@ -775,13 +1137,18 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
-            precioSeleccionado
+            listaProductosSeleccionados,
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -791,8 +1158,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -815,7 +1182,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": descuento
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -826,17 +1193,23 @@ class ModalNewVenta extends Component {
                 "telefono": clienteSeleccionado.celular
             },
             "items": listaProductosSeleccionadosEditados.map(item => {
+                var porcentaje = 0
+                if (Boolean(item.tipo_precio_seleccionado)) {
+                    porcentaje = Number(this.obtenerPorcentajePrecioPerzonalizado(item.precios_perzonalizados, listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))
+                } else {
+                    porcentaje = Number(porcentaje)
+                }
                 return {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(porcentaje)) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -868,13 +1241,18 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
-            precioSeleccionado
+            listaProductosSeleccionados,
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -884,8 +1262,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -908,7 +1286,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": descuento
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -919,17 +1297,23 @@ class ModalNewVenta extends Component {
                 "telefono": clienteSeleccionado.celular
             },
             "items": listaProductosSeleccionadosEditados.map(item => {
+                var porcentaje = 0
+                if (Boolean(item.tipo_precio_seleccionado)) {
+                    porcentaje = Number(this.obtenerPorcentajePrecioPerzonalizado(item.precios_perzonalizados, listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))
+                } else {
+                    porcentaje = Number(porcentaje)
+                }
                 return {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -943,7 +1327,7 @@ class ModalNewVenta extends Component {
             "valor_retenido_renta": 0.00,
             "credito": {
                 "fecha_vencimiento": `${item.fecha_vencimiento}`,
-                "monto": Number(item.monto) - Number(item.valor_acreditado)
+                "monto": Number((Number(item.monto) - Number(item.valor_acreditado)).toFixed(2))
             },
             "pagos": [
                 {
@@ -965,13 +1349,18 @@ class ModalNewVenta extends Component {
             descuento,
             clienteSeleccionado,
             listaProductosSeleccionadosEditados,
-            precioSeleccionado
+            listaProductosSeleccionados,
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
         } = this.state
 
         var date = new Date()
         var json = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
             "fecha_emision": date.toISOString(),
             "emisor": {
                 "ruc": "",
@@ -981,8 +1370,8 @@ class ModalNewVenta extends Component {
                 "razon_social": "",
                 "direccion": "",
                 "establecimiento": {
-                    "punto_emision": "",
-                    "codigo": "",
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
                     "direccion": ""
                 }
             },
@@ -1005,7 +1394,7 @@ class ModalNewVenta extends Component {
                 ],
                 "importe_total": Number(sumaTotal),
                 "propina": 0.0,
-                "descuento": descuento
+                "descuento": Number(Number(descuento).toFixed(2))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1016,17 +1405,23 @@ class ModalNewVenta extends Component {
                 "telefono": clienteSeleccionado.celular
             },
             "items": listaProductosSeleccionadosEditados.map(item => {
+                var porcentaje = 0
+                if (Boolean(item.tipo_precio_seleccionado)) {
+                    porcentaje = Number(this.obtenerPorcentajePrecioPerzonalizado(item.precios_perzonalizados, listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))
+                } else {
+                    porcentaje = Number(porcentaje)
+                }
                 return {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(porcentaje)) + Number(item.precio_costo)).toFixed(2)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(precioSeleccionado.porcentaje)) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -1052,31 +1447,158 @@ class ModalNewVenta extends Component {
 
         return json
     }
+
+    createJsonFacturaElectronicaTransferencia = () => {
+        const {
+            sumaSubTotal,
+            precioProductosSinIva,
+            precioProductosConIva,
+            sumaIva,
+            sumaTotal,
+            descuento,
+            clienteSeleccionado,
+            listaProductosSeleccionadosEditados,
+            listaProductosSeleccionados,
+            precioSeleccionado,
+            punto_emision,
+            codigoEstablecimiento,
+            numero_factura
+        } = this.state
+
+        var date = new Date()
+        var json = {
+            "ambiente": this.state.ambienteFacturacion,
+            "tipo_emision": 1,
+            "secuencial": Number(numero_factura),
+            "fecha_emision": date.toISOString(),
+            "emisor": {
+                "ruc": "",
+                "obligado_contabilidad": false,
+                "contribuyente_especial": "",
+                "nombre_comercial": "",
+                "razon_social": "",
+                "direccion": "",
+                "establecimiento": {
+                    "punto_emision": String(punto_emision),
+                    "codigo": String(codigoEstablecimiento),
+                    "direccion": ""
+                }
+            },
+            "moneda": "USD",
+            "totales": {
+                "total_sin_impuestos": Number(sumaSubTotal),
+                "impuestos": [
+                    {
+                        "base_imponible": Number(precioProductosSinIva),
+                        "valor": 0.0,
+                        "codigo": "2",
+                        "codigo_porcentaje": "0"
+                    },
+                    {
+                        "base_imponible": Number(precioProductosConIva),
+                        "valor": Number(sumaIva),
+                        "codigo": "2",
+                        "codigo_porcentaje": "2"
+                    }
+                ],
+                "importe_total": Number(sumaTotal),
+                "propina": 0.0,
+                "descuento": Number(Number(descuento).toFixed(2))
+            },
+            "comprador": {
+                "email": clienteSeleccionado.email,
+                "identificacion": clienteSeleccionado.numero_identificacion,
+                "tipo_identificacion": clienteSeleccionado.tipo_identificacion,
+                "razon_social": clienteSeleccionado.nombre,
+                "direccion": clienteSeleccionado.direccion,
+                "telefono": clienteSeleccionado.celular
+            },
+            "items": listaProductosSeleccionadosEditados.map(item => {
+                var porcentaje = 0
+                if (Boolean(item.tipo_precio_seleccionado)) {
+                    porcentaje = Number(this.obtenerPorcentajePrecioPerzonalizado(item.precios_perzonalizados, listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))
+                } else {
+                    porcentaje = Number(porcentaje)
+                }
+                return {
+                    cantidad: Number(item.cantidad),
+                    codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
+                    codigo_auxiliar: item.codigo,
+                    precio_unitario: Number(((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)).toFixed(2)),
+                    descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
+                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    impuestos: [
+                        {
+                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
+                            codigo: '2',
+                            codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
+                        }
+                    ],
+                    descuento: 0.0
+                }
+            })
+            ,
+            "valor_retenido_iva": 0.00,
+            "valor_retenido_renta": 0.00,
+            "pagos": [
+                {
+                    "medio": "transferencia",
+                    "total": Number(sumaTotal)
+                }
+            ]
+        }
+
+        return json
+    }
     ///////////////////////////
-    onChangueSelecteccionarProducto = item => {
+    onChangueSelecteccionarProducto = async item => {
         var array = this.state.listaProductosSeleccionados
         var arrayValoresSelecionados = this.state.listaProductosSeleccionadosEditados
         var array2 = array.filter(item2 => item2.codigo === item.codigo)
         if (this.state.cargaAutomatica === false) {
-            this.setState({ itemProductoCargado: item })
+            var precioPerzonalizado = null;
+            if (Boolean(item.tipo_precio_seleccionado)) {
+                precioPerzonalizado = await this.obtenerPreciosPersonalizados(item.codigo)
+            }
+            this.setState({
+                itemProductoCargado: item,
+                preciosPerzonalizadosProducto: precioPerzonalizado
+            })
         } else {
             if (array2.length === 0) {
                 if (Number(item.stock_actual) === 0) {
                     setSnackBars.openSnack('error', 'rootSnackBar', 'Producto vacío', 2000)
                 } else {
                     array.push(item)
+                    if (Boolean(!this.state.seleccionarProductoPordefecto)) {
+                        if (this.state.precioSeleccionadoCargar != null) {
+                            item.precio_por_defecto = this.state.precioSeleccionadoCargar
+                        }
+                    }
+
+                    var precioP =0;
+                    if (Boolean(item.tipo_precio_seleccionado)) {
+                        precioP = await this.obtenerPreciosPersonalizados(item.codigo)
+                    }
+                    var porcentaje = Boolean(item.tipo_precio_seleccionado) ? Number(this.obtenerPorcentajePrecioPerzonalizado(precioP, item.precio_por_defecto)) : Number(this.obtenerPorcentajePrecio(item.precio_por_defecto))
+
                     arrayValoresSelecionados.push({
                         codigo: item.codigo,
                         cantidad: '1',
                         precio_venta_a: item.precio_venta_a,
                         precio_costo: item.precio_costo,
+                        precios_perzonalizados: precioP,
                         tiene_iva: item.tiene_iva,
                         porcentaje_iva: item.porcentaje_iva,
                         stock_actual: item.stock_actual,
                         codigo_barras: item.codigo_barras,
+                        tipo_precio_seleccionado: item.tipo_precio_seleccionado,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2))
+                        precio_venta: Number((Number(item.precio_costo) * porcentaje) + Number(item.precio_costo)).toFixed(2),
                     })
+
                     this.setState({
                         itemProductoCargado: null
                     })
@@ -1092,7 +1614,15 @@ class ModalNewVenta extends Component {
         })
     }
 
-    agregarItemSeleccionadoVista = (item) => {
+
+    obtenerPreciosPersonalizados = async (codigoProducto) => {
+        var db = firebase.database();
+        var productosRef = await db.ref('users/' + this.state.uidUser + '/precios_personalizados/' + codigoProducto).once('value')
+
+        return Object.values(productosRef.val())
+    }
+
+    agregarItemSeleccionadoVista = async (item) => {
         if (this.state.itemProductoCargado != null) {
             var array = this.state.listaProductosSeleccionados
             var arrayValoresSelecionados = this.state.listaProductosSeleccionadosEditados
@@ -1102,17 +1632,27 @@ class ModalNewVenta extends Component {
                     setSnackBars.openSnack('error', 'rootSnackBar', 'Producto vacío', 2000)
                 } else {
                     array.push(item)
+                    var precioPerzonalizado = null;
+                    if (Boolean(item.tipo_precio_seleccionado)) {
+                        precioPerzonalizado = await this.obtenerPreciosPersonalizados(item.codigo)
+                    }
+                    var porcentaje = Boolean(item.tipo_precio_seleccionado) ?
+                        Number(this.obtenerPorcentajePrecioPerzonalizado(precioPerzonalizado, item.precio_por_defecto))
+                        :
+                        Number(this.obtenerPorcentajePrecio(item.precio_por_defecto))
                     arrayValoresSelecionados.push({
                         codigo: item.codigo,
                         cantidad: '1',
+                        precios_perzonalizados: precioPerzonalizado,
                         precio_venta_a: item.precio_venta_a,
                         precio_costo: item.precio_costo,
                         tiene_iva: item.tiene_iva,
                         porcentaje_iva: item.porcentaje_iva,
                         stock_actual: item.stock_actual,
+                        tipo_precio_seleccionado: item.tipo_precio_seleccionado,
                         codigo_barras: item.codigo_barras,
                         descripcion_producto: item.descripcion_producto,
-                        precio_venta: Number(((Number(item.precio_costo) * Number(this.state.precioSeleccionado.porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                        precio_venta: Number((Number(item.precio_costo) * porcentaje) + Number(item.precio_costo)).toFixed(2),
                     })
                     this.setState({
                         listaProductosSeleccionados: array,
@@ -1130,6 +1670,26 @@ class ModalNewVenta extends Component {
         }
     }
 
+    obtenerPorcentajePrecio = (precio_por_defecto) => {
+        var porcentaje = 0
+        this.state.precios.filter(it => {
+            if (it.codigo === precio_por_defecto) {
+                porcentaje = it.porcentaje
+            }
+        })
+        return porcentaje
+    }
+
+    obtenerPorcentajePrecioPerzonalizado = (preciosPerzonalizados, precio_por_defecto) => {
+        var porcentaje = 0
+        preciosPerzonalizados.filter(it => {
+            if (it.codigo === precio_por_defecto) {
+                porcentaje = it.porcentaje
+            }
+        })
+        return porcentaje
+    }
+
     calcularValoresTotales = () => {
         var sumatotalConIVA = 0
         var sumatotal = 0
@@ -1138,7 +1698,12 @@ class ModalNewVenta extends Component {
         this.state.listaProductosSeleccionadosEditados.forEach(item => {
             var stock = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].cantidad
             var precioCosto = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].precio_costo
-            var reultado = (precioCosto * Number(this.state.precioSeleccionado.porcentaje)) + Number(precioCosto)
+            var reultado = 0
+            if (Boolean(item.tipo_precio_seleccionado)) {
+                reultado = (precioCosto * Number(this.obtenerPorcentajePrecioPerzonalizado(item.precios_perzonalizados, this.state.listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))) + Number(precioCosto)
+            } else {
+                reultado = (precioCosto * Number(this.obtenerPorcentajePrecio(this.state.listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))) + Number(precioCosto)
+            }
             var precio = reultado
 
             var precioIva = 0
@@ -1151,7 +1716,7 @@ class ModalNewVenta extends Component {
             }
 
             sumatotalConIVA = sumatotalConIVA + (Number(stock) * Number(precioIva))
-            sumatotal = sumatotal + (Number(stock) * Number(precio))
+            sumatotal = sumatotal + (Number(stock) * Number(precio)-sumatotalConIVA)
         })
         this.setState({ sumaTotal: (sumatotal + sumatotalConIVA).toFixed(2) })
         this.setState({ sumaIva: sumatotalConIVA.toFixed(2) })
@@ -1265,6 +1830,12 @@ class ModalNewVenta extends Component {
                 }
                 break
             }
+            case 'transferencia': {
+                if (this.comprobarCamposLlenosCredito()) {
+                    this.setState({ estadoModalFinalizaPago: true })
+                }
+                break
+            }
             default: {
                 break
             }
@@ -1278,6 +1849,9 @@ class ModalNewVenta extends Component {
                 width: '100%'
             }
         }
+
+        console.log(this.state.listaProductosSeleccionadosEditados);
+
         return <>
             <div style={{
                 zIndex: 30,
@@ -1288,6 +1862,7 @@ class ModalNewVenta extends Component {
                 width: '100vw',
                 height: '100vh'
             }}>
+
                 <Grid container
                     variant="permanent"
                     style={{
@@ -1297,29 +1872,36 @@ class ModalNewVenta extends Component {
 
                     <Grid item xs={9} style={{ background: 'rgba(222, 239, 255)' }}>
                         <Grid container>
-                            <Grid item xs={6}>
-                                <TextField
-                                    id="filled-tipo-venta"
-                                    select
-                                    label="Tipo de venta"
-                                    error={this.state.tipo_venta.length > 0 ? false : true}
-                                    value={this.state.tipo_venta}
-                                    onChange={event => this.setState({
-                                        tipo_venta: event.target.value
-                                    })}
-                                    margin="normal"
-                                    variant="outlined"
-                                    style={styles.styleText}
-                                >
-                                    <MenuItem value={'factura'}>Factura</MenuItem>
-                                    <MenuItem value={'final'}>Consumidor Final</MenuItem>
-                                </TextField>
+                            <Grid item xs={4}>
+                                <div style={{
+                                    display: 'flex',
+                                    paddingLeft: 16,
+                                    paddingRight: 16,
+                                    flexDirection: 'column',
+                                }}>
+                                    <TextField
+                                        id="filled-tipo-venta"
+                                        select
+                                        label="Tipo de venta"
+                                        error={this.state.tipo_venta.length > 0 ? false : true}
+                                        value={this.state.tipo_venta}
+                                        onChange={event => this.setState({
+                                            tipo_venta: event.target.value
+                                        })}
+                                        margin="normal"
+                                        variant="outlined"
+                                        style={styles.styleText}
+                                    >
+                                        <MenuItem value={'factura'}>Factura</MenuItem>
+                                        <MenuItem value={'final'}>Consumidor Final</MenuItem>
+                                    </TextField>
 
-                                <AutoCompleteSelectedProducto
-                                    styleText={styles.styleText}
-                                    onChangue={this.onChangueSelecteccionarProducto}
-                                >
-                                </AutoCompleteSelectedProducto>
+                                    <AutoCompleteSelectedProducto
+                                        styleText={styles.styleText}
+                                        onChangue={this.onChangueSelecteccionarProducto}
+                                    >
+                                    </AutoCompleteSelectedProducto>
+                                </div>
 
                                 <ModalContainerNormal
                                     open={this.state.estadoModalGuardarVenta}
@@ -1337,13 +1919,28 @@ class ModalNewVenta extends Component {
                                 </ModalContainerNormal>
 
                             </Grid>
-                            <Grid item xs={6}>
+                            <Grid item xs={8}>
                                 <ContenedorProductoVista
                                     itemProductoCargado={this.state.itemProductoCargado}
                                     cargaAutomatica={this.state.cargaAutomatica}
                                     cargaAutomaticaCambiar={() => this.setState({ cargaAutomatica: !this.state.cargaAutomatica })}
                                     agregarItemSeleccionadoVista={this.agregarItemSeleccionadoVista}
-                                    precioSeleccionado={this.state.precioSeleccionado}
+
+                                    precios={this.state.precios}
+                                    preciosPerzonalizadosProducto={this.state.preciosPerzonalizadosProducto}
+                                    onChangePrecio={valor => {
+                                        var producto = this.state.itemProductoCargado
+                                        producto.precio_por_defecto = valor
+                                        this.setState({
+                                            itemProductoCargado: producto
+                                        })
+                                    }}
+
+                                    seleccionarProductoPordefecto={this.state.seleccionarProductoPordefecto}
+                                    seleccionarProductoPordefectoCambiar={() => this.setState({ seleccionarProductoPordefecto: !this.state.seleccionarProductoPordefecto })}
+
+                                    precioSeleccionadoCargar={this.state.precioSeleccionadoCargar}
+                                    precioSeleccionadoCargarCambiar={valor => this.setState({ precioSeleccionadoCargar: valor })}
                                 />
                             </Grid>
                         </Grid>
@@ -1364,6 +1961,11 @@ class ModalNewVenta extends Component {
                         </Grid>
                     </Grid>
                     <Grid item xs={3} style={{ overflowY: 'auto', height: '100vh' }}>
+                        <ContenedorNumeroFactura
+                            numero_factura={this.state.numero_factura}
+                            punto_emision={this.state.punto_emision}
+                            codigoEstablecimiento={this.state.codigoEstablecimiento}
+                        />
                         {
                             this.state.tipo_venta === 'factura' &&
                             <ContenedorClienteVista
@@ -1393,33 +1995,9 @@ class ModalNewVenta extends Component {
                             tipo_pago={this.state.tipo_pago}
                         />
                         <div style={{ marginLeft: 16, marginRight: 16 }}>
-                            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
-                                <ContenedorSeleccionarTipoPrecio
-                                    precioSeleccionado={this.state.precioSeleccionado}
-                                    precios={this.state.precios}
-                                    handleChangeSeleccion={codigo => {
-                                        var precio = this.state.precios.filter(p => p.codigo === codigo)[0]
-                                        this.setState({
-                                            precioSeleccionado: precio
-                                        })
-                                        setTimeout(() => {
-                                            this.calcularValoresTotales()
-                                        }, 100)
-                                        setSnackBars.openSnack('info', 'rootSnackBar', 'Precio cambiado', 500)
-                                    }}
-                                />
-                                <Tooltip title="Configurar precios">
-                                    <IconButton onClick={() => {
-                                        this.setState({
-                                            estadoModalSimpleConfigurarPrecios: true
-                                        })
-                                    }}>
-                                        <SettingsIcon color='default' />
-                                    </IconButton>
-                                </Tooltip>
-                            </div>
                             <ContenedorSeleccionarTipoPago
                                 tipo_pago={this.state.tipo_pago}
+                                tipo_venta={this.state.tipo_venta}
                                 handleChangeSeleccionTipoPago={value => {
                                     this.setState({
                                         tipo_pago: value

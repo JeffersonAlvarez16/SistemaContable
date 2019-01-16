@@ -19,6 +19,7 @@ import DonutSmall from '@material-ui/icons/DonutSmall';
 import ShoppingCart from '@material-ui/icons/ShoppingCart';
 import Trending from '@material-ui/icons/TrendingUp';
 import AccountCircle from '@material-ui/icons/AccountCircle';
+import Style from '@material-ui/icons/Style';
 import MarkunreadMailbox from '@material-ui/icons/MarkunreadMailbox';
 import Tooltip from '@material-ui/core/Tooltip';
 
@@ -79,7 +80,7 @@ export const mailFolderListItems = (
                 <ListItemText primary="Contactos" />
             </ListItem>
         </Link>
-        <Link prefetch href="/ventas">
+        <Link prefetch href="/ventasFac">
             <ListItem button>
                 <Tooltip title="Ventas" placement="right">
                     <ListItemIcon>
@@ -107,6 +108,16 @@ export const mailFolderListItems = (
                     </ListItemIcon>
                 </Tooltip>
                 <ListItemText primary="Caja" />
+            </ListItem>
+        </Link>
+        <Link prefetch href="/cuentas_cobrar">
+            <ListItem button>
+                <Tooltip title="Cuentas Cobrar" placement="right">
+                    <ListItemIcon>
+                        <Style />
+                    </ListItemIcon>
+                </Tooltip>
+                <ListItemText primary="Cuentas Cobrar" />
             </ListItem>
         </Link>
         <Link prefetch href="/usuarios">

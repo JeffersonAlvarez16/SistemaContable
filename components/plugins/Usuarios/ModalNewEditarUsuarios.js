@@ -34,7 +34,10 @@ class ModalUsuarios extends React.Component {
         password: '',
         clientes: false,
         productos: false,
-        stock: false,
+        devolucion_cliente:false,
+        devolucion_proveedor:false,
+        ajuste_stock:false,
+        compra_productos:false,       
         proveedores: false,
         ventas: false,
         retenciones: false,
@@ -42,7 +45,9 @@ class ModalUsuarios extends React.Component {
         generales: false,
         openTipo: null,
         anchorEl: null,
-        title: ''
+        title: '',
+        cuentas_cobrar:false,
+        caja:false
     };
 
     componentDidMount() {
@@ -57,11 +62,16 @@ class ModalUsuarios extends React.Component {
                 password: this.props.item.password,
                 tipo_usuario: this.props.item.tipo_usuario,
                 productos: this.props.item.privilegios.productos,
-                stock: this.props.item.privilegios.stock,
+                devolucion_cliente:this.props.item.privilegios.stock.devolucion_cliente,
+                devolucion_proveedor:this.props.item.privilegios.stock.devolucion_proveedor,
+                ajuste_stock:this.props.item.privilegios.stock.ajuste_stock,
+                compra_productos:this.props.item.privilegios.stock.compra_productos,                 
                 ventas: this.props.item.privilegios.ventas,
                 retenciones: this.props.item.privilegios.retenciones,
                 proveedores: this.props.item.privilegios.proveedores,
                 clientes: this.props.item.privilegios.clientes,
+                cuentas_cobrar:this.props.item.privilegios.cuentas_cobrar,
+                caja:this.props.item.privilegios.caja,
                 usuarios: this.props.item.privilegios.usuarios,
                 generales: this.props.item.privilegiosGenerales.generales,
 
@@ -96,18 +106,25 @@ class ModalUsuarios extends React.Component {
                         code: codigo,
                         nombre: this.state.nombre,
                         password: this.state.password,
-                        tipo_usuario: this.state.tipo_usuario,
+                        tipo_usuario: 'vendedor',
                         estado: true,
-                        privilegios:{
+                        privilegios: {
                             productos: this.state.productos,
-                        stock: this.state.stock,
-                        proveedores: this.state.proveedores,
-                        clientes: this.state.clientes,
-                        ventas: this.state.ventas,
-                        retenciones: this.state.retenciones,
-                        usuarios: this.state.usuarios,
+                            stock: {
+                                devolucion_cliente:this.state.devolucion_cliente,
+                                devolucion_proveedor:this.state.devolucion_proveedor,
+                                compra_productos:this.state.compra_productos,
+                                ajuste_stock:this.state.ajuste_stock
+                            },
+                            cuentas_cobrar:this.state.cuentas_cobrar,
+                            caja:this.state.caja,
+                            proveedores: this.state.proveedores,
+                            clientes: this.state.clientes,
+                            ventas: this.state.ventas,
+                            retenciones: this.state.retenciones,
+                            usuarios: this.state.usuarios,
                         },
-                        privilegiosGenerales:{
+                        privilegiosGenerales: {
                             generales: this.state.generales
                         }
                     })
@@ -117,44 +134,51 @@ class ModalUsuarios extends React.Component {
                     }, 100)
                 } else {
                     var productosRef = db.ref('users/' + user.uid + '/usuarios/' + this.props.item.code)
-                   
-                    productosRef.update({                      
+
+                    productosRef.update({
                         nombre: this.state.nombre,
                         password: this.state.password,
-                        tipo_usuario: this.state.tipo_usuario,                      
+                        tipo_usuario: 'vendedor',
                         estado: this.props.item.estado,
-                        privilegios:{
+                        privilegios: {
                             productos: this.state.productos,
-                        stock: this.state.stock,
-                        proveedores: this.state.proveedores,
-                        clientes: this.state.clientes,
-                        ventas: this.state.ventas,
-                        retenciones: this.state.retenciones,
-                        usuarios: this.state.usuarios,
+                            stock: {
+                                devolucion_cliente:this.state.devolucion_cliente,
+                                devolucion_proveedor:this.state.devolucion_proveedor,
+                                compra_productos:this.state.compra_productos,
+                                ajuste_stock:this.state.ajuste_stock
+                            },
+                            cuentas_cobrar:this.state.cuentas_cobrar,
+                            caja:this.state.caja,
+                            proveedores: this.state.proveedores,
+                            clientes: this.state.clientes,
+                            ventas: this.state.ventas,
+                            retenciones: this.state.retenciones,
+                            usuarios: this.state.usuarios,
                         },
-                        privilegiosGenerales:{
+                        privilegiosGenerales: {
                             generales: this.state.generales
                         }
-                    }) 
+                    })
                     setTimeout(() => {
                         this.props.handleClose()
-                        setSnackBars.openSnack('success', 'rootSnackBar', 'Usuario registrado con exito', 2000)
+                        setSnackBars.openSnack('info', 'rootSnackBar', 'Usuario actualizado con exito', 2000)
                     }, 100)
                 }
 
 
             }
         })
-        
+
     }
     //programar es como vivir toda una vida de hacer tarea pero amar hacer tarea
     render() {
 
         const { classes } = this.props;
-        const { anchorEl, openTipo, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
+        const { cuentas_cobrar,caja,compra_productos,devolucion_cliente,devolucion_proveedor,ajuste_stock, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
 
         return (
-            <div style={{ width: 500, maxHeight: 650 }}>
+            <div style={{ width: 600, maxHeight: 650 }}>
                 <AppBar style={{
                     position: 'relative',
                 }}>
@@ -170,8 +194,8 @@ class ModalUsuarios extends React.Component {
                         </IconButton>
                     </Toolbar>
                 </AppBar>
-                <Grid item xs="12" style={{ margin: 15, columnSpan: 10 }}>
-                    <div style={{ display: 'flex' }}>
+                <Grid item xs="12">
+                    <div style={{ display: 'flex', margin: 15 }}>
 
                         <Grid item xs="6" style={{ margin: 2 }}>
                             <TextField
@@ -198,181 +222,266 @@ class ModalUsuarios extends React.Component {
                             />
                         </Grid>
                     </div>
-                    <Grid item xs="12" style={{ margin: 2 }}>
+                </Grid>
+                <Grid item xs="12" >
 
+                    <div style={{ display: 'flex', margin: 15 }}>
 
-
-                        <TextField
-                            style={{ width: '100%' }}
-                            id="standard-tipo-usuario"
-                            label="Tipo Usuario"
-                            required
-                            value={this.state.tipo_usuario}
-                            onChange={(event) => this.setState({ tipo_usuario: event.target.value })}
-                            margin="normal"
-                            variant="filled"
-                        />
-
-
-                    </Grid>
-                    <Grid item xs="12" style={{ margin: 2 }}>
-                        <Typography variant="title" gutterBottom>
-                            Privilegios
+                        <Grid item xs={6}>
+                            <Typography variant="title" gutterBottom>
+                                Privilegios
                         </Typography>
-                        <div style={{ display: 'flex' }}>
-                            <Grid item xs="6">
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={productos}
-                                            onChange={() => {
-                                                this.setState({
-                                                    productos: !this.state.productos
-                                                })
-                                            }}
+                            <div style={{ display: 'flex' }} >
 
+                                <Grid item xs={6}>
+                                    <div style={{ display: 'flex' }}>
+                                        <FormControlLabel
+                                            control={
+                                                <Checkbox
+                                                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                    checked={productos}
+                                                    onChange={() => {
+                                                        this.setState({
+                                                            productos: !this.state.productos
+                                                        })
+                                                    }}
+
+                                                />
+                                            }
+                                            label="Productos"
                                         />
-                                    }
-                                    label="Productos"
-                                />
-                                {
-                                    // 
-                                }
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={stock}
-                                            onChange={() => {
-                                                this.setState({
-                                                    stock: !this.state.stock
-                                                })
+                                    </div>
 
-                                            }}
-                                        />
-                                    }
-                                    label="Stock"
-                                />
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={proveedores}
-                                            onChange={() => {
-                                                this.setState({
-                                                    proveedores: !this.state.proveedores
-                                                })
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={proveedores}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        proveedores: !this.state.proveedores
+                                                    })
 
-                                            }}
-                                        />
-                                    }
-                                    label="Proveedores"
-                                />
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={clientes}
-                                            onChange={() => {
-                                                this.setState({
-                                                    clientes: !this.state.clientes
-                                                })
+                                                }}
+                                            />
+                                        }
+                                        label="Proveedores"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={clientes}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        clientes: !this.state.clientes
+                                                    })
 
-                                            }}
+                                                }}
 
-                                        />
-                                    }
-                                    label="Clientes"
-                                />
+                                            />
+                                        }
+                                        label="Clientes"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={caja}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        caja: !this.state.caja
+                                                    })
 
-                            </Grid>
-                            <Grid item xs="6">
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={ventas}
-                                            onChange={() => {
-                                                this.setState({
-                                                    ventas: !this.state.ventas
-                                                })
+                                                }}
 
-                                            }}
+                                            />
+                                        }
+                                        label="Caja"
+                                    />
+                                </Grid>
+                                <Grid item xs={6}>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={ventas}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        ventas: !this.state.ventas
+                                                    })
 
-                                        />
-                                    }
-                                    label="Ventas"
-                                />
+                                                }}
 
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={retenciones}
-                                            onChange={() => {
-                                                this.setState({
-                                                    retenciones: !this.state.retenciones
-                                                })
+                                            />
+                                        }
+                                        label="Ventas"
+                                    />
 
-                                            }}
-                                        />
-                                    }
-                                    label="Retenciones"
-                                />
-                                <FormControlLabel
-                                    control={
-                                        <Checkbox
-                                            icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                            checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                            checked={usuarios}
-                                            onChange={() => {
-                                                this.setState({
-                                                    usuarios: !this.state.usuarios
-                                                })
-                                            }}
-                                        />
-                                    }
-                                    label="Usuarios"
-                                />
-                            </Grid>
-                        </div>
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={retenciones}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        retenciones: !this.state.retenciones
+                                                    })
 
+                                                }}
+                                            />
+                                        }
+                                        label="Retenciones"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={usuarios}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        usuarios: !this.state.usuarios
+                                                    })
+                                                }}
+                                            />
+                                        }
+                                        label="Usuarios"
+                                    />
+                                     <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={cuentas_cobrar}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        cuentas_cobrar: !this.state.cuentas_cobrar
+                                                    })
 
-                    </Grid>
+                                                }}
 
-                    <Grid item xs="12" style={{ margin: 2 }}>
-                        <Typography variant="title" gutterBottom>
-                            Privilegios Generales
+                                            />
+                                        }
+                                        label="Cuentas por Cobrar"
+                                    />
+                                </Grid>
+                            </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                            <Typography variant="title" gutterBottom>
+                                Privilegios Stock
                         </Typography>
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
-                                    checkedIcon={<CheckBoxIcon fontSize="small" />}
-                                    checked={generales}
-                                    onChange={() => {
-                                        this.setState({
-                                            generales: !this.state.generales
-                                        })
+                            <div style={{ display: 'flex' }}>
+                                <Grid item xs={6}>
 
-                                    }}
-                                />
-                            }
-                            label="Configuracion de Precios"
-                        />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={devolucion_cliente}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        devolucion_cliente: !this.state.devolucion_cliente
+                                                    })
 
+                                                }}
+                                            />
+                                        }
+                                        label="Devolucion Cliente"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={compra_productos}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        compra_productos: !this.state.compra_productos
+                                                    })
 
-                    </Grid>
+                                                }}
+                                            />
+                                        }
+                                        label="Compra Productos"
+                                    />                                    
+                                </Grid>
+                                <Grid item xs={6}>
+
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={devolucion_proveedor}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        devolucion_proveedor: !this.state.devolucion_proveedor
+                                                    })
+
+                                                }}
+                                            />
+                                        }
+                                        label="Devolucion Proveedor"
+                                    />
+                                    <FormControlLabel
+                                        control={
+                                            <Checkbox
+                                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                                checked={ajuste_stock}
+                                                onChange={() => {
+                                                    this.setState({
+                                                        ajuste_stock: !this.state.ajuste_stock
+                                                    })
+
+                                                }}
+                                            />
+                                        }
+                                        label="Ajuste Stock"
+                                    />
+                                </Grid>
+                            </div>
+                        </Grid>
+                    </div>
+
                 </Grid>
 
-            </div>
+
+
+                <Grid item xs={12} style={{ margin: 15 }}>
+                    <Typography variant="title" gutterBottom>
+                        Privilegios Generales
+                        </Typography>
+                    <FormControlLabel
+                        control={
+                            <Checkbox
+                                icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
+                                checkedIcon={<CheckBoxIcon fontSize="small" />}
+                                checked={generales}
+                                onChange={() => {
+                                    this.setState({
+                                        generales: !this.state.generales
+                                    })
+
+                                }}
+                            />
+                        }
+                        label="Configuracion de Precios"
+                    />
+
+
+                </Grid>
+
+            </div >
         );
     }
 }

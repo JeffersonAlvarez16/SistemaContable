@@ -116,7 +116,6 @@ class TablaNormal extends React.Component {
     isSelected = id => this.state.selected.indexOf(id) !== -1;
 
     componentDidMount() {
-        console.log(this.props.data)
         this.setState({
             data: this.props.data,
             estadoTabla: this.props.estadoTabla
@@ -167,7 +166,7 @@ class TablaNormal extends React.Component {
                 {
                     this.state.estadoTabla === 'vacio' &&
                     <TablaVacia
-                        title={`Aún no hay ${textoTitleP}`}
+                        title={`${textoTitleP}: 0`}
                         titleButton={`AGREGAR ${textoTitleS}`}
                     />
                 }

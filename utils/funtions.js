@@ -134,7 +134,7 @@ class FUNTIONS {
     obtenerFechaActual=()=>{
         var date= new Date()
         var day= date.getDate()
-        var mon= date.getMonth()
+        var mon= date.getMonth()+1
         var yea= date.getFullYear()
         if(String(day).length===1){
             day='0'+day
@@ -142,7 +142,11 @@ class FUNTIONS {
         if(String(mon).length===1){
             mon='0'+mon
         }
+        console.log(`${yea}-${mon}-${day}`)
         return `${yea}-${mon}-${day}`
+    }
+    obtenerHoraActual=()=>{
+        return `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`
     }
 
 

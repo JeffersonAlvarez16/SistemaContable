@@ -10,7 +10,7 @@ const ModalContainerNormal = (props) => {
             open={props.open}
             style={{ zIndex: 99980 }}
         >
-            {props.children}
+            <div >{props.children}</div>
         </Dialog>
     );
 }

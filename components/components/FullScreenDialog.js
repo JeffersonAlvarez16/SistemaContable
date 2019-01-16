@@ -42,11 +42,11 @@ class FullScreenDialog extends React.Component {
           onClose={this.handleClose}
           TransitionComponent={Transition}
         >
-         <div>
-           {
-             this.props.children
-           }
-         </div>
+          <div>
+            {
+              this.props.children
+            }
+          </div>
         </Dialog>
       </div>
     );

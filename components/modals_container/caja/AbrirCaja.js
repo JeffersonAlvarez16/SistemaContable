@@ -62,8 +62,7 @@ class AbrirCaja extends Component {
                     valor_caja: saldo_inicial,
                 }
                 cajaUsuarioRef.set(item)
-                cajaUsuarioAbiertaRef.set(item)
-                setTimeout(() => { this.props.handleClose() }, 100)
+                cajaUsuarioAbiertaRef.set(item)                
             }
         })
     }
@@ -93,7 +92,7 @@ class AbrirCaja extends Component {
                 }}>
                     <Button disabled={this.state.estadoCaja} color="primary" variant="contained" onClick={() => {
                         this.abrirCaja()
-
+                        this.props.handleClose()
                     }}>
                         Abrir Caja
                     </Button>

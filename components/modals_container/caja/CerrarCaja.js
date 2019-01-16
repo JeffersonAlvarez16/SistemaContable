@@ -103,8 +103,7 @@ class CerrarCaja extends Component {
                     estado: false,
                     usuario_cerrar: usuario.code
                 })
-                cajaUsuarioAbiertaRef.remove()
-                setTimeout(() => { handleClose() }, 100)
+                cajaUsuarioAbiertaRef.remove()                
             }
         })
     }
@@ -189,9 +188,10 @@ class CerrarCaja extends Component {
                     display: 'flex',
                     flexDirection: 'row'
                 }}>
-                    <Button disabled={!this.state.estadoCaja} color="primary" variant="contained" onClick={() =>
+                    <Button disabled={!this.state.estadoCaja} color="primary" variant="contained" onClick={() =>{
                         this.cerrarCaja()
-                    }>
+                        this.props.handleClose()
+                    }}>
                         Cerrar Caja
                     </Button>
                     <Button color="primary" onClick={() =>

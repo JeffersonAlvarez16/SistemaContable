@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Grid, CircularProgress } from '@material-ui/core';
+import { Grid, CircularProgress, Input, FormControl, InputLabel, InputAdornment } from '@material-ui/core';
 import Search from '../../components/Search';
 import AutoCompleteRetenciones from '../AutoCompleteRetenciones'
 import AutoCompleteSelectedProducto from '../AutoCompleteSelectedProducto';
@@ -17,6 +17,7 @@ import CloseIcon from '@material-ui/icons/Close';
 
 
 
+
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -24,6 +25,12 @@ import 'firebase/auth'
 import setSnackBars from '../setSnackBars';
 import funtions from '../../../utils/funtions';
 import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
+import MaskedInput from "react-text-mask";
+import NumberFormat from 'react-number-format';
+
+
+import SeleccionarFecha from '../plugins/SeleccionarFecha';
+import SeleccionarHora from '../plugins/SeleccionarHora';
 
 
 class NuevaRetencion extends Component {
@@ -46,9 +53,15 @@ class NuevaRetencion extends Component {
     }
 
     componentDidMount() {
+        document.addEventListener("keydown", this.escFunction, false);
+
         const fecha = new Date().toISOString().toString().split(':')
         var fechas = fecha[0] + ':' + fecha[1]
-        this.setState({ fecha_emision_documento_sustento: fechas })
+        var hora = new Date()
+        this.setState({
+            fecha_emision_documento_sustento: fechas,
+            hora_emision_documento_sustento: hora
+        })
 
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -57,11 +70,17 @@ class NuevaRetencion extends Component {
                 empresaRef.on('value', (snap) => {
                     if (snap.val()) {
                         this.setState({ ambienteFacturacion: snap.val() })
-                    } 
+                    }
                 })
             }
         })
 
+    }
+
+    escFunction = (event) => {
+        if (event.keyCode === 27) {
+            this.props.handleClose()
+        }
     }
 
     onChangueSelectedProveedor = (item) => {
@@ -120,7 +139,7 @@ class NuevaRetencion extends Component {
                     fecha_registro: funtions.obtenerFechaActual(),
                     hora_registro: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
                     estado: 'pendiente',
-                    error_emision:'',
+                    error_emision: '',
                     empleado: this.props.usuario.code,
                     order: '' + date
                 })
@@ -131,7 +150,8 @@ class NuevaRetencion extends Component {
 
     postSet = async (uidUser, jsonData, codigo) => {
         //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
-        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
+        // const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
+        const rawResponse = await fetch('http://192.168.1.97:5000/retensincontabilidad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -140,14 +160,6 @@ class NuevaRetencion extends Component {
             },
             body: JSON.stringify(jsonData)
         })
-
-        const content = await rawResponse.json();
-        //console.log(content)
-        //setSnackBars.openSnack('success', 'rootSnackBar', 'Retención emitida con exito: ' + content.estado, 2000)
-        /* if(content!=null){
-            this.setState({estadoModalEmitirRetencion:false})
-            this.props.handleClose()
-        } */
     }
 
 
@@ -203,6 +215,22 @@ class NuevaRetencion extends Component {
     }
 
     generarRetencionRenta = () => {
+        var fecha = this.state.fecha_emision_documento_sustento.split('T')
+        var fechaSola = fecha[0]
+        var hora = String(this.state.hora_emision_documento_sustento).split(' ')
+        var horaForma = hora[4].split(':')
+        var horaLista = horaForma[0] + ':' + horaForma[1]
+
+        var numero_documento = this.state.numero_documento
+        var numeroRecorrido = numero_documento.toString().length
+        var numeroFinal = ''
+        for (var i = 0; i < Number(numeroRecorrido); i++) {
+            numeroFinal = numeroFinal + numero_documento.charAt(i)
+            if (i === 2 || i == 5) {
+                numeroFinal = numeroFinal + '-'
+            }
+        }
+
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
             "tipo_emision": 1,
@@ -229,8 +257,8 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
                     "valor_retenido": Number(this.state.valorRenta)
@@ -249,6 +277,12 @@ class NuevaRetencion extends Component {
     }
 
     generarRetencionIvaRenta = () => {
+        var fecha = this.state.fecha_emision_documento_sustento.split('T')
+        var fechaSola = fecha[0]
+        var hora = String(this.state.hora_emision_documento_sustento).split(' ')
+        var horaForma = hora[4].split(':')
+        var horaLista = horaForma[0] + ':' + horaForma[1]
+
         var retencionIvaRenta = {
             "ambiente": 1,
             "tipo_emision": 1,
@@ -275,8 +309,8 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "2",
                     "codigo_porcentaje": this.state.retencionIva.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigo(this.state.retencionIva.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionIva.tipo_documento,
                     "valor_retenido": Number(this.state.valorIVA)
@@ -285,8 +319,8 @@ class NuevaRetencion extends Component {
                     "base_imponible": Number(this.state.base_disponible),
                     "codigo": "1",
                     "codigo_porcentaje": this.state.retencionRenta.tipo_porcentaje,
-                    "fecha_emision_documento_sustento": this.state.fecha_emision_documento_sustento + ":56.782Z",
-                    "numero_documento_sustento": `${this.state.numero_documento}`,
+                    "fecha_emision_documento_sustento": fechaSola + 'T' + horaLista + ":56.782Z",
+                    "numero_documento_sustento": `${numeroFinal}`,
                     "porcentaje": this.getPorcentajeCodigoRenta(this.state.retencionRenta.tipo_porcentaje),
                     "tipo_documento_sustento": this.state.retencionRenta.tipo_documento,
                     "valor_retenido": Number(this.state.valorRenta)
@@ -358,7 +392,6 @@ class NuevaRetencion extends Component {
 
 
     render() {
-
         const styles = {
             styleText: {
                 width: '100%',
@@ -538,31 +571,47 @@ class NuevaRetencion extends Component {
                                         </TextField>
                                     </Grid>
                                     <Grid item xs={6}>
-                                        <TextField
-                                            id="standard-fecha"
+                                        <div style={{ marginTop: 24 }}></div>
+                                        <SeleccionarFecha
                                             label="Fecha de emisión del documento en sustento"
                                             value={this.state.fecha_emision_documento_sustento}
-                                            type="datetime-local"
-                                            onChange={e => this.setState({ fecha_emision_documento_sustento: e.target.value })}
-                                            margin="normal"
-                                            variant="filled"
-                                            style={{ width: '100%' }}
+                                            onChange={event => {
+                                                const fecha = new Date(event).toISOString().toString().split(':')
+                                                var fechas = fecha[0] + ':' + fecha[1]
+                                                this.setState({ fecha_emision_documento_sustento: fechas })
+                                            }}
+                                            width='100%'
+                                        />
+                                        <SeleccionarHora
+                                            label={"Hora"}
+                                            value={this.state.hora_emision_documento_sustento}
+                                            onChange={event => {
+                                                var hora = new Date(event)
+                                                this.setState({ hora_emision_documento_sustento: hora })
+                                            }}
+                                            width='100%'
                                         />
                                     </Grid>
                                 </Grid>
                                 <Grid container xs={6} spacing={8}>
-                                    <Grid item xs={6} >
+                                    <Grid item xs={6} style={{ display: 'flex', justifyContent: 'center' }} >
                                         <TextField
-                                            id="standard-numero-documento"
-                                            label="Número de documento"
+                                            id="formatted-text-mask-input"
+                                            label="Numero de documento"
+                                            error={this.state.numero_documento.length < 15 ? true : false}
                                             value={this.state.numero_documento}
-                                            error={this.state.numero_documento.length > 0 ? false : true}
-                                            onChange={e => {
-                                                this.setState({ numero_documento: e.target.value })
+                                            onChange={event => {
+                                                this.setState({
+                                                    numero_documento: event.target.value
+                                                })
                                             }}
                                             margin="normal"
-                                            variant="filled"
+                                            variant="outlined"
                                             style={{ width: '100%' }}
+                                            autoComplete='off'
+                                            InputProps={{
+                                                inputComponent: NumberFormatCustomNumeroFactura,
+                                            }}
                                         />
                                     </Grid>
                                     <Grid item xs={6} >
@@ -684,5 +733,35 @@ class NuevaRetencion extends Component {
         )
     }
 }
+
+const NumberFormatCustomNumeroFactura = (props) => {
+    const { inputRef, onChange, ...other } = props;
+    return (
+        <NumberFormat
+            {...other}
+            getInputRef={inputRef}
+            onValueChange={values => {
+                onChange({
+                    target: {
+                        value: values.value,
+                    },
+                });
+            }}
+            thousandSeparator
+            format="###-###-#########"
+            mask="_"
+        />
+
+    );
+}
+
+const cardExpiry = (val) => {
+    let month = limit(val.substring(0, 2), '12');
+    let date = limit(val.substring(2, 4), '31');
+
+    return month + (date.length ? '/' + date : '');
+}
+
+
 
 export default NuevaRetencion;

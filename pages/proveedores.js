@@ -1,11 +1,10 @@
 import React, { Component } from 'react';
 import Divider from '@material-ui/core/Divider';
 
+import AddIcon from '@material-ui/icons/Add';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import IconButton from '@material-ui/core/IconButton';
-import Tooltip from '@material-ui/core/Tooltip';
 
 
 //firebase 
@@ -26,6 +25,8 @@ import ModalNewEditProveedor from '../components/modals_container/ModalNewEditPr
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactivar';
 import setSnackBars from '../components/plugins/setSnackBars';
+import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
+import colors from '../utils/colors';
 
 
 class Proveedores extends Component {
@@ -33,17 +34,17 @@ class Proveedores extends Component {
     state = {
         listaProveedores: [],
         rowslistaStock: [
-            { id: 'acciones', numeric: false, disablePadding: true, label: 'Acciones' },
-            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
+            { id: 'acciones', numeric: false, disablePadding: true, label: '' },
             { id: 'nombre', numeric: true, disablePadding: false, label: 'Nombre' },
+            { id: 'celular', numeric: true, disablePadding: false, label: 'celular' },
+            { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
             { id: 'email', numeric: true, disablePadding: false, label: 'Email' },
             { id: 'tipo_identificacion', numeric: true, disablePadding: false, label: 'Tipo de Identificacion' },
             { id: 'identificacion', numeric: true, disablePadding: false, label: 'identificacion' },
             { id: 'tipo_persona', numeric: true, disablePadding: false, label: 'Tipo Persona' },
             { id: 'tipo', numeric: true, disablePadding: false, label: 'Tipo' },
-            { id: 'celular', numeric: true, disablePadding: false, label: 'celular' },
             { id: 'telefono', numeric: true, disablePadding: false, label: 'Telefono' },
-            { id: 'direccion', numeric: true, disablePadding: false, label: 'Dirección' },
+            { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'observacion', numeric: true, disablePadding: false, label: 'Observacion' },
             { id: 'usuario', numeric: true, disablePadding: false, label: 'Empleado' },
             { id: 'ciudad', numeric: true, disablePadding: false, label: 'Ciudad' },
@@ -62,7 +63,9 @@ class Proveedores extends Component {
         //uid de usuario
         usuarioUID: '',
         //usaurio
-        usuario:null
+        usuario: null,
+        estadoPermisos: null,
+        estadoacciones: ''
     }
 
     componentDidMount() {
@@ -107,16 +110,84 @@ class Proveedores extends Component {
         });
     }
 
+    obtenerPermisosusuarios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.proveedores === true) {
+                            this.setState({
+                                estadoPermisos: true
+                            })
+                        } else {
+                            this.setState({
+                                estadoPermisos: false
+                            })
+                        }
+                    }
+                });
+            }
+        });
+    }
+
+    comprobarUsuario = (item) => {
+        if (this.state.usuario.tipo_usuario === 'administrador') {
+            if (this.state.estadoacciones === 'desactivar') {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+            } else if (this.state.estadoacciones === 'activar') {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+            } else {
+                this.setState({ itemSeleccionado: item })
+                this.setState({ openModalFullScreen: true })
+            }
+        } else {
+            if (this.state.estadoacciones === 'desactivar') {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Proveedor', 2000)
+                }
+            } else if (this.state.estadoacciones === 'activar') {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Proveedor', 2000)
+                }
+            } else {
+                if (item.usuario === this.state.usuario.code) {
+                    this.setState({ itemSeleccionado: item })
+                    this.setState({ openModalFullScreen: true })
+                } else {
+                    setSnackBars.openSnack('warning', 'rootSnackBar', 'Usted no registro este Proveedor', 2000)
+                }
+            }
+        }
+
+
+    }
+
     handleGetData = (n, item) => {
         if (item.id === 'codigo') {
             return n.codigo
         }
         if (item.id === 'acciones') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
-                <Tooltip title="Editar"  placement="left">
-                    <IconButton aria-label="Editar" onClick={()=>{
-                        this.setState({ itemSeleccionado: n })
-                        this.setState({ openModalFullScreen: true })
+                <Tooltip title="Editar" placement="left">
+                    <IconButton aria-label="Editar" onClick={() => {
+                        this.setState({
+                            estadoacciones: 'editar'
+                        })
+                        setTimeout(() => {
+                            this.comprobarUsuario(n)
+                        }, 100)
+                        /*  this.setState({ itemSeleccionado: n })
+                          this.setState({ openModalFullScreen: true }) */
                     }}>
                         <EditIcon color='primary' />
                     </IconButton>
@@ -125,8 +196,12 @@ class Proveedores extends Component {
                     Boolean(n.estado) ?
                         <Tooltip title="Desactivar" placement="right">
                             <IconButton aria-label="Desactivar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
-                                this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'desactivar' })
+                                this.setState({
+                                    estadoacciones: 'desactivar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
                             }}>
                                 <VisibilityOffIcon />
                             </IconButton>
@@ -134,9 +209,15 @@ class Proveedores extends Component {
                         :
                         <Tooltip title="Activar">
                             <IconButton aria-label="Activar" onClick={() => {
-                                this.setState({ itemSeleccionado: n })
+                                this.setState({
+                                    estadoacciones: 'activar'
+                                })
+                                setTimeout(() => {
+                                    this.comprobarUsuario(n)
+                                }, 100)
+                                /* this.setState({ itemSeleccionado: n })
                                 this.setState({ estadoModalSimple: true, estadoModalDeleteActivarDesactivar: 'activar' })
-                            }}>
+                           */  }}>
                                 <VisibilityIcon color='primary' />
                             </IconButton>
                         </Tooltip>
@@ -147,45 +228,87 @@ class Proveedores extends Component {
         }
         if (item.id === 'nombre') {
             return <div style={{ width: 'max-content' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.nombre)}
+                {this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label={<div>{n.nombre}</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                )}
             </div>
         }
         if (item.id === 'email') {
-            return this.getColorActivadoDesactivado(n.estado, n.email)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div>{n.email}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            )
         }
         if (item.id === 'tipo') {
             return this.getColorActivadoDesactivado(n.estado, n.tipo)
         }
         if (item.id === 'tipo_identificacion') {
-           
-            if(n.tipo_identificacion==='05'){                
-                return this.getColorActivadoDesactivado(n.estado, "Cedula")
-            }else{
-                return this.getColorActivadoDesactivado(n.estado, "RUC")
+
+            if (n.tipo_identificacion === '05') {
+                return this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label={<div style={{ color: colors.getColorWhite() }}>Cedula</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryDarkBlue300() }}
+                    />
+                )
+            } else {
+                return this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label={<div style={{ color: colors.getColorWhite() }}>Ruc</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryDarkDeepPurple300() }}
+                    />
+                )
             }
-            
+
         }
         if (item.id === 'identificacion') {
-            return this.getColorActivadoDesactivado(n.estado, n.identificacion)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.identificacion}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymary() }}
+                />
+            )
         }
 
         if (item.id === 'tipo_persona') {
-            if(n.tipo_persona===true){
-                return this.getColorActivadoDesactivado(n.estado, "NO OBLIGADO A LLEVAR CONTABILIDAD")
-            }else{
-                return this.getColorActivadoDesactivado(n.estado, "OBLIGADO A LLEVAR CONTABILIDAD")  
+            if (n.tipo_persona === true) {
+                return this.getColorActivadoDesactivado(n.estado, "No obligado a llevar contabilidad")
+            } else {
+                return this.getColorActivadoDesactivado(n.estado, "Obligado a llevar contabilidad")
             }
-           
+
         }
         if (item.id === 'celular') {
-            return this.getColorActivadoDesactivado(n.estado, n.celular)
+            return this.getColorActivadoDesactivado(n.estado,
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.celular}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymary() }}
+                />
+            )
         }
         if (item.id === 'telefono') {
             return this.getColorActivadoDesactivado(n.estado, n.telefono)
         }
         if (item.id === 'direccion') {
             return <div style={{ width: 'max-content' }}>
-                {this.getColorActivadoDesactivado(n.estado, n.direccion)}
+                {this.getColorActivadoDesactivado(n.estado,
+                    <Chip
+                        label={<div>{n.direccion}</div>}
+                        clickable
+                        style={{ background: colors.getColorPrymaryGrey200() }}
+                    />
+                )}
             </div>
         }
         if (item.id === 'observacion') {
@@ -296,61 +419,84 @@ class Proveedores extends Component {
 
     render() {
         return (
-            <Layout title="Proveedores" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
-                <MenuHerramientas>
-                    <ItemMenuHerramienta
-                        titleButton="Nuevo Proveedor"
-                        color="primary"
-                        visible={true}
-                        disabled={this.state.itemsSeleccionados.length > 0}
-                        onClick={() => this.setState({ itemSeleccionado: null, openModalFullScreen: true })}
-                    />
+            <Layout title="Proveedores" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerPermisosusuarios()
+                }, 100)
+            }}>
+                {
+                    this.state.estadoPermisos === true &&
+                    <div>
+                        <MenuHerramientas>
+                            <ItemMenuHerramienta
+                                titleButton="Nuevo Proveedor"
+                                color="primary"
+                                visible={true}
+                                disabled={this.state.itemsSeleccionados.length > 0}
+                                onClick={() => this.setState({ itemSeleccionado: null, openModalFullScreen: true })}
+                            >
+                                <AddIcon />
+                            </ItemMenuHerramienta>
 
-                    <div style={{ flex: 0.8 }}></div>
+                            <div style={{ flex: 0.95 }}></div>
 
-                    <Search
-                        id='buscar-producto'
-                        textoSearch="Buscar..."
-                        textoTooltip="Buscar producto"
-                        handleSearch={this.handleSearch}
-                    />
-                </MenuHerramientas>
+                            <Search
+                                id='buscar-producto'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar proveedores"
+                                handleSearch={this.handleSearch}
+                            />
+                        </MenuHerramientas>
 
-                <Divider />
+                        <Divider />
 
-                <TablaNormal
-                    textoTitleP="Proveedores"
-                    textoTitleS="Proveedor"
-                    selectedItems={true}
-                    toolbar={false}
-                    notTab={true}
-                    data={this.state.listaProveedores}
-                    rows={this.state.rowslistaStock}
-                    handleGetData={this.handleGetData}
-                    estadoTabla={this.state.estadoTabla}
-                    itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
-                />
+                        <TablaNormal
+                            textoTitleP="Proveedores"
+                            textoTitleS="Proveedor"
+                            selectedItems={true}
+                            toolbar={false}
+                            notTab={true}
+                            data={this.state.listaProveedores}
+                            rows={this.state.rowslistaStock}
+                            handleGetData={this.handleGetData}
+                            estadoTabla={this.state.estadoTabla}
+                            itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
+                        />
 
-                <FullScreenDialog openModal={this.state.openModalFullScreen}>
-                    <ModalNewEditProveedor
-                        item={this.state.itemSeleccionado}
-                        handleClose={() => this.setState({ openModalFullScreen: false })}
-                        usuario={this.state.usuario}
-                    />
-                </FullScreenDialog>
+                        <FullScreenDialog openModal={this.state.openModalFullScreen}>
+                            <ModalNewEditProveedor
+                                item={this.state.itemSeleccionado}
+                                handleClose={() => this.setState({ openModalFullScreen: false })}
+                                usuario={this.state.usuario}
+                            />
+                        </FullScreenDialog>
 
-                <ModalContainerNormal
-                    open={this.state.estadoModalSimple}
-                    handleClose={() => this.setState({ estadoModalSimple: false })}
-                >
-                    <DeleteActivarDesactivar
-                        tipo={this.state.estadoModalDeleteActivarDesactivar}
-                        handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
-                        handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
-                        handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
-                    />
-                </ModalContainerNormal>
+                        <ModalContainerNormal
+                            open={this.state.estadoModalSimple}
+                            handleClose={() => this.setState({ estadoModalSimple: false })}
+                        >
+                            <DeleteActivarDesactivar
+                                tipo={this.state.estadoModalDeleteActivarDesactivar}
+                                handleClose={() => this.setState({ estadoModalSimple: false })}
+                                handleEliminarItems={() => this.handleEliminarItems([this.state.itemSeleccionado])}
+                                handleActivarItems={() => this.handleActivarItems([this.state.itemSeleccionado])}
+                                handleDesactivarItems={() => this.handleDesactivarItems([this.state.itemSeleccionado])}
+                            />
+                        </ModalContainerNormal>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
+                }
             </Layout>
         );
     }

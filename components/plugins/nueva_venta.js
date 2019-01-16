@@ -67,7 +67,7 @@ class NuevaVenta extends Component {
                 empresaRef.on('value', (snap) => {
                     if (snap.val()) {
                         this.setState({ ambienteFacturacion: snap.val() })
-                    } 
+                    }
                 })
             }
         })
@@ -178,10 +178,6 @@ class NuevaVenta extends Component {
             this.setOperacionStock(productosSeleccionados)
             var codigoRegistroVenta = funtions.guidGenerator()
             this.setSaveRegistroVenta(codigoRegistroVenta)
-            /*  setTimeout(() => {
-                 this.contentFactura.nuevaVenta()
-                 this.sectionFactura.nuevaVenta()
-             }, 1000) */
             if (tipo_venta === 'factura') {
                 this.setState({ estadoModalGuardarVenta: true })
                 var jsonData = this.createJsonFacturaElectronica()
@@ -265,6 +261,8 @@ class NuevaVenta extends Component {
             facturaElectronica
         } = this.state
 
+        const { cajaSeleccionada } = this.props
+
         var db = firebase.database();
         var operacionVentaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var order = new Date()
@@ -287,7 +285,9 @@ class NuevaVenta extends Component {
             empleado: this.props.usuario.code,
             order: '' + order,
             estado: true,
+            caja: cajaSeleccionada.codigo
         })
+        console.log(cajaSeleccionada)
     }
 
     // actualizar el stok de los productos
@@ -305,6 +305,8 @@ class NuevaVenta extends Component {
     //opercacion stock
     setOperacionStock = (listaProductos) => {
         const { cliente, observacion, dinero_resibido, sumaTotal, tipo_venta, sumaSubTotal, descuento, cambio } = this.state
+        const { cajaSeleccionada } = this.props
+
         var codigoStock = funtions.guidGenerator()
         var arrayProductos = []
         listaProductos.forEach(item => {
@@ -337,8 +339,10 @@ class NuevaVenta extends Component {
             en_deuda: '',
             vuelto: cambio,
             acreditado: '',
-            order: order + ""
+            order: order + "",
+            caja: cajaSeleccionada.codigo
         });
+        console.log(cajaSeleccionada)
     }
 
     //crar json para factura electrónica
@@ -436,7 +440,8 @@ class NuevaVenta extends Component {
     }
 
     render() {
-
+console.log(this.props.cajaSeleccionada)
+console.log("this.props.cajaSeleccionada")
         return <>
             <div style={{
                 zIndex: 30,

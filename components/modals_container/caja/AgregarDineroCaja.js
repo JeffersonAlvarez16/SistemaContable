@@ -38,15 +38,12 @@ class AgregarDineroCaja extends Component {
                 var cajaRefValorActual = db.ref('users/' + user.uid + '/caja/cajas_normales/' + caja.codigo)
                 cajaRefValorActual.once('value', (snap) => {
                     if (snap.val()) {
-                        console.log(snap.val().valor_caja)
                         cajaRefValorActual.update({
                             valor_caja: Number(Number(snap.val().valor_caja) + Number(saldoAgregado)).toFixed(2)
                         })
 
                     }
-                })
-
-                handleClose()
+                })                
             }
         })
     }
@@ -100,9 +97,10 @@ class AgregarDineroCaja extends Component {
                     marginBottom: 16,
                     marginTop: 16,
                 }}>
-                    <Button color="primary" variant="contained" onClick={() =>
+                    <Button color="primary" variant="contained" onClick={() =>{
                         this.agregarDinero()
-                    }>
+                        this.props.handleClose()
+                    }}>
                         Agregar
                     </Button>
                     <Button color="primary" onClick={() =>

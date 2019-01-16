@@ -39,11 +39,8 @@ class LoginContenedor extends Component {
                         this.setState({
                             stateUsers: 'llena',
                             users: arraytem
-                        })
-                        console.log(arraytem)
-                        this.checkStatusSession(arraytem)
-                    
-                        
+                        })                      
+                        this.checkStatusSession(arraytem)        
                     }
                 })
             }

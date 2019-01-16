@@ -9,8 +9,10 @@ import CloseIcon from '@material-ui/icons/Close';
 import TextField from '@material-ui/core/TextField';
 import Grid from '@material-ui/core/Grid';
 import Divider from '@material-ui/core/Divider';
-
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import setSnackBars from '../plugins/setSnackBars';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 //firebase 
@@ -25,6 +27,11 @@ import AutoCompleteProveedor from '../plugins/AutoCompleteProveedores';
 import AutoCompleteClientes from '../plugins/AutoCompleteClientes';
 import AutoCompleteCliente from '../plugins/AutoCompleteClientes-New';
 import AutoCompleteProveedores from '../plugins/AutoCompleteRetenciones';
+import ModalPreguntarCaja from './compra_productos/ModalPreguntarCaja';
+import ModalContainerNormal from './ModalContainerNormal';
+import { Chip, Avatar } from '@material-ui/core';
+import colors from '../../utils/colors';
+import ModalPreguntarCajaSalida from './compra_productos/ModalPreguntarCajaSalida';
 
 
 class ModalCompraProductos extends Component {
@@ -50,6 +57,30 @@ class ModalCompraProductos extends Component {
 
     componentDidMount() {
         document.addEventListener("keydown", this.escFunction, false);
+        this.dineroEnCaja()
+    }
+
+    dineroEnCaja = () => {
+        var db = firebase.database();
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+                operacionVentaRefCaja.on('value', (snap) => {
+                    if (snap.val()) {
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
+                        var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                this.setState({
+                                    dinero_en_caja: Number(snap2.val().valor_caja)
+                                })
+                            }
+                        })
+                    }
+                })
+
+            }
+        })
     }
 
     escFunction = (event) => {
@@ -70,15 +101,15 @@ class ModalCompraProductos extends Component {
             return sumaStock
         }
 
-        if (this.props.tipoAjuste === 'ajuste-stock-entrada') {
+        if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
             return sumaStock
         }
 
-        if (this.props.tipoAjuste === 'ajuste-stock-salida') {
+        if (this.props.tipoAjuste === 'ajuste_stock_salida') {
             return restaStock
         }
 
-        if (this.props.tipoAjuste === 'devolucion-proveedor') {
+        if (this.props.tipoAjuste === 'devolucion_proveedor') {
             return restaStock
         }
     }
@@ -96,24 +127,72 @@ class ModalCompraProductos extends Component {
         setSnackBars.openSnack('info', 'rootSnackBar', 'Compra relizada con éxito', 2000)
         this.props.handleClose()
     }
+    //recuperar referencias
+    obtenerReferenciaTipo = () => {
+        if (this.props.tipoAjuste === 'compra_producto') {
+            return 'compras_productos'
+        }
+
+        if (this.props.tipoAjuste === 'devolucion_cliente') {
+            return 'devoluciones_clientes'
+        }
+
+        if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
+            return 'ajustes_stock_entradas'
+        }
+
+        if (this.props.tipoAjuste === 'ajuste_stock_salida') {
+            return 'ajustes_stock_salidas'
+        }
+
+        if (this.props.tipoAjuste === 'devolucion_proveedor') {
+            return 'devoluciones_proveedores'
+        }
+    }
     // guardar venta caja
-    setCompraCaja(itemVenta) {
+    setOperacionCaja(itemVenta) {
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
         operacionVentaRefCaja.once('value', (snap) => {
             if (snap.val()) {
-                var caja = funtions.snapshotToArray(snap).filter(it=>it.usuario===this.props.usuario.code)[0]
+                var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
-                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/compras_productos/' + codigoVentaCaja)
+                    var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/' + this.obtenerReferenciaTipo() + '/' + codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
-                   
+
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
                     cajaRefValorActual.once('value', (snap2) => {
                         if (snap2.val()) {
-                             cajaRefValorActual.update({
-                                valor_caja: `${Number(Number(snap2.val().valor_caja) - Number(itemVenta.total_final)).toFixed(2)}`
-                            })
+                            var resta = Number(Number(snap2.val().valor_caja) - Number(itemVenta.total_final)).toFixed(2)
+                            var suma = Number(Number(itemVenta.total_final) + Number(snap2.val().valor_caja)).toFixed(2)
+
+                            if (this.props.tipoAjuste === 'compra_producto') {
+                                cajaRefValorActual.update({
+                                    valor_caja: `${resta}`
+                                })
+                            }
+                            if (this.props.tipoAjuste === 'devolucion_cliente') {
+                                cajaRefValorActual.update({
+                                    valor_caja: `${resta}`
+                                })
+                            }
+                            if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
+                                cajaRefValorActual.update({
+                                    valor_caja: `${resta}`
+                                })
+                            }
+                            if (this.props.tipoAjuste === 'ajuste_stock_salida') {
+                                cajaRefValorActual.update({
+                                    valor_caja: `${suma}`
+                                })
+                            }
+                            if (this.props.tipoAjuste === 'devolucion_proveedor') {
+                                cajaRefValorActual.update({
+                                    valor_caja: `${suma}`
+                                })
+                            }
+
                         }
                     })
                 }
@@ -123,31 +202,46 @@ class ModalCompraProductos extends Component {
 
     finalizarCompra = () => {
         if (this.comprovarFinalizarCompraYDevolucionProveedor()) {
-            this.updateDataProductos()
+            this.setState({
+                estadoModalEnviarCajaEntrada: true
+            })
+            //this.updateDataProductos()
         }
     }
 
     finalizarDevolucionCliente = () => {
         if (this.comprovarDevolucionCliente()) {
-            this.updateDataProductos()
+            this.setState({
+                estadoModalEnviarCajaEntrada: true
+            })
+            //this.updateDataProductos()
         }
     }
 
     finalizarDevolucionProveedor = () => {
         if (this.comprovarFinalizarCompraYDevolucionProveedor()) {
-            this.updateDataProductos()
+            this.setState({
+                estadoModalEnviarCajaSalida: true
+            })
+            //this.updateDataProductos()
         }
     }
 
     finalizarAjusteEntrada = () => {
         if (this.comprovarAjusteEntradaSalida()) {
-            this.updateDataProductos()
+            this.setState({
+                estadoModalEnviarCajaEntrada: true
+            })
+            //this.updateDataProductos()
         }
     }
 
     finalizarAjusteSalida = () => {
         if (this.comprovarAjusteEntradaSalida()) {
-            this.updateDataProductos()
+            this.setState({
+                estadoModalEnviarCajaSalida: true
+            })
+            //this.updateDataProductos()
         }
     }
 
@@ -208,24 +302,49 @@ class ModalCompraProductos extends Component {
             hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
             cliente_proveedor: this.state.proveedorCompra.length > 0 ? this.state.proveedorCompra : this.state.clienteDevolucion,
             productos: arrayProductos,
-            total_final: this.state.total_final,
+            total_final: `${Number(this.state.total_final).toFixed(2)}`,
             empleado: this.props.usuario.code,
             observacion: this.state.observacionCompra,
-            subtotal: '',
-            descuento: '',
-            otros_gastos: '',
-            flete: '',
-            valor_pagado: '',
+            subtotal: '0.00',
+            descuento: '0.00',
+            otros_gastos: '0.00',
+            flete: '0.00',
+            valor_pagado: '0.00',
             medio_pago: '',
-            saldo_favor: '',
-            en_deuda: '',
-            vuelto: '',
-            acreditado: '',
+            saldo_favor: '0.00',
+            en_deuda: '0.00',
+            vuelto: '0.00',
+            acreditado: '0.00',
             order: order + ""
         }
 
         operacionStockRef.set(itemOperacion)
-        this.setCompraCaja(itemOperacion)
+
+        if (this.props.tipoAjuste === 'compra_producto') {
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
+        }
+        if (this.props.tipoAjuste === 'devolucion_cliente') {
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
+        }
+        if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
+        }
+        if (this.props.tipoAjuste === 'ajuste_stock_salida') {
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
+        }
+        if (this.props.tipoAjuste === 'devolucion_proveedor') {
+            if (Boolean(this.state.operarEnCaja)) {
+                this.setOperacionCaja(itemOperacion)
+            }
+        }
 
     }
 
@@ -275,13 +394,13 @@ class ModalCompraProductos extends Component {
             if (this.props.tipoAjuste === 'compra_producto') {
                 return <div style={{ width: 'max-content', display: 'flex', flexDirection: 'row' }}>
                     <div style={{ width: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingRight: 20 }}>
-                        {`${n.precio_costo}`}
+                        {`${Number(n.precio_costo).toFixed(2)}`}
                     </div>
                     <TextField
                         id="handle-precio-edit"
                         margin="dense"
                         type="number"
-                        value={this.state.listaSeleccionadosValoresEditados.filter(item => n.codigo === item.codigo)[0].precio_costo_nuevo}
+                        value={Number(this.state.listaSeleccionadosValoresEditados.filter(item => n.codigo === item.codigo)[0].precio_costo_nuevo).toFixed(2)}
                         onChange={event => {
                             var array = this.state.listaSeleccionadosValoresEditados
                             array.filter(item => n.codigo === item.codigo)[0].precio_costo_nuevo = event.target.value
@@ -294,7 +413,7 @@ class ModalCompraProductos extends Component {
                         style={{ width: 80 }}
                     />
                     <div style={{ width: 150, display: 'flex', alignItems: 'center', justifyContent: 'start', paddingLeft: 20 }}>
-                        {`Nuevo precio costo ${Number(this.state.listaSeleccionadosValoresEditados.filter(item => n.codigo === item.codigo)[0].precio_costo_nuevo)}`}
+                        {`Nuevo precio costo ${Number(this.state.listaSeleccionadosValoresEditados.filter(item => n.codigo === item.codigo)[0].precio_costo_nuevo).toFixed(2)}`}
                     </div>
                 </div >
             } else {
@@ -362,15 +481,15 @@ class ModalCompraProductos extends Component {
                 return sumaRetorno
             }
 
-            if (this.props.tipoAjuste === 'ajuste-stock-entrada') {
+            if (this.props.tipoAjuste === 'ajuste_stock_entrada') {
                 return sumaRetorno
             }
 
-            if (this.props.tipoAjuste === 'ajuste-stock-salida') {
+            if (this.props.tipoAjuste === 'ajuste_stock_salida') {
                 return restaRetorno
             }
 
-            if (this.props.tipoAjuste === 'devolucion-proveedor') {
+            if (this.props.tipoAjuste === 'devolucion_proveedor') {
                 return restaRetorno
             }
         }
@@ -402,7 +521,32 @@ class ModalCompraProductos extends Component {
         }
     }
 
+    handleDescontarCaja = () => {
+        var db = firebase.database();
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
+                        var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                cajaRefValorActual.update({
+                                    valor_caja: Number(Number(snap2.val().valor_caja) - Number(this.state.total_final)).toFixed(2)
+                                })
+                            }
+                        })
+                    }
+                })
 
+            }
+        })
+    }
+
+    handleEvitarCaja = () => {
+        this.updateDataProductos()
+    }
 
     render() {
 
@@ -453,18 +597,38 @@ class ModalCompraProductos extends Component {
                                 <div>Devolución del cliente</div>
                             }
                             {
-                                tipoAjuste === 'ajuste-stock-entrada' &&
+                                tipoAjuste === 'ajuste_stock_entrada' &&
                                 <div>Ajuste de stock - Entrada</div>
                             }
                             {
-                                tipoAjuste === 'ajuste-stock-salida' &&
+                                tipoAjuste === 'ajuste_stock_salida' &&
                                 <div>Ajuste de stock - Salida</div>
                             }
                             {
-                                tipoAjuste === 'devolucion-proveedor' &&
+                                tipoAjuste === 'devolucion_proveedor' &&
                                 <div>Devolución al proveedor</div>
                             }
                         </Typography>
+                        <div>
+                            <Chip
+                                avatar={
+                                    <Avatar style={{ width: 'max-content', paddingLeft: 16, paddingRight: 16, paddingTop: 5, paddingBottom: 5, background: colors.getColorWhite() }}>
+                                        {
+                                            this.state.dinero_en_caja != null &&
+                                            <>
+                                                {
+                                                    Number(this.state.dinero_en_caja).toFixed(2)
+                                                }
+                                            </>
+                                        }
+                                    </Avatar>
+                                }
+                                style={{
+                                    background: colors.getColorWhite()
+                                }}
+                                label="Dinero en caja"
+                            />
+                        </div>
                         {
                             tipoAjuste === 'compra_producto' &&
                             <Button color="inherit" onClick={() => this.finalizarCompra()} >
@@ -478,19 +642,19 @@ class ModalCompraProductos extends Component {
                             </Button>
                         }
                         {
-                            tipoAjuste === 'ajuste-stock-entrada' &&
+                            tipoAjuste === 'ajuste_stock_entrada' &&
                             <Button color="inherit" onClick={() => this.finalizarAjusteEntrada()} >
                                 Finalizar Ajuste
                             </Button>
                         }
                         {
-                            tipoAjuste === 'ajuste-stock-salida' &&
+                            tipoAjuste === 'ajuste_stock_salida' &&
                             <Button color="inherit" onClick={() => this.finalizarAjusteSalida()} >
                                 Finalizar Ajuste
                             </Button>
                         }
                         {
-                            tipoAjuste === 'devolucion-proveedor' &&
+                            tipoAjuste === 'devolucion_proveedor' &&
                             <Button color="inherit" onClick={() => this.finalizarDevolucionProveedor()} >
                                 Finalizar Devolución
                             </Button>
@@ -532,7 +696,7 @@ class ModalCompraProductos extends Component {
                             />
                         }
                         {
-                            tipoAjuste === 'devolucion-proveedor' &&
+                            tipoAjuste === 'devolucion_proveedor' &&
                             <AutoCompleteProveedores
                                 styleText={styles.styleSearch}
                                 dataRef="proveedores"
@@ -554,15 +718,15 @@ class ModalCompraProductos extends Component {
                             <div>{observacionSinError}</div>
                         }
                         {
-                            tipoAjuste === 'ajuste-stock-entrada' &&
+                            tipoAjuste === 'ajuste_stock_entrada' &&
                             <div>{observacionConError}</div>
                         }
                         {
-                            tipoAjuste === 'ajuste-stock-salida' &&
+                            tipoAjuste === 'ajuste_stock_salida' &&
                             <div>{observacionConError}</div>
                         }
                         {
-                            tipoAjuste === 'devolucion-proveedor' &&
+                            tipoAjuste === 'devolucion_proveedor' &&
                             <div>{observacionSinError}</div>
                         }
 
@@ -593,6 +757,56 @@ class ModalCompraProductos extends Component {
                         itemsSeleccionados={items => this.setState({ itemsSeleccionados: items })}
                     />
                 }
+
+                <ModalContainerNormal
+                    open={this.state.estadoModalEnviarCajaEntrada}
+                    handleClose={() => this.setState({ estadoModalEnviarCajaEntrada: false })}
+                >
+                    <ModalPreguntarCaja
+                        handleClose={() => this.setState({ estadoModalEnviarCajaEntrada: false })}
+                        handleDescontarCaja={() => {
+                            if (this.state.total_final <= this.state.dinero_en_caja) {
+                                this.setState({ operarEnCaja: true })
+                                setTimeout(() => {
+                                    this.updateDataProductos()
+                                    this.handleDescontarCaja()
+                                }, 100)
+                            } else {
+                                setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)
+                            }
+                        }}
+                        handleEvitarCaja={() => {
+                                this.setState({ operarEnCaja: false })
+                                setTimeout(() => {
+                                    this.handleEvitarCaja()
+                                }, 100)
+                        }}
+
+                    />
+                </ModalContainerNormal>
+
+                <ModalContainerNormal
+                    open={this.state.estadoModalEnviarCajaSalida}
+                    handleClose={() => this.setState({ estadoModalEnviarCajaSalida: false })}
+                >
+                    <ModalPreguntarCajaSalida
+                        handleClose={() => this.setState({ estadoModalEnviarCajaSalida: false })}
+                        handleDescontarCaja={() => {
+                            this.setState({ operarEnCaja: true })
+                            setTimeout(() => {
+                                this.updateDataProductos()
+                                this.handleDescontarCaja()
+                            }, 100)
+                        }}
+                        handleEvitarCaja={() => {
+                            this.setState({ operarEnCaja: false })
+                            setTimeout(() => {
+                                this.handleEvitarCaja()
+                            }, 100)
+                        }}
+
+                    />
+                </ModalContainerNormal>
             </div >
         );
     }

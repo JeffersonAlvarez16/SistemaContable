@@ -9,6 +9,7 @@ import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 import setSnackBars from '../../plugins/setSnackBars';
+import NumberFormat from 'react-number-format';
 
 class ModalFinalizaPago extends React.Component {
     state = {
@@ -20,7 +21,8 @@ class ModalFinalizaPago extends React.Component {
         fecha_vencimiento: `${new Date().getFullYear() + "-" + (new Date().getMonth() + 1) + "-" + new Date().getDate()}`,
         monto: '',
 
-        valor_acreditado:''
+        valor_acreditado: '',
+        buttonEstadoAceptar:false,
     }
 
     componentDidMount() {
@@ -66,13 +68,18 @@ class ModalFinalizaPago extends React.Component {
 
     }
 
-    finalizarPago = () => {
+    finalizarPago = (event) => {
+       
         switch (this.props.tipo_pago) {
             case 'efectivo': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
                 this.props.handleAceptar({ tipo_pago: 'efectivo' })
                 break
             }
             case 'credito': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
                 this.props.handleAceptar({
                     tipo_pago: 'credito',
                     fecha_vencimiento: this.state.fecha_vencimiento,
@@ -83,6 +90,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-credito': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-credito',
                         medio: 'Tarjeta de crédito',
@@ -95,6 +104,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-debito': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-debito',
                         medio: 'Tarjeta de débito',
@@ -107,6 +118,8 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'cheque': {
                 if (this.comprobarTextLlenos()) {
+                    this.setState({buttonEstadoAceptar:true})
+                    this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'cheque',
                         medio: 'Cheque',
@@ -115,6 +128,12 @@ class ModalFinalizaPago extends React.Component {
                         propiedades_banco: this.state.propiedades_banco,
                     })
                 }
+                break
+            }
+            case 'transferencia': {
+                this.setState({buttonEstadoAceptar:true})
+                this.props.handleClose()
+                this.props.handleAceptar({ tipo_pago: 'transferencia' })
                 break
             }
             default: {
@@ -147,6 +166,10 @@ class ModalFinalizaPago extends React.Component {
                 {
                     this.props.tipo_pago === 'cheque' &&
                     <DialogTitle >{`Pago con cheque`}</DialogTitle>
+                }
+                {
+                    this.props.tipo_pago === 'transferencia' &&
+                    <DialogTitle >{`Pago con transferencia bancaria`}</DialogTitle>
                 }
                 <DialogContent>
                     <Typography variant="title" gutterBottom>
@@ -194,7 +217,7 @@ class ModalFinalizaPago extends React.Component {
                                 id="filled-fecha-venta"
                                 helperText={this.state.propiedades_numero.length > 0 ? '' : 'Complete este campo'}
                                 label="Numero de la tarjeta de crédito"
-                                error={this.state.propiedades_numero.length > 0 ? false : true}
+                                error={this.state.propiedades_numero.length < 16 ? true : false}
                                 value={this.state.propiedades_numero}
                                 onChange={event => this.setState({
                                     propiedades_numero: event.target.value
@@ -203,6 +226,9 @@ class ModalFinalizaPago extends React.Component {
                                 variant="outlined"
                                 style={{ width: '100%' }}
                                 autoComplete='off'
+                                InputProps={{
+                                    inputComponent: NumberFormatCustomTarjeta,
+                                }}
                             >
                             </TextField>
                             <TextField
@@ -229,7 +255,7 @@ class ModalFinalizaPago extends React.Component {
                                 id="filled-fecha-venta"
                                 helperText={this.state.propiedades_numero.length > 0 ? '' : 'Complete este campo'}
                                 label="Numero de la tarjeta de débito"
-                                error={this.state.propiedades_numero.length > 0 ? false : true}
+                                error={this.state.propiedades_numero.length < 16 ? true : false}
                                 value={this.state.propiedades_numero}
                                 onChange={event => this.setState({
                                     propiedades_numero: event.target.value
@@ -238,6 +264,9 @@ class ModalFinalizaPago extends React.Component {
                                 variant="outlined"
                                 style={{ width: '100%' }}
                                 autoComplete='off'
+                                InputProps={{
+                                    inputComponent: NumberFormatCustomTarjeta,
+                                }}
                             >
                             </TextField>
                             <TextField
@@ -292,10 +321,14 @@ class ModalFinalizaPago extends React.Component {
                             </TextField>
                         </>
                     }
+                    {
+                        this.props.tipo_pago === 'transferencia' &&
+                        <></>
+                    }
                 </DialogContent>
 
                 <DialogActions>
-                    <Button onClick={() => this.finalizarPago()} color="primary" >
+                    <Button disabled={this.state.buttonEstadoAceptar} onClick={event => this.finalizarPago(event)} color="primary" >
                         Aceptar
                 </Button>
                     <Button onClick={() => this.props.handleClose()} color="primary" >
@@ -307,5 +340,27 @@ class ModalFinalizaPago extends React.Component {
 
     }
 }
+
+const NumberFormatCustomTarjeta = (props) => {
+    const { inputRef, onChange, ...other } = props;
+    return (
+        <NumberFormat
+            {...other}
+            getInputRef={inputRef}
+            onValueChange={values => {
+                onChange({
+                    target: {
+                        value: values.value,
+                    },
+                });
+            }}
+            thousandSeparator
+            format="####  ####  ####  ####"
+            mask="_"
+        />
+        
+    );
+}
+
 
 export default ModalFinalizaPago

@@ -3,25 +3,20 @@ import Layout from '../components/containers/Layout';
 import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import Search from '../components/components/Search';
-import { Divider, IconButton, TextField } from '@material-ui/core';
+import { Divider, IconButton, TextField, Button, Chip } from '@material-ui/core';
 import TablaNormal from '../components/components/tables/TableNormal';
 import FullScreenDialog from '../components/components/FullScreenDialog';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import Tooltip from '@material-ui/core/Tooltip';
 import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
-import InputIcon from '@material-ui/icons/Input';
+import AddIcon from '@material-ui/icons/Add';
 
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import LoopIcon from '@material-ui/icons/Loop';
 import CircularProgress from '@material-ui/core/CircularProgress';
-
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 
-//impresiones
-//import Print from 'print-js'
-
-//firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
@@ -34,6 +29,11 @@ import ResivoVenta from '../components/plugins/plantillas/resivo_venta';
 import ContainerPlantillas from '../components/plugins/plantillas/container_plantillas';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import ModalEliminarRetencion from '../components/modals_container/retenciones/ModalEliminarRetencion';
+import colors from '../utils/colors';
+
+
+//librerias Imprimir
+
 
 class Retencion extends Component {
 
@@ -46,14 +46,14 @@ class Retencion extends Component {
         listaVentasTemporal: [],
 
         rowslistaRetenciones: [
-            { id: 'accions', numeric: false, disablePadding: true, label: 'Resivo' },
+            { id: 'accions', numeric: false, disablePadding: true, label: '' },
             { id: 'factura', numeric: false, disablePadding: true, label: 'Numero de fatura' },
             { id: 'estado', numeric: false, disablePadding: true, label: 'Estado Retencion' },
             { id: 'razon_social', numeric: true, disablePadding: false, label: 'Sujeto - Razon Social' },
-            { id: 'valor', numeric: true, disablePadding: false, label: 'Valor de Retención' },
-            { id: 'tipo_retencion', numeric: true, disablePadding: false, label: 'Tipo de Retención' },
-            { id: 'telefono', numeric: true, disablePadding: false, label: 'Sujeto - Telefono' },
             { id: 'identificacion', numeric: true, disablePadding: false, label: 'Sujeto - Identificación' },
+            { id: 'valor', numeric: true, disablePadding: false, label: 'Valor de Retención' },
+            { id: 'telefono', numeric: true, disablePadding: false, label: 'Sujeto - Telefono' },
+            { id: 'tipo_retencion', numeric: true, disablePadding: false, label: 'Tipo de Retención' },
             { id: 'codigo', numeric: false, disablePadding: true, label: 'Codigo' },
             { id: 'fecha', numeric: true, disablePadding: false, label: 'Fecha' },
             { id: 'hora', numeric: true, disablePadding: false, label: 'Hora' },
@@ -72,21 +72,22 @@ class Retencion extends Component {
         itemEditar: null,
         //fecha actual
         fechaActual: '',
+        estadoPermisos: null,
+        itemFormateadoImprimir: {}
     }
 
-    
+
     componentDidMount() {
-        this.obtenerDataBaseDatos()
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
     }
 
-    obtenerDataBaseDatos = () => {
+    obtenerDataBaseDatos = (fecha) => {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(funtions.obtenerFechaActual())
+                var retencionesRef = db.ref('users/' + user.uid + '/retenciones/').orderByChild('fecha_registro').equalTo(fecha)
                 retencionesRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -118,8 +119,8 @@ class Retencion extends Component {
     }
 
     cambiarListaPorFecha = fecha => {
-        this.setState({ fechaActual: fecha })
-        setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
+        this.setState({ fechaActual: fecha, estadoTabla:'cargando' })
+        setTimeout(() => { this.obtenerDataBaseDatos(fecha) }, 200)
     }
 
     eliminarRetencionDB = codigo => {
@@ -131,7 +132,10 @@ class Retencion extends Component {
         })
     }
 
-    enviarToPlantillaData = () => {
+    enviarToPlantillaData = (n) => {
+        this.refEventoImprimir.handlePrint()
+    }
+    imprimirRetencion = () => {
 
     }
 
@@ -141,16 +145,15 @@ class Retencion extends Component {
         }
         if (item.id === 'accions') {
             return <>
-                {/* <ReactToPrint
-                    ref={el => (this.componentImp = el)}
+                <ReactToPrint
+                    ref={el => (this.refEventoImprimir = el)}
                     trigger={() => <></>}
                     content={() => this.refImprimirResivo}
-                /> */}
+                />
                 <IconButton onClick={() => {
-                    /* this.enviarToPlantillaData(n.codigo)
-                    this.componentImp.handlePrint() */
-                    setSnackBars.openSnack('warning', 'rootSnackBar', 'En desarrollo', 2000)
-                }}>
+                    //this.enviarToPlantillaData(n)
+                }}
+                >
                     <LocalPrintshopIcon />
                 </IconButton>
             </>
@@ -206,16 +209,40 @@ class Retencion extends Component {
             </>
         }
         if (item.id === 'razon_social') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.razon_social}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div style={{ color: colors.getColorWhite() }}>{n.retencion.sujeto.razon_social}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryDarkBlue300() }}
+                />
+            </div>
         }
         if (item.id === 'factura') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.items[0].numero_documento_sustento}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.items[0].numero_documento_sustento}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            </div>
         }
         if (item.id === 'telefono') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.telefono}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.sujeto.telefono}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />                
+            </div>
         }
         if (item.id === 'identificacion') {
-            return <div style={{ width: 'max-content' }}>{n.retencion.sujeto.identificacion}</div>
+            return <div style={{ width: 'max-content' }}>
+                <Chip
+                    label={<div>{n.retencion.sujeto.identificacion}</div>}
+                    clickable
+                    style={{ background: colors.getColorPrymaryGrey200() }}
+                />
+            </div>
         }
         if (item.id === 'fecha') {
             return <div style={{ width: 'max-content' }}>{n.fecha_registro}</div>
@@ -229,7 +256,7 @@ class Retencion extends Component {
                     {
                         Number(n.retencion.items[0].codigo) === 1 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Renta: $${n.retencion.items[0].valor_retenido}`}
+                            {`Retencion Renta: $ ${n.retencion.items[0].valor_retenido}`}
                         </div>
                     }
                 </div>
@@ -238,13 +265,13 @@ class Retencion extends Component {
                     {
                         Number(n.retencion.items[1].codigo) === 1 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Renta: $${n.retencion.items[0].valor_retenido}`}
+                            {`Retencion Renta: $ ${n.retencion.items[0].valor_retenido}`}
                         </div>
                     }
                     {
                         Number(n.retencion.items[0].codigo) === 2 &&
                         <div style={{ width: 'max-content' }}>
-                            {`Retencion Iva: $${n.retencion.items[1].valor_retenido}`}
+                            {`Retencion Iva: $ ${n.retencion.items[1].valor_retenido}`}
                         </div>
                     }
                 </div>
@@ -268,91 +295,133 @@ class Retencion extends Component {
             />
         }
     }
+
+    obtenerPermisosusuarios = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var usuariosRef = db.ref(`users/${user.uid}/usuarios/${this.state.usuario.code}`)
+                usuariosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        if (snapshot.val().privilegios.retenciones === true) {
+                            this.setState({
+                                estadoPermisos: true
+                            })
+                        } else {
+                            this.setState({
+                                estadoPermisos: false
+                            })
+                        }
+                    }
+                });
+            }
+        });
+    }
+
     render() {
         return (
-            <Layout title="Retenciones" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
+            <Layout title="Retenciones" onChangueUserState={usuario => {
+                this.setState({ usuario: usuario })
+                setTimeout(() => {
+                    this.obtenerPermisosusuarios()
+                    this.obtenerDataBaseDatos(funtions.obtenerFechaActual())
+                }, 100)
+            }
+            }>
+                {
+                    this.state.estadoPermisos === true &&
+                    <div>
+                        <MenuHerramientas>
+                            <ItemMenuHerramienta
+                                titleButton="Nueva Retencion"
+                                color="primary"
+                                visible={true}
+                                onClick={() => {
+                                    this.setState({ itemEditar: null })
+                                    this.setState({ openModalNewRetencion: true })
+                                }}
+                            >
+                                <AddIcon />
+                            </ItemMenuHerramienta>
 
-                <MenuHerramientas>
-                    <ItemMenuHerramienta
-                        titleButton="Nueva Retencion"
-                        color="primary"
-                        visible={true}
-                        onClick={() => {
-                            this.setState({ itemEditar: null })
-                            this.setState({ openModalNewRetencion: true })
-                        }}
-                    />
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <TextField
-                            id="datetime-local"
-                            type="date"
-                            defaultValue={this.state.fechaActual}
-                            InputLabelProps={{
-                                shrink: true,
+                            <div style={{ display: 'flex', alignItems: 'center' }}>
+                                <TextField
+                                    id="datetime-local"
+                                    type="date"
+                                    defaultValue={this.state.fechaActual}
+                                    InputLabelProps={{
+                                        shrink: true,
+                                    }}
+                                    onChange={e => this.cambiarListaPorFecha(e.target.value)}
+                                />
+                            </div>
+
+
+                            <div style={{ flex: 0.93 }}></div>
+
+                            <Search
+                                id='buscar-retencion'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar retencion"
+                                handleSearch={this.handleSearch}
+                            />
+
+
+                        </MenuHerramientas>
+
+                        <Divider />
+
+                        <TablaNormal
+                            textoTitleP="Retenciones"
+                            textoTitleS="Retenciones"
+                            selectedItems={true}
+                            toolbar={false}
+                            notTab={true}
+                            data={this.state.listaRetenciones}
+                            rows={this.state.rowslistaRetenciones}
+                            handleGetData={this.handleGetData}
+                            estadoTabla={this.state.estadoTabla}
+                            itemsSeleccionados={items => {
+                                this.setState({ itemsSeleccionados: items })
                             }}
-                            onChange={e => this.cambiarListaPorFecha(e.target.value)}
                         />
+
+                        <FullScreenDialog openModal={this.state.openModalNewRetencion}>
+                            <NuevaRetencion
+                                usuario={this.state.usuario}
+                                handleClose={() => this.setState({ openModalNewRetencion: false })}
+                                item={this.state.itemEditar}
+                            >
+                            </NuevaRetencion>
+                        </FullScreenDialog>
+
+                        <ModalContainerNormal
+                            open={this.state.estadoModalSimple}
+                            handleClose={() => this.setState({ estadoModalSimple: false })}
+                        >
+                            <ModalEliminarRetencion
+                                handleClose={() => this.setState({ estadoModalSimple: false })}
+                                handleEliminar={() => {
+                                    this.eliminarRetencionDB(this.state.itemEliminar)
+                                    this.setState({ estadoModalSimple: false })
+                                }}
+                            />
+                        </ModalContainerNormal>
                     </div>
-                    <div style={{ flex: 0.9 }}></div>
-
-                    <Search
-                        id='buscar-retencion'
-                        textoSearch="Buscar..."
-                        textoTooltip="Buscar Retencion"
-                        handleSearch={this.handleSearch}
-                    />
-
-
-                </MenuHerramientas>
-
-                <Divider />
-
-                <ContainerPlantillas>
-                    <ResivoVenta
-                        item={this.state.itemFormateadoImprimir}
-                        ref={el => (this.refImprimirResivo = el)}
-                    />
-                </ContainerPlantillas>
-
-
-
-                <TablaNormal
-                    textoTitleP="Retenciones"
-                    textoTitleS="Retenciones"
-                    selectedItems={true}
-                    toolbar={false}
-                    notTab={true}
-                    data={this.state.listaRetenciones}
-                    rows={this.state.rowslistaRetenciones}
-                    handleGetData={this.handleGetData}
-                    estadoTabla={this.state.estadoTabla}
-                    itemsSeleccionados={items => {
-                        this.setState({ itemsSeleccionados: items })
-                    }}
-                />
-
-                <FullScreenDialog openModal={this.state.openModalNewRetencion}>
-                    <NuevaRetencion
-                        usuario={this.state.usuario}
-                        handleClose={() => this.setState({ openModalNewRetencion: false })}
-                        item={this.state.itemEditar}
-                    >
-                    </NuevaRetencion>
-                </FullScreenDialog>
-
-                <ModalContainerNormal
-                    open={this.state.estadoModalSimple}
-                    handleClose={() => this.setState({ estadoModalSimple: false })}
-                >
-                    <ModalEliminarRetencion
-                        handleClose={() => this.setState({ estadoModalSimple: false })}
-                        handleEliminar={() => {
-                            this.eliminarRetencionDB(this.state.itemEliminar)
-                            this.setState({ estadoModalSimple: false })
-                        }}
-                    />
-                </ModalContainerNormal>
+                }
+                {
+                    this.state.estadoPermisos === false &&
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', height: '80vh' }}>
+                        <h3><strong>Usted no tiene permisos para <br />
+                            esta seccion comuniquese con el administrador</strong></h3>
+                    </div>
+                }
+                {
+                    this.state.estadoPermisos === null &&
+                    <CircularProgress />
+                }
             </Layout>
+
         );
     }
 }

@@ -21,6 +21,7 @@ const ContenedorSeleccionarTipoPago = (props) => {
                 id="standard-select-page-tipe"
                 select
                 label="Tipo de pago"
+                disabled={props.tipo_venta==='final'?true:false}
                 value={props.tipo_pago}
                 onChange={(e) => props.handleChangeSeleccionTipoPago(e.target.value)}
                 margin="normal"
@@ -41,6 +42,9 @@ const ContenedorSeleccionarTipoPago = (props) => {
                     </MenuItem>
                     <MenuItem value='cheque'>
                         Cheque
+                    </MenuItem>
+                    <MenuItem value='transferencia'>
+                        Transferencia Bancaria
                     </MenuItem>
             </TextField>
         </div>

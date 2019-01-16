@@ -120,7 +120,7 @@ const ContenedorPreciosTotalesVista = (props) => {
                                 onChange={() => props.handleFacturaElectronica()}
                             />}
                         label="Factura Electrónica"
-                    />
+                    />                   
                 </div>
             </Grid>
         </div>

@@ -2,11 +2,8 @@ import React, { Component } from 'react';
 //lista dependecias
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
-import ListItemText from '@material-ui/core/ListItemText';
 import SettingsIcon from '@material-ui/icons/Settings';
-import Divider from '@material-ui/core/Divider';
-import { TextField, InputAdornment, IconButton, Tooltip } from '@material-ui/core';
+import { TextField, IconButton, Tooltip } from '@material-ui/core';
 import CloseIcon from '@material-ui/icons/Close';
 import Grid from '@material-ui/core/Grid';
 import Typography from '@material-ui/core/Typography';
@@ -19,6 +16,7 @@ import funtions from '../../utils/funtions';
 
 import ModalContainerNormal from '../modals_container/ModalContainerNormal';
 import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
+import setSnackBars from './setSnackBars';
 
 class ContainerSelectPrecios extends Component {
     state = {
@@ -53,7 +51,7 @@ class ContainerSelectPrecios extends Component {
                             alignItems: 'center'
                         }}>
                         <Typography variant="title" gutterBottom>
-                            Precios
+                            Precios generales
                         </Typography>
                         <div style={{ flex: 1 }}></div>
                         <Tooltip title="Configurar precios">
@@ -61,9 +59,13 @@ class ContainerSelectPrecios extends Component {
                                 color="primary"
                                 aria-label="Add to price"
                                 onClick={() => {
-                                    this.setState({
-                                        estadoModalSimple: true
-                                    })
+                                    if(Boolean(this.props.estadoAbrir)){
+                                        this.setState({
+                                            estadoModalSimple: true
+                                        })
+                                    }else{
+                                        setSnackBars.openSnack('error','rootSnackBarERROR','Ingresar el precio costo del producto',1000)
+                                    }      
                                 }}
                             >
                                 <SettingsIcon />
@@ -91,16 +93,9 @@ class ContainerSelectPrecios extends Component {
                                     <TextField
                                         id={item.codigo}
                                         variant="filled"
-                                        label={<div style={{ marginLeft: 80 }}>{item.nombre}</div>}
+                                        label={<div>{item.nombre}</div>}
                                         value={((Number(this.props.precio_costo) * Number(item.porcentaje) + Number(this.props.precio_costo)).toFixed(2))}
                                         style={{ width: '100%' }}
-                                        InputProps={{
-                                            startAdornment: (
-                                                <InputAdornment position="start">
-                                                    <div style={{ marginTop: 17, width: 'max-content', color: 'rgba(0,0,0,0.4)' }}> {`+ %${item.porcentaje}`} =</div>
-                                                </InputAdornment>
-                                            ),
-                                        }}
                                     />
                                 </ListItem>
                             }
