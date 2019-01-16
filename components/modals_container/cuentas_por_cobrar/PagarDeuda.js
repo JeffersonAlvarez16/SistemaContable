@@ -67,6 +67,14 @@ class PagarDeuda extends Component {
                         estado: true,
                         tipo: 'pago_deuda'
                     })
+                    var cajaRefCuentaValorTotal = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + this.props.cajaSeleccionada.codigo)
+                    cajaRefCuentaValorTotal.once('value', (snap) => {
+                        if (snap.val()) {
+                            cajaRefCuentaValorTotal.update({
+                                valor_caja: (Number(snap.val().valor_caja) + Number(this.state.valorPagar)).toFixed(2)
+                            })
+                        }
+                    })
                     this.props.handleClose()
                 }
             })

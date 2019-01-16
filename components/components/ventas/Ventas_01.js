@@ -1,21 +1,15 @@
 import React, { Component } from 'react';
-import Layout from '../../containers/Layout';
-import Grid from '@material-ui/core/Grid';
-import SectionFactura from '../SectionFactura';
-import SectionContentFactura from '../SectionContentFactura';
 import MenuHerramientas from '../menus/MenuHerramientas';
 import Search from '../Search';
 import TablaNormal from '../tables/TableNormal';
 import Divider from '@material-ui/core/Divider';
 import ItemMenuHerramienta from '../menus/ItemMenuHerramienta';
-import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
 
 import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import InputIcon from '@material-ui/icons/Input';
-import FileCopy from '@material-ui/icons/FileCopy';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import CloseIcon from '@material-ui/icons/Close';
@@ -28,8 +22,6 @@ import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import DoneIcon from '@material-ui/icons/Done';
 
-import TextField from '@material-ui/core/TextField';
-
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -37,7 +29,6 @@ import 'firebase/auth'
 
 import ReturnTextTable from '../tables/ReturnTextTable';
 import FullScreenDialog from '../FullScreenDialog';
-import NuevaVenta from '../../plugins/nueva_venta';
 import funtions from '../../../utils/funtions';
 import ModalCompraProductos from '../../modals_container/ModalCompraProductos';
 import setSnackBars from '../../plugins/setSnackBars';
@@ -54,13 +45,8 @@ import ModalNewVenta from '../../plugins/ModalNewVenta';
 import colors from '../../../utils/colors';
 import ErrorEstado from '../../plugins/plugins/ErrorEstado';
 
-import ViewPDF from '../../plugins/plugins/ViewPDF'
-
-
 class Ventas_01 extends Component {
-
     state = {
-
         itemsSeleccionados: [],
         listaVentas: [],
         estadoTabla: 'cargando',
@@ -442,10 +428,6 @@ class Ventas_01 extends Component {
                                     setTimeout(() => {
                                         this.comprobarUsuario(n)
                                     }, 100)
-                                    /*  this.setState({
-                                         codigoEmitirFactura: n.codigo,
-                                         estadoModalEmitirFactura: true,
-                                     }) */
                                 }}>
                                     <InputIcon color='primary' fontSize="small" />
                                 </IconButton>
@@ -573,9 +555,6 @@ class Ventas_01 extends Component {
             },
             body: JSON.stringify(jsonData)
         })
-
-        /* const content = await rawResponse.json();
-        console.log(content) */
     }
 
     // actualizar el stock de los productos

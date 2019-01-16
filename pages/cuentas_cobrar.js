@@ -398,6 +398,7 @@ class DeudasCobrar extends Component {
     }
 
     render() {
+        console.log(this.state.sumaTotalListaDeudas)
         return (
             <Layout title="Cuentas por Cobrar" onChangueUserState={usuario => {
                 this.setState({ usuario: usuario })
@@ -427,12 +428,7 @@ class DeudasCobrar extends Component {
                                 Boolean(this.state.estadoCaja) === false &&
                                 <>
                                     <Tooltip title="Estado de caja">
-                                        <IconButton onClick={() => {
-                                            this.setState({
-                                                codigoEmitirFactura: n.codigo,
-                                                estadoModalCancelarVenta: true,
-                                            })
-                                        }}>
+                                        <IconButton>
                                             <MonetizationOn style={{ color: '#EF5350' }} />
                                         </IconButton>
                                     </Tooltip>

@@ -16,9 +16,6 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import InputAdornment from '@material-ui/core/InputAdornment';
 
-
-
-
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -29,6 +26,9 @@ import setSnackBars from '../plugins/setSnackBars';
 import AutoCompleteProveedor from '../plugins/AutoCompleteProveedores';
 import AutoCompleteProveedores from '../plugins/AutoCompleteRetenciones';
 import ContainerSelectPrecios from '../plugins/ContainerSelectPrecios';
+import ContainerSelectPreciosPersonalizados from '../plugins/ContainerSelectPreciosPersonalizados';
+import ModalSettingsPricesPersonalizados from './ModalSettingsPricesPersonalizados';
+
 
 
 class ModalNewProducto extends Component {
@@ -52,6 +52,7 @@ class ModalNewProducto extends Component {
         precio_venta_c: '',
         precios: [],
         precio_por_defecto: '',
+        tipo_precio_seleccionado: true,
 
         stock_actual: '0',
         stock_minimo: '10',
@@ -81,6 +82,7 @@ class ModalNewProducto extends Component {
 
     componentDidMount() {
         this.obtenerPrecios()
+        this.obtenerPreciosPersonalizados()
         document.addEventListener("keydown", this.escFunction, false);
         //pregutnando si biene un item por los props para saber si esditar y crear
         if (this.props.item) {
@@ -94,6 +96,7 @@ class ModalNewProducto extends Component {
                 precio_venta_b: this.props.item.precio_venta_b,
                 precio_venta_c: this.props.item.precio_venta_c,
                 precio_por_defecto: this.props.item.precio_por_defecto,
+                tipo_precio_seleccionado: true,
 
                 descripcion_producto: this.props.item.descripcion_producto,
                 categoria_producto: this.props.item.categoria_producto,
@@ -127,7 +130,8 @@ class ModalNewProducto extends Component {
                 usuario: this.props.usuario.code,
                 porcentaje_iva: '12',
                 codigo: funtions.guidGenerator(),
-                unidad_medida: 'unidades'
+                unidad_medida: 'unidades',
+                tipo_precio_seleccionado: true
             })
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
@@ -147,10 +151,12 @@ class ModalNewProducto extends Component {
 
                         }
                     })
+
                 }
             })
         }
     }
+
 
     obtenerPrecios = () => {
         firebase.auth().onAuthStateChanged((user) => {
@@ -164,6 +170,85 @@ class ModalNewProducto extends Component {
                         })
                     }
                 })
+            }
+        })
+    }
+
+    obtenerPreciosPersonalizados = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/precios_personalizados/' + this.state.codigo)
+                productosRef.on('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        this.setState({
+                            preciosPerzonalizados: funtions.snapshotToArray(snapshot)
+                        })
+                    }
+                })
+                productosRef.once('value', (snapshot) => {
+                    if (snapshot.val()) {                       
+                    } else {
+                        var codigo1 = funtions.guidGenerator()
+                        var precio1 = {
+                            codigo: codigo1,
+                            codigoProducto: this.state.codigo,
+                            estado: true,
+                            id: codigo1,
+                            nombre: "Precio A",
+                            nuevo_precio: "0.00",
+                            porcentaje: 0.0
+                        }
+                        var codigo2 = funtions.guidGenerator()
+                        var precio2 = {
+                            codigo: codigo2,
+                            codigoProducto: this.state.codigo,
+                            estado: true,
+                            id: codigo2,
+                            nombre: "Precio B",
+                            nuevo_precio: "0.00",
+                            porcentaje: 0.0
+                        }
+                        var codigo3 = funtions.guidGenerator()
+                        var precio3 = {
+                            codigo: codigo3,
+                            codigoProducto: this.state.codigo,
+                            estado: true,
+                            id: codigo3,
+                            nombre: "Precio C",
+                            nuevo_precio: "0.00",
+                            porcentaje: 0.0
+                        }
+                        var codigo4 = funtions.guidGenerator()
+                        var precio4 = {
+                            codigo: codigo4,
+                            codigoProducto: this.state.codigo,
+                            estado: true,
+                            id: codigo4,
+                            nombre: "Precio D",
+                            nuevo_precio: "0.00",
+                            porcentaje: 0.0
+                        }
+                        var lista = [
+                            precio1,
+                            precio2,
+                            precio3,
+                            precio4
+                        ]
+                        this.setState({
+                            preciosPerzonalizados: lista,
+                        })
+                    }
+                })
+            }
+        })
+    }
+    guardarPreciosPersonalizados = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var productosRef = db.ref('users/' + user.uid + '/precios_personalizados/' + this.state.codigo)
+                productosRef.set(this.state.preciosPerzonalizados)
             }
         })
     }
@@ -195,41 +280,8 @@ class ModalNewProducto extends Component {
         var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + producto.codigo);
         productosRef.update({
             ...producto
-        });
-
-        /* if (producto.stock_actual != this.state.cantidad_actual_temporal) {
-            var order = new Date()
-            var codigoStock = funtions.guidGenerator()
-            var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
-            operacionStockRef.set({
-                codigo: codigoStock,
-                tipo_operacion: 'edicion-producto',
-                fecha: funtions.obtenerFechaActual(),
-                hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
-                cliente_proveedor: producto.proveedor,
-                productos: [
-                    {
-                        codigo: producto.codigo,
-                        cantidad: producto.stock_actual - this.state.cantidad_actual_temporal
-                    }
-                ],
-                total_final: '',
-                empleado: producto.usuario,
-                precio_por_defecto: producto.precio_por_defecto,
-                observacion: '',
-                subtotal: '',
-                descuento: '',
-                otros_gastos: '',
-                flete: '',
-                valor_pagado: '',
-                medio_pago: '',
-                saldo_favor: '',
-                en_deuda: '',
-                vuelto: '',
-                acreditado: '',
-                order: order + ''
-            });
-        } */
+        })
+        this.guardarPreciosPersonalizados()
     }
 
     setNewProducto = (producto) => {
@@ -237,39 +289,8 @@ class ModalNewProducto extends Component {
         var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + producto.codigo);
         productosRef.set({
             ...producto
-        });
-        /* 
-                var order = new Date()
-                var codigoStock = funtions.guidGenerator()
-                var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
-                operacionStockRef.set({
-                    codigo: codigoStock,
-                    tipo_operacion: 'registro-producto',
-                    fecha: funtions.obtenerFechaActual(),
-                    hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
-                    cliente_proveedor: producto.proveedor,
-                    productos: [
-                        {
-                            codigo: producto.codigo,
-                            cantidad: producto.stock_actual
-                        }
-                    ],
-                    total_final: '',
-                    empleado: producto.usuario,
-                    precio_por_defecto: producto.precio_por_defecto,
-                    observacion: '',
-                    subtotal: '',
-                    descuento: '',
-                    otros_gastos: '',
-                    flete: '',
-                    valor_pagado: '',
-                    medio_pago: '',
-                    saldo_favor: '',
-                    en_deuda: '',
-                    vuelto: '',
-                    acreditado: '',
-                    order: order + ''
-                }); */
+        })
+        this.guardarPreciosPersonalizados()
     }
 
 
@@ -300,6 +321,7 @@ class ModalNewProducto extends Component {
                 precio_venta_b: this.state.precio_venta_b,
                 precio_venta_c: this.state.precio_venta_c,
                 precio_por_defecto: this.state.precio_por_defecto,
+                tipo_precio_seleccionado: this.state.tipo_precio_seleccionado,
 
                 descripcion_producto: this.state.descripcion_producto,
                 categoria_producto: this.state.categoria_producto,
@@ -341,6 +363,12 @@ class ModalNewProducto extends Component {
         }
     }
 
+    seleccionarPreciosPersonalizados = () => {
+        this.setState({
+            tipo_precio_seleccionado: !this.state.tipo_precio_seleccionado
+        })
+    }
+
     render() {
 
         const styles = {
@@ -353,6 +381,8 @@ class ModalNewProducto extends Component {
                 width: '96%'
             }
         }
+
+        console.log(this.state.preciosPerzonalizados)
 
         return (
             <div>
@@ -374,7 +404,6 @@ class ModalNewProducto extends Component {
                         </Button>
                     </Toolbar>
                 </AppBar>
-
 
                 <form autoComplete="off">
                     <Grid container spacing={24} style={{ width: '100vw' }}>
@@ -486,24 +515,54 @@ class ModalNewProducto extends Component {
                                             value={this.state.precio_costo}
                                             margin="normal"
                                             variant="filled"
+                                            InputProps={{
+                                                inputComponent: NumberFormatCustom,
+                                            }}
                                         />
-                                        <TextField
-                                            id="filled-unidad-medida"
-                                            select
-                                            label="Precio por defecto"
-                                            error={this.state.precio_por_defecto.length === 0}
-                                            value={this.state.precio_por_defecto}
-                                            onChange={event => this.setState({ precio_por_defecto: event.target.value })}
-                                            margin="normal"
-                                            variant="outlined"
-                                            style={styles.styleText}
-                                        >
-                                            {
-                                                this.state.precios.map(item => {
-                                                    return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
-                                                })
-                                            }
-                                        </TextField>
+
+                                        {
+                                            Boolean(this.state.tipo_precio_seleccionado) === true &&
+                                            <TextField
+                                                id="filled-unidad-medida"
+                                                select
+                                                label="Precio por defecto - Personalizado"
+                                                error={this.state.precio_por_defecto.length === 0}
+                                                value={this.state.precio_por_defecto}
+                                                onChange={event => this.setState({ precio_por_defecto: event.target.value })}
+                                                margin="normal"
+                                                variant="outlined"
+                                                style={styles.styleText}
+                                            >
+                                                {
+                                                    this.state.preciosPerzonalizados != null &&
+                                                    this.state.preciosPerzonalizados.map((item,i) => {
+                                                        var itemR =
+                                                        itemR = <MenuItem selected key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
+                                                        return itemR
+                                                    })
+                                                }
+                                            </TextField>
+                                        }
+                                        {
+                                            Boolean(this.state.tipo_precio_seleccionado) === false &&
+                                            <TextField
+                                                id="filled-unidad-medida"
+                                                select
+                                                label="Precio por defecto - General"
+                                                error={this.state.precio_por_defecto.length === 0}
+                                                value={this.state.precio_por_defecto}
+                                                onChange={event => this.setState({ precio_por_defecto: event.target.value })}
+                                                margin="normal"
+                                                variant="outlined"
+                                                style={styles.styleText}
+                                            >
+                                                {
+                                                    this.state.precios.map(item => {
+                                                        return <MenuItem key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
+                                                    })
+                                                }
+                                            </TextField>
+                                        }
                                         <TextField
                                             style={styles.styleText}
                                             id="standard-descripcion-producto"
@@ -546,15 +605,35 @@ class ModalNewProducto extends Component {
                             </Grid>
 
                         </Grid>
-                        <Grid container xs={6} spacing={24} style={{ padding: 24 }}>
+                        <Grid container xs={6}>
                             <Grid item xs={6}>
-
-                                <ContainerSelectPrecios
-                                    precio_costo={this.state.precio_costo}
+                                {/* <FormControlLabel
+                                    control={
+                                        <Switch
+                                            checked={this.state.tipo_precio_seleccionado}
+                                            onChange={() => this.seleccionarPreciosPersonalizados()}
+                                        />}
+                                    label="Precios personalizados"
                                 />
+                                { */}
+                                    {/* Boolean(this.state.tipo_precio_seleccionado) === true && */}
+                                    <ModalSettingsPricesPersonalizados
+                                        codigoProducto={this.state.codigo}
+                                        precio_costo={this.state.precio_costo}
+                                        preciosPerzonalizados={this.state.preciosPerzonalizados}
+                                        setPreciosPerzonalizados={(preciosPerzonalizados)=>this.setState({preciosPerzonalizados})}
+                                    >
+                                    </ModalSettingsPricesPersonalizados>
+                               {/*  } 
+                                 {
+                                    Boolean(this.state.tipo_precio_seleccionado) === false &&
+                                    <ContainerSelectPrecios
+                                        precio_costo={this.state.precio_costo}
+                                        estadoAbrir={this.state.precio_costo.length > 0}
+                                    />
+                                } */}
                             </Grid>
-                            <Grid item xs={6}>
-
+                            <Grid item xs={6} style={{marginTop:25}}>
                                 <TextField
                                     id="filled-unidad-medida"
                                     select
@@ -574,7 +653,6 @@ class ModalNewProducto extends Component {
                                     <MenuItem value={'kilos'}>Kilos</MenuItem>
                                     <MenuItem value={'libras'}>Libras</MenuItem>
                                 </TextField>
-
                                 <Grid container spacing={24}>
                                     <Grid item xs={6}>
                                         <TextField
@@ -637,15 +715,31 @@ class ModalNewProducto extends Component {
 
                         </Grid>
                     </Grid>
-
-
-
-
                 </form>
 
             </div>
         );
     }
 }
+
+function NumberFormatCustom(props) {
+    const { inputRef, onChange, ...other } = props;
+  
+    return (
+      <NumberFormat
+        {...other}
+        getInputRef={inputRef}
+        onValueChange={values => {
+          onChange({
+            target: {
+              value: values.value,
+            },
+          });
+        }}
+        thousandSeparator
+        prefix=""
+      />
+    );
+  }
 
 export default ModalNewProducto;

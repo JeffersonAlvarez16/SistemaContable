@@ -67,21 +67,27 @@ class Login extends Component {
                 statePassword: 'error'
             })
         }
-        if (this.state.usuario.length > 0 && this.state.password.length > 0) {
+        if (this.state.usuario.length > 0 &&
+             this.state.password.length > 0) {
             this.setState({
                 success: false,
                 loading: true,
             })
-            firebase.auth().signInWithEmailAndPassword(this.state.usuario, this.state.password).catch((error) => {
+            firebase.auth().signInWithEmailAndPassword(
+                this.state.usuario, 
+                this.state.password).catch((error) => {
                 var errorCode = error.code;
                 if (errorCode === 'auth/invalid-email') {
-                    setSnackBars.openSnack('error', 'rootSnackBar', 'Formato de correo electrónico erroneo', 2000)
+                    setSnackBars.openSnack('error', 'rootSnackBar',
+                     'Formato de correo electrónico erroneo', 2000)
                 }
                 if (errorCode === 'auth/user-not-found') {
-                    setSnackBars.openSnack('error', 'rootSnackBar', 'Usuario no registrado', 2000)
+                    setSnackBars.openSnack('error', 'rootSnackBar',
+                     'Usuario no registrado', 2000)
                 }
                 if (errorCode === 'auth/wrong-password') {
-                    setSnackBars.openSnack('error', 'rootSnackBar', 'Contraseña erronea', 2000)
+                    setSnackBars.openSnack('error', 'rootSnackBar',
+                     'Contraseña erronea', 2000)
                 }
                 this.setState({
                     loading: false,
@@ -125,7 +131,7 @@ class Login extends Component {
                         textAlign:'center',
                         color:'black'
                     }}>
-                        RapiFac
+                        ServiFac
                     </Typography>
                     <Typography variant="headline" component="h1" style={{
                         textAlign:'center',

@@ -1055,8 +1055,7 @@ class Caja extends Component {
                                     </>
                                 }
 
-
-                                <ItemMenuHerramienta
+                                {/* <ItemMenuHerramienta
                                     titleButton="Ver total"
                                     color="primary"
                                     visible={true}
@@ -1068,7 +1067,7 @@ class Caja extends Component {
                                     }}
                                 >
                                     <BarChart />
-                                </ItemMenuHerramienta>
+                                </ItemMenuHerramienta> */}
 
                                 <ItemMenuHerramienta
                                     titleButton="Agregar dinero"
@@ -1172,7 +1171,7 @@ class Caja extends Component {
                         <ModalContainerNormal
                             open={this.state.estadoModalSimple}>
                             <VerTotales
-                                sumaTotalVentas={this.state.sumaTotalVentas}
+                                sumaTotalVentas={this.state.sumaTotalVentas.l}
                                 sumaTotalDineroIngresado={this.state.sumaTotalDineroIngresado}
                                 sumaTotalDineroRetirado={this.state.sumaTotalDineroRetirado}
                                 sumaTotalVentasDevueltas={this.state.sumaTotalVentasDevueltas}

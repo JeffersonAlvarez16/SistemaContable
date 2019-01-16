@@ -70,7 +70,6 @@ class VerTotales extends Component {
                 sumaTotalVentas: 0.00
             })
         }
-
         if (this.props.sumaTotalVentasCreditoAcreditado.filter(it => it.codigo === this.props.cajaSelecionada.codigo)[0] != null) {
             this.setState({
                 sumaTotalVentasCreditoAcreditado: this.props.sumaTotalVentasCreditoAcreditado.filter(it => it.codigo === this.props.cajaSelecionada.codigo)[0].suma

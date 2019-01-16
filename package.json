@@ -6,8 +6,8 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start", 
-    "heroku-postbuild": "npm run build"
+    "start": "next start",
+    "now-build": "next build && next export -o dist"
   },
   "keywords": [],
   "author": "Darwin Alvarez",
