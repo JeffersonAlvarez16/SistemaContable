@@ -5,7 +5,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import List from '@material-ui/core/List';
 import Typography from '@material-ui/core/Typography';
 import Divider from '@material-ui/core/Divider';
-import { mailFolderListItems, otherMailFolderListItems } from './tileData';
+import MailFolderListItems, { mailFolderListItems, otherMailFolderListItems } from './tileData';
 import Button from '@material-ui/core/Button';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
@@ -174,6 +174,7 @@ class ClippedDrawer extends React.Component {
           classes={{
             paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
           }}
+          style={{backgroundColor:'#009688'}}
           open={this.state.open}
         >
           <div className={classes.toolbar}>
@@ -186,10 +187,9 @@ class ClippedDrawer extends React.Component {
             marginTop: 64,
             width: drawerWidth
           }} /> */}
-          <Divider />
-          <List>{mailFolderListItems}</List>
-          <Divider />
-          <List>{otherMailFolderListItems}</List>
+     
+          <List style={{backgroundColor:'#009688',height:'100vh',opacity:'.9'}}><MailFolderListItems /></List>
+        
         </Drawer>
 
         <main className={classes.content}>

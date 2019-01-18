@@ -149,6 +149,30 @@ class ModalCompraProductos extends Component {
             return 'devoluciones_proveedores'
         }
     }
+
+    
+    handleDescontarCaja = () => {
+        var db = firebase.database();
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
+                operacionVentaRefCaja.once('value', (snap) => {
+                    if (snap.val()) {
+                        var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
+                        var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
+                        cajaRefValorActual.once('value', (snap2) => {
+                            if (snap2.val()) {
+                                cajaRefValorActual.update({
+                                    valor_caja: Number(Number(snap2.val().valor_caja) - Number(this.state.total_final)).toFixed(2)
+                                })
+                            }
+                        })
+                    }
+                })
+
+            }
+        })
+    }
     // guardar venta caja
     setOperacionCaja(itemVenta) {
         var db = firebase.database();
@@ -159,7 +183,9 @@ class ModalCompraProductos extends Component {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/' + this.obtenerReferenciaTipo() + '/' + codigoVentaCaja)
+                    var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/'+codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
+                    operacionGastos.set(itemVenta)
 
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
                     cajaRefValorActual.once('value', (snap2) => {
@@ -769,7 +795,7 @@ class ModalCompraProductos extends Component {
                                 this.setState({ operarEnCaja: true })
                                 setTimeout(() => {
                                     this.updateDataProductos()
-                                    this.handleDescontarCaja()
+                                  //this.handleDescontarCaja()
                                 }, 100)
                             } else {
                                 setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)

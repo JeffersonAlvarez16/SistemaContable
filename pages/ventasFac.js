@@ -37,7 +37,7 @@ class VentasFac extends Component {
         estadoPermisos: null
     }
     componentDidMount() {
-
+        
     }
 
     obtenerDataBaseDatos = () => {

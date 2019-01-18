@@ -1,6 +1,6 @@
 // This file is shared across the demos.
 
-import React from 'react';
+import React, { Component } from 'react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -23,118 +23,129 @@ import Style from '@material-ui/icons/Style';
 import MarkunreadMailbox from '@material-ui/icons/MarkunreadMailbox';
 import Tooltip from '@material-ui/core/Tooltip';
 
+import { withStyles } from '@material-ui/core/styles';
+
 
 import Link from 'next/link'
 import setSnackBars from '../plugins/setSnackBars';
+import { Divider } from '@material-ui/core';
 
 
-export const mailFolderListItems = (
-    <div>
-        <Link prefetch href="/">
-            <ListItem button>
-                <Tooltip title="Inicio" placement="right">
-                    <ListItemIcon>
-                        <Trending />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Inicio" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/productos">
-            <ListItem button>
-                <Tooltip title="Productos" placement="right">
-                    <ListItemIcon>
-                        <ShoppingBasket />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Productos" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/stock">
-            <ListItem button>
-                <Tooltip title="Stock" placement="right">
-                    <ListItemIcon>
-                        <History />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Stock" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/proveedores">
-            <ListItem button>
-                <Tooltip title="Proveedores" placement="right">
-                    <ListItemIcon>
-                        <DriveEta />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Proveedores" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/clientes">
-            <ListItem button>
-                <Tooltip title="Clientes" placement="right">
-                    <ListItemIcon>
-                        <SupervisedUserCircle />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Contactos" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/ventasFac">
-            <ListItem button>
-                <Tooltip title="Ventas" placement="right">
-                    <ListItemIcon>
-                        <ShoppingCart />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Ventas" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/retencion">
-            <ListItem button>
-                <Tooltip title="Retenciones" placement="right">
-                    <ListItemIcon>
-                        <DonutSmall />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Retenciones" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/caja">
-            <ListItem button>
-                <Tooltip title="Caja" placement="right">
-                    <ListItemIcon>
-                        <MonetizationOn />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Caja" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/cuentas_cobrar">
-            <ListItem button>
-                <Tooltip title="Cuentas Cobrar" placement="right">
-                    <ListItemIcon>
-                        <Style />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Cuentas Cobrar" />
-            </ListItem>
-        </Link>
-        <Link prefetch href="/usuarios">
-            <ListItem button>
-                <Tooltip title="Usuarios" placement="right">
-                    <ListItemIcon>
-                        <Usuarios />
-                    </ListItemIcon>
-                </Tooltip>
-                <ListItemText primary="Usuarios" />
-            </ListItem>
-        </Link>
-    </div>
-);
 
-export const otherMailFolderListItems = (
-    <div>
+class MailFolderListItems extends Component {
 
-    </div>
-);
+    state={
+        inicio:'red',
+        caja:'trasparent',
+        productos:'trasparent'
+    }
+    render() {
+        return (
+            <div>
+                <Link prefetch href="/">
+                    <ListItem button>
+                        <Tooltip title="Inicio" placement="right">
+                            <ListItemIcon>
+                                <Trending style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Inicio" />
+                    </ListItem>
+                </Link>
+                {/*     <Divider style={{backgroundColor:'#fff'}} /> */}
+                <Link prefetch href="/caja">
+                    <ListItem button>
+                        <Tooltip title="Caja" placement="right">
+                            <ListItemIcon>
+                                <MonetizationOn style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Caja" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/productos">
+                    <ListItem button>
+                        <Tooltip title="Productos" placement="right">
+                            <ListItemIcon>
+                                <ShoppingBasket style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Productos" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/stock">
+                    <ListItem button>
+                        <Tooltip title="Stock" placement="right">
+                            <ListItemIcon>
+                                <History style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Stock" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/proveedores">
+                    <ListItem button>
+                        <Tooltip title="Proveedores" placement="right">
+                            <ListItemIcon>
+                                <DriveEta style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Proveedores" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/clientes">
+                    <ListItem button>
+                        <Tooltip title="Clientes" placement="right">
+                            <ListItemIcon>
+                                <SupervisedUserCircle style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Clientes" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/ventasFac">
+                    <ListItem button>
+                        <Tooltip title="Ventas" placement="right">
+                            <ListItemIcon>
+                                <ShoppingCart style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Ventas" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/retencion">
+                    <ListItem button>
+                        <Tooltip title="Retenciones" placement="right">
+                            <ListItemIcon>
+                                <DonutSmall style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Retenciones" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/cuentas_cobrar">
+                    <ListItem button>
+                        <Tooltip title="Cuentas Cobrar" placement="right">
+                            <ListItemIcon>
+                                <Style style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Cuentas Cobrar" />
+                    </ListItem>
+                </Link>
+                <Link prefetch href="/usuarios">
+                    <ListItem button>
+                        <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
+                            <ListItemIcon>
+                                <Usuarios style={{ color: '#fff' }} />
+                            </ListItemIcon>
+                        </Tooltip>
+                        <ListItemText primary="Usuarios" />
+                    </ListItem>
+                </Link>
+            </div>
+        )
+    }
+};
+
+export default MailFolderListItems

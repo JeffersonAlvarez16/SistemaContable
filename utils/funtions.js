@@ -1,20 +1,20 @@
 class FUNTIONS {
 
     filterObjectsCategories = (array, categoria) => {
-        return array.filter((item)=>item.categoria===categoria)
+        return array.filter((item) => item.categoria === categoria)
     }
 
     filterObjectsTipos = (array, tipo) => {
-        return array.filter((item)=>item.tipo===tipo)
+        return array.filter((item) => item.tipo === tipo)
     }
 
     filterObjectsCodigo = (array, codigo) => {
         var arrayReturn = []
-        
+
         array.forEach(item => {
-            var itemData=JSON.stringify(item);
-            itemData=itemData.toLowerCase()
-            var itemFilter=itemData.includes(codigo)
+            var itemData = JSON.stringify(item);
+            itemData = itemData.toLowerCase()
+            var itemFilter = itemData.includes(codigo)
             if (itemFilter) {
                 arrayReturn.push(item)
             }
@@ -23,11 +23,11 @@ class FUNTIONS {
     }
     filterObjectsCedulas = (array, cedula) => {
         var arrayReturn = []
-        
+
         array.forEach(item => {
-            var itemData=JSON.stringify(item);
-            itemData=itemData.toLowerCase()
-            var itemFilter=itemData.includes(cedula)
+            var itemData = JSON.stringify(item);
+            itemData = itemData.toLowerCase()
+            var itemFilter = itemData.includes(cedula)
             if (itemFilter) {
                 arrayReturn.push(item)
             }
@@ -112,7 +112,7 @@ class FUNTIONS {
         var S4 = () => {
             return (((1 + Math.random()) * 0x10000) | 0).toString(16).substring(1);
         };
-        return ( S4() + S4() + S4());
+        return (S4() + S4() + S4());
     }
 
     setTime = (secons, funt) => {
@@ -131,22 +131,45 @@ class FUNTIONS {
         return array
     };
 
-    obtenerFechaActual=()=>{
-        var date= new Date()
-        var day= date.getDate()
-        var mon= date.getMonth()+1
-        var yea= date.getFullYear()
-        if(String(day).length===1){
-            day='0'+day
+    obtenerFechaActual = () => {
+        var date = new Date()
+        var day = date.getDate()
+        var mon = date.getMonth() + 1
+        var yea = date.getFullYear()
+        if (String(day).length === 1) {
+            day = '0' + day
         }
-        if(String(mon).length===1){
-            mon='0'+mon
+        if (String(mon).length === 1) {
+            mon = '0' + mon
         }
-        console.log(`${yea}-${mon}-${day}`)
         return `${yea}-${mon}-${day}`
     }
-    obtenerHoraActual=()=>{
+    obtenerHoraActual = () => {
         return `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`
+    }
+
+    diaActual = () => {
+        var date = new Date()
+        let dias = ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"];
+        var diaActual = (dias[date.getDay() - 1])
+        return diaActual
+    }
+    mesActual = () => {
+        var date = new Date()
+        let meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        var mes_name = date.getMonth();
+        var mesActual = (meses[mes_name])
+        return mesActual
+    }
+
+    fecha = () => {
+        var date = new Date()
+        let dias = ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado",];
+        let meses = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+        var mes_name = date.getMonth();
+        var fechaNum = date.getDate();
+        var fecha = (dias[date.getDay()] + " " + fechaNum + " de " + meses[mes_name] + " de " + date.getFullYear())
+        return fecha
     }
 
 

@@ -27,6 +27,13 @@ class RetirarDineroCaja extends Component {
             if (user) {
                 var db = firebase.database();
                 var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + caja.codigo + '/retiro_dinero/' + codigo)
+                var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/'+codigo)               
+                operacionGastos.set({
+                    fecha: funtions.obtenerFechaActual(),
+                    usuario: usuario.code,
+                    observacion,
+                    total_final: saldoAgregado,
+                })
                 cajaUsuarioRef.update({
                     valor: saldoAgregado,
                     observacion,

@@ -93,64 +93,67 @@ class Layout extends Component {
     render() {
         const { children, title } = this.props
         return (
-            <div>
+            <div style={{ backgroundColor: '#eee' }}>
                 <Head>
                     <title>{title}</title>
                     <meta name="viewport" content="width=device-width, initial-scale=1" />
                     <html lang="es" />
 
-                    {/* Material Ui */}
-                    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
-                    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
+
+                    <link rel="stylesheet" href="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.css" />
+                        <script src="//cdn.jsdelivr.net/chartist.js/latest/chartist.min.js"></script>
+                        {/* Material Ui */}
+                        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" />
+                        <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
                 </Head>
-                {
-                    this.state.online === true ?
-                        <MuiThemeProvider theme={themeCont}>
-                            <div id='rootSnackBar'></div>
+                    {
+                        this.state.online === true ?
+                            <MuiThemeProvider theme={themeCont}>
+                                <div id='rootSnackBar'></div>
 
-                            {
-                                this.state.sesionState === 'iniciada' &&
-                                <LoginContenedor title={title} onChangueUserState={usuario => this.props.onChangueUserState(usuario)}>
-                                    {
-                                        children
-                                    }
-                                </LoginContenedor>
-                            }
+                                {
+                                    this.state.sesionState === 'iniciada' &&
+                                    <LoginContenedor title={title} onChangueUserState={usuario => this.props.onChangueUserState(usuario)}>
+                                        {
+                                            children
+                                        }
+                                    </LoginContenedor>
+                                }
 
-                            {
-                                this.state.sesionState === 'cerrada' &&
-                                <Login />
-                            }
-                        </MuiThemeProvider>
-                        :
-                        <div style={{
-                            display: 'flex',
-                            width: '100vw',
-                            height: '100vh',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                        }}>
+                                {
+                                    this.state.sesionState === 'cerrada' &&
+                                    <Login />
+                                }
+                            </MuiThemeProvider>
+                            :
                             <div style={{
-                                background: 'red',
-                                padding: 20,
-                                color: 'white',
-                                borderRadius: 50
+                                display: 'flex',
+                                width: '100vw',
+                                height: '100vh',
+                                alignItems: 'center',
+                                justifyContent: 'center',
                             }}>
-                                Por favor revise su conexión a internet!
+                                <div style={{
+                                    background: 'red',
+                                    padding: 20,
+                                    color: 'white',
+                                    borderRadius: 50
+                                }}>
+                                    Por favor revise su conexión a internet!
                             </div>
-                        </div>
-                }
-                <style jsx global>{`
+                            </div>
+                    }
+                    <style jsx global>{`
                     body { 
                         margin:0
                     }
                 `}</style>
 
             </div>
-        );
-    }
-}
-
-
-
+                );
+            }
+        }
+        
+        
+        
 export default Layout;

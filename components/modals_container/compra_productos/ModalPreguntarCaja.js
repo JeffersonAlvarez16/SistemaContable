@@ -15,7 +15,8 @@ const ModalPreguntarCaja = (props) => {
                 <Button color="primary" style={{ marginRight: 16 }} onClick={() => props.handleClose()}>
                     Cancelar
                 </Button>
-                <Button variant="contained" color="primary" style={{ marginRight: 16 }} onClick={() => {
+                <Button variant="contained" color="primary" style={{ marginRight: 16 }} onClick={(event) => {
+                    event.preventDefault()
                     props.handleDescontarCaja()
                     props.handleClose()
                 }}>
