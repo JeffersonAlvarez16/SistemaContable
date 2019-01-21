@@ -631,8 +631,9 @@ class Ventas_01 extends Component {
                     cajaRefValorAcreditado.remove()
 
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
-
+                   
                     var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/').orderByChild('cliente/codigo').equalTo(itemVenta.cliente.codigo)
+                  
                     cuentaCobrarDeudaQuitarRef.once('value', (snap2) => {
                         if (snap2.val()) {
                             var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + funtions.snapshotToArray(snap2)[0].cliente.codigo + '/lista_deudas/' + itemVenta.codigo)

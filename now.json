@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "Servifac-AutoRepuestos-Thiago",
+    "name": "Servifac-Drecil",
     "builds": [
         { "src": "package.json", "use": "@now/static-build" }
     ]

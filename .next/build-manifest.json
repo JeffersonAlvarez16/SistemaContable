@@ -11,15 +11,19 @@
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],
-    "/index": [
+    "/cuentas_cobrar": [
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],
-    "/ventasFac": [
+    "/stock": [
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],
-    "/": [
+    "/retencion": [
+      "static/runtime/webpack.js",
+      "static/runtime/main.js"
+    ],
+    "/productos": [
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ]

@@ -2,7 +2,7 @@ import React, { Component } from 'react'
 import Layout from '../components/containers/Layout';
 import Dashboard from '../components/Dashboard/containers/Dashboard';
 import ChartistGraph from "react-chartist";
-import { Grid, Chip, Card } from '@material-ui/core';
+import { Grid, Chip, Card, IconButton, Icon } from '@material-ui/core';
 import funtions from '../utils/funtions';
 
 // firebase
@@ -18,7 +18,7 @@ class Main extends Component {
             nombre: ''
         },
         ventasDiarias: {
-            labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"],
+            labels: ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
             series: [[0, 0, 0, 0, 0, 0, 0]]
         },
         ventasMensauales: {
@@ -52,15 +52,21 @@ class Main extends Component {
         viernes: 4,
         sabado: 5,
         domingo: 6,
-        idex_of: 0,
+        idex_of: null,
         idex_of_mes: '',
         listaVentasPorDia: [],
         listaVentasMensuales: []
     }
 
     componentDidMount() {
+        setTimeout(() => {
+            this.setState({
+                initialState: true
+            })
+        }, 10);
         var db = firebase.database()
         firebase.auth().onAuthStateChanged((user) => {
+            console.log('jkhjkh')
             if (user) {
                 var ref = db.ref(`users/${user.uid}/ventas`)
                 var refGastos = db.ref(`users/${user.uid}/gastos`)
@@ -74,38 +80,67 @@ class Main extends Component {
                         this.devolverMesActual(funtions.mesActual())
                         listaVentas.map(item => {
                             if (item.fecha_venta === funtions.obtenerFechaActual()) {
-                                this.setState({
-                                    total_ventas_diarias: Number(this.state.total_ventas_diarias) + Number(item.total),
-                                })
+                                if (item.tipo_pago != 'credito') {
+                                    this.setState({
+                                        total_ventas_diarias: Number(this.state.total_ventas_diarias) + Number(item.total),
+                                    })
+                                }
+
 
                             }
                         })
                         listaVentas.map(item => {
                             if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
-                                this.setState({
-                                    total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
-                                })
+                                if (item.tipo_pago != 'credito') {
+                                    this.setState({
+                                        total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
+                                    })
+                                }
 
                             }
                         })
 
                         setTimeout(() => {
+                            console.log('sadasdsadassda')
                             this.devolverDiaActual(funtions.diaActual())
-                            var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
-                            refVentasDiarias.update({
-                                valor: this.state.total_ventas_diarias
+                            var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
+                            refVentasDiariasVa.once('value', snapshot => {
+                                if (snapshot.val()) {
+                                    console.log(this.state.idex_of)
+                                    var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
+                                    refVentasDiarias.update({
+                                        valor: this.state.total_ventas_diarias
+                                    })
+                                } else {
+                                    for (let i = 0; i < 7; i++) {
+                                        if (i === this.state.idex_of) {
+                                            var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
+                                            refVentasDiarias.update({
+                                                valor: this.state.total_ventas_diarias
+                                            })
+                                        } else {
+                                            var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${i}`)
+                                            refVentasDiarias.update({
+                                                valor: 0
+                                            })
+                                        }
+                                    }
+                                }
                             })
+
+
                             for (var i = 0; i < this.state.ventasDiarias.series[0].length; i++) {
                                 if (i === this.state.idex_of) {
                                     var refVentasDiariasTotal = db.ref(`users/${user.uid}/ventas_diarias`)
                                     refVentasDiariasTotal.on('value', snapshot => {
                                         if (snapshot.val()) {
                                             var listaVentasPorDia = funtions.snapshotToArray(snapshot)
+                                            console.log(listaVentasPorDia)
                                             this.setState({
                                                 listaVentasPorDia: listaVentasPorDia
                                             })
                                             listaVentasPorDia.forEach((item, j) => {
-                                                if (j === i) {
+                                                if (Number(item.id) === i) {
                                                     this.state.ventasDiarias.series[0][i] = item.valor
                                                 } else {
                                                     this.state.ventasDiarias.series[0][j] = item.valor
@@ -116,18 +151,41 @@ class Main extends Component {
                                 }
                             }
 
-                            var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
-                            refVentasMensuales.set({
-                                valor: this.state.total_ventas_mensuales
+
+                            var refVentasMensualesVa = db.ref(`users/${user.uid}/ventas_mensuales`)
+                            refVentasMensualesVa.once('value', snapshot => {
+                                if (snapshot.val()) {
+                                    var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
+                                    refVentasMensuales.update({
+                                        valor: this.state.total_ventas_mensuales
+                                    })
+                                } else {
+                                    for (let j = 0; j < 12; j++) {
+
+                                        if (j === this.state.index_des) {
+                                            var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
+                                            refVentasMensuales.update({
+                                                valor: this.state.total_ventas_mensuales
+                                            })
+                                        } else {
+
+                                            var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${j}`)
+                                            refVentasMensuales.update({
+                                                valor: 0
+                                            })
+                                        }
+
+                                    }
+                                }
                             })
+
                             for (var i = 0; i < this.state.ventasMensauales.series[0].length; i++) {
                                 if (i === this.state.index_des) {
                                     var refVentasMensualesTotal = db.ref(`users/${user.uid}/ventas_mensuales`)
-
                                     refVentasMensualesTotal.on('value', snapshot => {
                                         if (snapshot.val()) {
                                             var listaVentasMensuales = funtions.snapshotToArray(snapshot)
-                                            console.log(listaVentasMensuales)
+
                                             this.setState({
                                                 listaVentasMensuales: listaVentasMensuales
                                             })
@@ -176,11 +234,184 @@ class Main extends Component {
                     }
                 })
 
-                setTimeout(() => {
-                    this.setState({
-                        initialState: true
-                    })
-                }, 0);
+
+            } else {
+                this.setState({ sesionState: 'cerrada' })
+            }
+        })
+
+    }
+
+    refrescar = () => {
+        var db = firebase.database()
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var ref = db.ref(`users/${user.uid}/ventas`)
+                var refGastos = db.ref(`users/${user.uid}/gastos`)
+                ref.on('value', snapshot => {
+                    if (snapshot.val()) {
+                        var listaVentas = funtions.snapshotToArray(snapshot)
+                        this.setState({
+                            total_ventas_diarias: 0,
+                            total_ventas_mensuales: 0
+                        })
+                        this.devolverMesActual(funtions.mesActual())
+                        listaVentas.map(item => {
+                            if (item.fecha_venta === funtions.obtenerFechaActual()) {
+                                if (item.tipo_pago != 'credito') {
+                                    this.setState({
+                                        total_ventas_diarias: Number(this.state.total_ventas_diarias) + Number(item.total),
+                                    })
+                                }
+
+
+                            }
+                        })
+                        listaVentas.map(item => {
+                            if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
+                                if (item.tipo_pago != 'credito') {
+                                    this.setState({
+                                        total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
+                                    })
+                                }
+
+                            }
+                        })
+
+                        setTimeout(() => {
+                            this.devolverDiaActual(funtions.diaActual())
+                            var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
+                            refVentasDiariasVa.once('value', snapshot => {
+                                if (snapshot.val()) {
+                                    var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
+                                    refVentasDiarias.update({
+                                        valor: this.state.total_ventas_diarias
+                                    })
+                                } else {
+                                    for (let i = 0; i < 7; i++) {
+                                        if (i === this.state.idex_of) {
+                                            var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
+                                            refVentasDiarias.update({
+                                                valor: this.state.total_ventas_diarias
+                                            })
+                                        } else {
+                                            var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${i}`)
+                                            refVentasDiarias.update({
+                                                valor: 0
+                                            })
+                                        }
+
+                                    }
+                                }
+                            })
+
+
+                            for (var i = 0; i < this.state.ventasDiarias.series[0].length; i++) {
+                                if (i === this.state.idex_of) {
+                                    var refVentasDiariasTotal = db.ref(`users/${user.uid}/ventas_diarias`)
+                                    refVentasDiariasTotal.on('value', snapshot => {
+                                        if (snapshot.val()) {
+                                            var listaVentasPorDia = funtions.snapshotToArray(snapshot)
+                                            console.log(listaVentasPorDia)
+                                            this.setState({
+                                                listaVentasPorDia: listaVentasPorDia
+                                            })
+                                            listaVentasPorDia.forEach((item, j) => {
+                                                if (Number(item.id) === i) {
+                                                    this.state.ventasDiarias.series[0][i] = item.valor
+                                                } else {
+                                                    this.state.ventasDiarias.series[0][j] = item.valor
+                                                }
+                                            })
+                                        }
+                                    })
+                                }
+                            }
+
+
+                            var refVentasMensualesVa = db.ref(`users/${user.uid}/ventas_mensuales`)
+                            refVentasMensualesVa.once('value', snapshot => {
+                                if (snapshot.val()) {
+                                    var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
+                                    refVentasMensuales.update({
+                                        valor: this.state.total_ventas_mensuales
+                                    })
+                                } else {
+                                    for (let j = 0; j < 12; j++) {
+
+                                        if (j === this.state.index_des) {
+                                            var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
+                                            refVentasMensuales.update({
+                                                valor: this.state.total_ventas_mensuales
+                                            })
+                                        } else {
+
+                                            var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${j}`)
+                                            refVentasMensuales.update({
+                                                valor: 0
+                                            })
+                                        }
+
+                                    }
+                                }
+                            })
+
+                            for (var i = 0; i < this.state.ventasMensauales.series[0].length; i++) {
+                                if (i === this.state.index_des) {
+                                    var refVentasMensualesTotal = db.ref(`users/${user.uid}/ventas_mensuales`)
+                                    refVentasMensualesTotal.on('value', snapshot => {
+                                        if (snapshot.val()) {
+                                            var listaVentasMensuales = funtions.snapshotToArray(snapshot)
+
+                                            this.setState({
+                                                listaVentasMensuales: listaVentasMensuales
+                                            })
+                                            listaVentasMensuales.forEach((item, j) => {
+                                                if (j === i) {
+                                                    this.state.ventasMensauales.series[0][i] = item.valor
+                                                } else {
+                                                    this.state.ventasMensauales.series[0][j] = item.valor
+                                                }
+                                            })
+                                        }
+                                    })
+                                    //  this.state.ventasMensauales.series[0][i] = this.state.total_ventas_mensuales
+                                }
+                            }
+                        }, 20);
+
+
+                    }
+
+                })
+                refGastos.on('value', snapshot => {
+                    if (snapshot.val()) {
+                        var listaGastos = funtions.snapshotToArray(snapshot)
+                        this.setState({
+                            total_gastos_diarios: 0,
+                            total_gastos_mensuales: 0
+                        })
+                        listaGastos.map(item => {
+                            if (item.fecha === funtions.obtenerFechaActual()) {
+                                this.setState({
+                                    total_gastos_diarios: Number(this.state.total_gastos_diarios) + Number(item.total_final),
+                                })
+
+                            }
+                        })
+
+                        listaGastos.map(item => {
+                            if (item.fecha.substr(5, 2) === this.state.idex_of_mes) {
+                                this.setState({
+                                    total_gastos_mensuales: Number(this.state.total_gastos_mensuales) + Number(item.total_final),
+                                })
+                            }
+                        })
+
+                    }
+                })
+
+
             } else {
                 this.setState({ sesionState: 'cerrada' })
             }
@@ -192,10 +423,11 @@ class Main extends Component {
     }
 
     devolverDiaActual = (valor) => {
+        console.log(valor)
         switch (valor) {
             case 'Lunes':
                 this.setState({
-                    idex_of: 0,
+                    idex_of: 1,
                     data: {
                         labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"],
                         series: [[0, 0, 0, 0, 0, 0, 0]]
@@ -204,32 +436,32 @@ class Main extends Component {
                 break;
             case 'Martes':
                 this.setState({
-                    idex_of: 1
+                    idex_of: 2
                 })
                 break;
             case 'Miercoles':
                 this.setState({
-                    idex_of: 2
+                    idex_of: 3
                 })
                 break;
             case 'Jueves':
                 this.setState({
-                    idex_of: 3,
+                    idex_of: 4,
                 })
                 break;
             case 'Viernes':
                 this.setState({
-                    idex_of: 4
+                    idex_of: 5
                 })
                 break;
             case 'Sabado':
                 this.setState({
-                    idex_of: 5
+                    idex_of: 6
                 })
                 break;
             case 'Domingo':
                 this.setState({
-                    idex_of: 6
+                    idex_of: 0
                 })
                 break;
         }
@@ -322,6 +554,7 @@ class Main extends Component {
     }
 
     render() {
+        console.log(this.state.listaVentasPorDia)
         return (
             <div>
                 {
@@ -344,19 +577,31 @@ class Main extends Component {
                                     <Grid item xs={5} style={{ margin: 0 }}>
                                         <Card style={{ backgroundColor: '#eee', }}>
 
-                                            <div style={{ marginTop: -15, marginLeft: 50, fontFamily: "cursive", }}>
+                                            <div style={{ marginTop: -15, marginLeft: 50, fontFamily: "cursive", display: 'flex' }}>
                                                 <h6 style={{ fontSize: 14 }}>Grafico de ventas semanales</h6>
+                                                <div style={{ flex: .9 }}></div>
+                                                <IconButton
+                                                    onClick={() => {
+                                                        this.refrescar()
+                                                    }}>
+                                                    <Icon style={{ color: 'black' }}>refresh</Icon>
+                                                </IconButton>
                                             </div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '85%', marginLeft: 50 }}>
                                                 {
-                                                    this.state.listaVentasPorDia.map((item) => {
-                                                        if (item.id === this.state.idex_of) {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + item.valor} />
+
+                                                    this.state.listaVentasPorDia.map((items) => {
+                                                        console.log(items)
+                                                        if (this.state.idex_of === Number(items.id)) {
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + items.valor} />
                                                         } else {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + item.valor} />
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + items.valor} />
                                                         }
                                                     })
                                                 }
+
+
+
                                             </div>
                                             <ChartistGraph data={this.state.ventasDiarias} options={this.state.options} type={this.state.type} style={{ fill: 'blue' }} />
                                         </Card>
@@ -364,16 +609,23 @@ class Main extends Component {
 
                                     <Grid item xs={7} style={{ margin: 0 }}>
                                         <Card style={{ backgroundColor: '#eee', }}>
-                                            <div style={{ marginTop: -15, marginLeft: 50, fontFamily: "cursive", }}>
+                                            <div style={{ marginTop: -15, marginLeft: 50, fontFamily: "cursive", display: 'flex', }}>
                                                 <h6 style={{ fontSize: 14 }}>Grafico de ventas musuales</h6>
+                                                <div style={{ flex: .9 }}></div>
+                                                <IconButton
+                                                    onClick={() => {
+                                                        this.refrescar()
+                                                    }}>
+                                                    <Icon style={{ color: 'black' }}>refresh</Icon>
+                                                </IconButton>
                                             </div>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', width: '90%', marginLeft: 50 }}>
                                                 {
-                                                    this.state.ventasMensauales.series[0].map((item, i) => {
-                                                        if (i === this.state.index_des) {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + this.state.total_ventas_mensuales} />
+                                                    this.state.listaVentasMensuales.map((item) => {
+                                                        if (Number(item.id) === this.state.index_des) {
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + item.valor} />
                                                         } else {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label='$ 0' />
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + item.valor} />
                                                         }
                                                     })
                                                 }

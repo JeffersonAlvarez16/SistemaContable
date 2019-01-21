@@ -865,6 +865,9 @@ class ModalNewVenta extends Component {
     }
     ////////////////////////
     setVentaCaja(itemVenta, tipo_pago, item) {
+        console.log(itemVenta)
+        console.log(tipo_pago)
+        console.log(item)
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
@@ -886,6 +889,7 @@ class ModalNewVenta extends Component {
                         })
                     }
                     if (tipo_pago === 'credito') {
+                        console.log('hola')
                         var cuentaCobrarClienteRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo)
                         var configuracionMes = db.ref('users/' + firebase.auth().currentUser.uid + '/configuracion/dias_a_pagar_defecto/dias')
                         cuentaCobrarClienteRef.once('value', (snap) => {
@@ -959,7 +963,7 @@ class ModalNewVenta extends Component {
                                             usuario: this.props.usuario.code,
                                         })
 
-
+                                       
                                         var deudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
                                         deudaRef.set({
                                             codigo: itemVenta.codigo,
