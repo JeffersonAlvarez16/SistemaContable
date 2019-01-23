@@ -31,6 +31,7 @@ import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
 import colors from '../../utils/colors';
 import ContenedorNumeroFactura from './ventas/ContenedorNumeroFactura';
 import { async } from '@firebase/util';
+import RenderPropsMenu from './MenuFilter';
 
 class ModalNewVenta extends Component {
 

@@ -11,15 +11,7 @@
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],
-    "/cuentas_cobrar": [
-      "static/runtime/webpack.js",
-      "static/runtime/main.js"
-    ],
-    "/stock": [
-      "static/runtime/webpack.js",
-      "static/runtime/main.js"
-    ],
-    "/retencion": [
+    "/ventasFac": [
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],

@@ -25,6 +25,9 @@ import 'firebase/auth'
 
 import funtions from '../../utils/funtions';
 import Divider from '@material-ui/core/Divider';
+import { async } from '@firebase/util';
+import RenderPropsMenu from './MenuFilter';
+import { CircularProgress } from '@material-ui/core';
 
 
 class AutoCompleteSelectedProducto extends React.Component {
@@ -32,19 +35,31 @@ class AutoCompleteSelectedProducto extends React.Component {
         anchorEl: null,
         listaProductos: [],
         listaProductosTemporal: [],
+        listaBuscada: [],
 
         //estado lista 
         estadoListaLoader: 'vacia',
         //texto buscado
         textoBuscado: '',
         //selecciona automatica
-        checkedSeleccionAutomatica: false
+        checkedSeleccionAutomatica: false,
+        //estado para mostrar el loader
+        textoBuscadoLoading : false,
+
     };
 
 
     componentDidMount() {
+        this.setState({
+            filtroBusqueda: 'nombreProducto',
+            checkedSeleccionAutomatica: false,
+        })
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
+                this.setState({
+                    uidUser: user.uid
+                })
+
                 var db = firebase.database();
                 var productosRef = db.ref('users/' + user.uid + "/productos");
                 productosRef.on('value', (snapshot) => {
@@ -70,31 +85,70 @@ class AutoCompleteSelectedProducto extends React.Component {
         });
     }
 
+    resivirListaDescripcion = (texto) => {
+        var db = firebase.database()
+        var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('descripcion_producto').startAt(texto)
+        productosRef.once('value', snap => {
+            if (snap.val()) {
+                this.setState({
+                    listaBuscada: funtions.snapshotToArray(snap),
+                    textoBuscadoLoading : false
+                })
+            }
+        })
+    }
 
+    resivirListaCodigoReferencia = (texto) => {
+        var db = firebase.database()
+        var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('codigo_referencia').equalTo(texto)
+        productosRef.once('value', snap => {
+            if (snap.val()) {
+                this.setState({
+                    listaBuscada: funtions.snapshotToArray(snap),
+                    textoBuscadoLoading : false
+                })
+            }
+        })
+    }
+
+    resivirListaCodigoBarras = (texto) => {
+        var db = firebase.database()
+        var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('codigo_barras').equalTo(texto)
+        productosRef.once('value', snap => {
+            if (snap.val()) {
+                this.setState({textoBuscadoLoading : false})
+                var listainterna = funtions.snapshotToArray(snap)
+                if (listainterna.length > 0) {
+                    this.props.onChangue(listainterna[0])
+                    this.setState({
+                        listaProductosTemporal: [],
+                        textoBuscado: ''
+                    })
+                    this.setState({
+                        listaBuscada: funtions.snapshotToArray(snap)
+                    })
+                }
+            }
+        })
+    }
 
     handleSearchItems = (text) => {
         this.setState({ textoBuscado: text })
         if (this.state.checkedSeleccionAutomatica) {
-            let array = funtions.filterObjectsCodigo(this.state.listaProductos, text)
-            if(array.length===1){
-                this.props.onChangue(array[0])
-                this.setState({
-                    listaProductosTemporal: [],
-                    textoBuscado: ''
-                })
-            }
+            this.setState({textoBuscadoLoading : true})
+            this.resivirListaCodigoBarras(text)
         } else {
-            if (text.length > 0) {
-                let array = funtions.filterObjectsCodigo(this.state.listaProductos, text)
-                this.setState({
-                    listaProductosTemporal: array
-                })
-
-            } else {
-                this.setState({
-                    listaProductosTemporal: []
-                })
+            this.setState({textoBuscadoLoading : true})
+            if (this.state.filtroBusqueda === 'nombreProducto') {
+                this.resivirListaDescripcion(text)
             }
+            if (this.state.filtroBusqueda === 'codigoReferencia') {
+                this.resivirListaCodigoReferencia(text)
+            }
+            this.setState({
+                listaProductosTemporal: this.state.listaBuscada
+            })
+
         }
     }
 
@@ -129,6 +183,17 @@ class AutoCompleteSelectedProducto extends React.Component {
                     }}
                     style={styleText}
                     label='Buscar producto...'
+                    helperText={
+                        this.state.filtroBusqueda === 'nombreProducto' ?
+                            'Buscando por nombre del producto'
+                            :
+                            this.state.filtroBusqueda === 'codigobarras' ?
+                                'Buscando por codigo de barras'
+                                :
+                                this.state.filtroBusqueda === 'codigoReferencia' ?
+                                    'Buscando por codigo de referencia'
+                                    :
+                                    ''}
                     margin={margin ? 'dense' : 'normal'}
                     variant="outlined"
                     onFocus={(event) => this.setState({ anchorEl: event.currentTarget })}
@@ -138,30 +203,56 @@ class AutoCompleteSelectedProducto extends React.Component {
                         endAdornment: (
                             <InputAdornment variant="filled" position="end">
                                 {
+                                    this.state.textoBuscadoLoading === true &&
+                                    
+                                        <CircularProgress size={15}/>
+                                }
+                                {
                                     this.state.textoBuscado.length > 0 &&
                                     <Tooltip title="Borrar busqueda" >
                                         <IconButton
                                             aria-label="Toggle clean text"
-                                            onClick={() => this.setState({ textoBuscado: '', listaProductosTemporal:[] })}
+                                            onClick={() => this.setState({ textoBuscado: '', listaProductosTemporal: [], textoBuscadoLoading : false })}
                                         >
                                             <CloseIcon />
                                         </IconButton>
                                     </Tooltip>
                                 }
 
-                                <Tooltip title="Seleccion Automática" >
+                                {/* <Tooltip title="Seleccion Automática" >
                                     <Checkbox
                                         checked={this.state.checkedSeleccionAutomatica}
                                         onChange={() => this.setState({ checkedSeleccionAutomatica: !this.state.checkedSeleccionAutomatica })}
                                     />
-                                </Tooltip>
+                                </Tooltip> */}
+
+                                <RenderPropsMenu
+                                    handleNombreProducto={() =>
+                                        this.setState({
+                                            filtroBusqueda: 'nombreProducto',
+                                            checkedSeleccionAutomatica: false,
+                                        })
+                                    }
+                                    handleCodigoBarras={() =>
+                                        this.setState({
+                                            checkedSeleccionAutomatica: true,
+                                            filtroBusqueda: 'codigobarras'
+                                        })
+                                    }
+                                    handleCodigoreferencia={() =>
+                                        this.setState({
+                                            filtroBusqueda: 'codigoReferencia',
+                                            checkedSeleccionAutomatica: false,
+                                        })
+                                    }
+                                ></RenderPropsMenu>
 
                             </InputAdornment>
                         ),
                     }}
                 />
 
-                <Popper open={this.state.listaProductosTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, minWidth:450 }} >
+                <Popper open={this.state.listaProductosTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, minWidth: 450 }} >
                     {({ TransitionProps }) => (
                         <Fade {...TransitionProps} timeout={350}>
                             <Paper elevation={6}>
