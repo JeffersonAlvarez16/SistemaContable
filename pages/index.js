@@ -66,7 +66,6 @@ class Main extends Component {
         }, 10);
         var db = firebase.database()
         firebase.auth().onAuthStateChanged((user) => {
-            console.log('jkhjkh')
             if (user) {
                 var ref = db.ref(`users/${user.uid}/ventas`)
                 var refGastos = db.ref(`users/${user.uid}/gastos`)
@@ -78,6 +77,7 @@ class Main extends Component {
                             total_ventas_mensuales: 0
                         })
                         this.devolverMesActual(funtions.mesActual())
+                        this.devolverDiaActual(funtions.diaActual())
                         listaVentas.map(item => {
                             if (item.fecha_venta === funtions.obtenerFechaActual()) {
                                 if (item.tipo_pago != 'credito') {
@@ -101,8 +101,6 @@ class Main extends Component {
                         })
 
                         setTimeout(() => {
-                            console.log('sadasdsadassda')
-                            this.devolverDiaActual(funtions.diaActual())
                             var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
                             refVentasDiariasVa.once('value', snapshot => {
                                 if (snapshot.val()) {
@@ -201,7 +199,7 @@ class Main extends Component {
                                     //  this.state.ventasMensauales.series[0][i] = this.state.total_ventas_mensuales
                                 }
                             }
-                        }, 20);
+                        }, 50);
 
 
                     }
@@ -283,6 +281,7 @@ class Main extends Component {
                             var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
                             refVentasDiariasVa.once('value', snapshot => {
                                 if (snapshot.val()) {
+                                    console.log(this.state.idex_of)
                                     var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
                                     refVentasDiarias.update({
                                         valor: this.state.total_ventas_diarias
@@ -331,7 +330,7 @@ class Main extends Component {
 
                             var refVentasMensualesVa = db.ref(`users/${user.uid}/ventas_mensuales`)
                             refVentasMensualesVa.once('value', snapshot => {
-                                if (snapshot.val()) {
+                                if (snapshot.val()) {                                 
                                     var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
                                     refVentasMensuales.update({
                                         valor: this.state.total_ventas_mensuales
@@ -378,7 +377,7 @@ class Main extends Component {
                                     //  this.state.ventasMensauales.series[0][i] = this.state.total_ventas_mensuales
                                 }
                             }
-                        }, 20);
+                        }, 50);
 
 
                     }
@@ -429,7 +428,7 @@ class Main extends Component {
                 this.setState({
                     idex_of: 1,
                     data: {
-                        labels: ["Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", "Domingo"],
+                        labels: ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", ],
                         series: [[0, 0, 0, 0, 0, 0, 0]]
                     },
                 })
@@ -465,6 +464,8 @@ class Main extends Component {
                 })
                 break;
         }
+
+        console.log(this.state.idex_of)
     }
     devolverMesActual = (valor) => {
         switch (valor) {
@@ -554,7 +555,6 @@ class Main extends Component {
     }
 
     render() {
-        console.log(this.state.listaVentasPorDia)
         return (
             <div>
                 {
@@ -593,9 +593,9 @@ class Main extends Component {
                                                     this.state.listaVentasPorDia.map((items) => {
                                                         console.log(items)
                                                         if (this.state.idex_of === Number(items.id)) {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + items.valor} />
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + Number(items.valor).toFixed(2)} />
                                                         } else {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + items.valor} />
+                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + Number(items.valor).toFixed(2)} />
                                                         }
                                                     })
                                                 }
@@ -623,9 +623,9 @@ class Main extends Component {
                                                 {
                                                     this.state.listaVentasMensuales.map((item) => {
                                                         if (Number(item.id) === this.state.index_des) {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + item.valor} />
+                                                            return <Chip style={{ fontSize: 9, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + Number(item.valor).toFixed(2)} />
                                                         } else {
-                                                            return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + item.valor} />
+                                                            return <Chip style={{ fontSize: 9, fontFamily: "cursive", backgroundColor: '#52c7b8', color: 'black' }} label={'$ ' + Number(item.valor).toFixed(2)} />
                                                         }
                                                     })
                                                 }

@@ -20,7 +20,7 @@ class Dashboard extends Component {
                     Ventas diarias
                   </Typography>
                   <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
-                    $ {this.props.ventaDiaria}
+                    $ {Number(this.props.ventaDiaria).toFixed(2)}
                   </Typography>
                 </CardContent>
               </CardActionArea>
@@ -38,7 +38,7 @@ class Dashboard extends Component {
                     Gastos diarios
                   </Typography>
                   <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
-                    $ {this.props.gostosDiarios}
+                    $ {Number(this.props.gostosDiarios).toFixed(2)}
                   </Typography>
                 </CardContent>
               </CardActionArea>
@@ -56,7 +56,7 @@ class Dashboard extends Component {
                     Ventas Mensuales
                   </Typography>
                   <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
-                    $ {this.props.total_ventas_mensuales}
+                    $ {Number(this.props.total_ventas_mensuales).toFixed(2)}
                   </Typography>
                 </CardContent>
               </CardActionArea>
@@ -75,7 +75,7 @@ class Dashboard extends Component {
                     Gastos Mensuales
                   </Typography>
                   <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
-                    $ {this.props.gastosMensuales}
+                    $ {Number(this.props.gastosMensuales).toFixed(2)}
                   </Typography>
                 </CardContent>
               </CardActionArea>

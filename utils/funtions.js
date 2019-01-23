@@ -150,7 +150,8 @@ class FUNTIONS {
 
     diaActual = () => {
         var date = new Date()
-        let dias = ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];      
+        let dias = ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];     
+        console.log(date.getDay()) 
         var diaActual = (dias[date.getDay()])
         return diaActual
     }
