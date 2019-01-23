@@ -11,10 +11,6 @@
       "static/runtime/webpack.js",
       "static/runtime/main.js"
     ],
-    "/ventasFac": [
-      "static/runtime/webpack.js",
-      "static/runtime/main.js"
-    ],
     "/productos": [
       "static/runtime/webpack.js",
       "static/runtime/main.js"
