@@ -34,6 +34,19 @@ class FUNTIONS {
         })
         return arrayReturn
     }
+    filterObjectsnombre = (array, nombre) => {
+        var arrayReturn = []
+
+        array.forEach(item => {
+            var itemData = JSON.stringify(item);
+            itemData = itemData.toLowerCase()
+            var itemFilter = itemData.includes(nombre)
+            if (itemFilter) {
+                arrayReturn.push(item)
+            }
+        })
+        return arrayReturn
+    }
 
     filterObjectsCedula = (array, cedula) => {
         var arrayReturn = []
@@ -150,7 +163,8 @@ class FUNTIONS {
 
     diaActual = () => {
         var date = new Date()
-        let dias = ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];      
+        let dias = ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"];     
+        console.log(date.getDay()) 
         var diaActual = (dias[date.getDay()])
         return diaActual
     }

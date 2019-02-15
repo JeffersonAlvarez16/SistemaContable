@@ -28,13 +28,14 @@ import Divider from '@material-ui/core/Divider';
 import FullScreenDialog from '../components/FullScreenDialog';
 import ModalNewEditProveedor from '../modals_container/ModalNewEditProveedor';
 import { Button } from '@material-ui/core';
+import setSnackBars from './setSnackBars';
 
 
-class AutoCompleteProveedores extends React.Component {
+class AutoCompleteCategoriaMarcas extends React.Component {
     state = {
         anchorEl: null,
-        listaProvedores: [],
-        listaProvedoresTemporal: [],
+        dataAuto: [],
+        dataAutoTemporal: [],
 
         //estado lista 
         estadoListaLoader: 'vacia',
@@ -50,39 +51,39 @@ class AutoCompleteProveedores extends React.Component {
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + '/proveedores');
+                var productosRef = db.ref('users/' + user.uid + "/" + this.props.dataRef);
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
-                            listaProvedores: [],
+                            dataAuto: [],
                             estadoListaLoader: 'cargando'
                         })
                         var lista = funtions.snapshotToArray(snapshot)
-                        var listaFiltrada = lista.filter(item => item.estado === true)
                         this.setState({
-                            listaProvedores: listaFiltrada,
+                            dataAuto: lista,
                             estadoListaLoader: 'llena'
                         })
                     } else {
                         this.setState({
-                            listaProvedores: [],
+                            dataAuto: [],
                             estadoListaLoader: 'vacio'
                         })
                     }
                 });
             }
-        });        
+        });
     }
 
-    componentWillReceiveProps(props){
-        if (props.codigoProveedor.length>0) {
+    componentWillReceiveProps(props) {
+
+        if (props.codigomarca != undefined) {
             firebase.auth().onAuthStateChanged((user) => {
                 if (user) {
                     var db = firebase.database();
-                    var productosRef = db.ref('users/' + user.uid + '/proveedores/'+props.codigoProveedor);
-                    productosRef.on('value', (snapshot) => {
+                    var marcasRef = db.ref('users/' + user.uid + '/marcas/' + props.codigomarca);
+                    marcasRef.on('value', (snapshot) => {
                         if (snapshot.val()) {
-                            this.setState({textLabel:snapshot.val().nombre})
+                            this.setState({ textLabel: snapshot.val().nombre })
                         }
                     })
                 }
@@ -92,29 +93,51 @@ class AutoCompleteProveedores extends React.Component {
 
     handleSearchItems = (text) => {
         this.setState({ textoBuscado: text })
-
         if (text.length > 0) {
-            let array = funtions.filterObjectsCedulas(this.state.listaProvedores, text)
+            let array = funtions.filterObjectsnombre(this.state.dataAuto, text)
             this.setState({
-                listaProvedoresTemporal: array
+                dataAutoTemporal: array
             })
-
+            console.log(array)
         } else {
             this.setState({
-                listaProvedoresTemporal: []
+                dataAutoTemporal: []
             })
         }
     }
 
 
     handleToggle = (item) => {
-        console.log(item)
         this.props.onChangue(item)
         this.setState({
-            listaProvedoresTemporal: [],
+            dataAutoTemporal: [],
             textoBuscado: '',
             textLabel: item.nombre
         })
+    }
+
+    guardar = () => {
+        if (this.state.dataAutoTemporal.length === 0 && this.state.textoBuscado.length > 0) {
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    var codigo = funtions.guidGenerator()
+                    var db = firebase.database();
+                    var productosRef = db.ref('users/' + user.uid + "/" + this.props.dataRef + "/" + codigo);
+                    productosRef.set({
+                        nombre: this.state.textoBuscado
+                    })
+                    var item = {
+                        id: codigo,
+                        nombre: this.state.textoBuscado
+                    }
+                    this.handleToggle(item)
+                }
+                setSnackBars.openSnack('success', 'rootSnackBar', `${this.props.dataRefObject.toUpperCase()} creada`, 2000)
+
+            })
+        }
+
+
     }
 
 
@@ -139,12 +162,15 @@ class AutoCompleteProveedores extends React.Component {
                         this.handleSearchItems(event.target.value)
                     }}
                     style={styleText}
-                    label={this.state.textLabel.length > 0 ? this.state.textLabel : 'Seleccionar proveedor'}
+                    label={this.state.textLabel != null  ? this.state.textLabel : this.props.dataRefObject}
                     margin={margin ? 'dense' : 'normal'}
                     variant="outlined"
                     onFocus={(event) => this.setState({ anchorEl: event.currentTarget })}
                     error={this.props.error}
                     autoComplete='off'
+                    onBlur={() => {
+                        this.guardar()
+                    }}
                     InputProps={{
                         endAdornment: (
                             <InputAdornment variant="filled" position="end">
@@ -153,7 +179,7 @@ class AutoCompleteProveedores extends React.Component {
                                     <Tooltip title="Borrar busqueda" >
                                         <IconButton
                                             aria-label="Toggle clean text"
-                                            onClick={() => this.setState({ textoBuscado: '', listaProvedoresTemporal: [] })}
+                                            onClick={() => this.setState({ textoBuscado: '', dataAutoTemporal: [] })}
                                         >
                                             <CloseIcon />
                                         </IconButton>
@@ -173,59 +199,21 @@ class AutoCompleteProveedores extends React.Component {
                     />
                 </FullScreenDialog>
 
-                <Popper open={this.state.listaProvedoresTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, maxWidth: 800 }} >
+                <Popper open={this.state.dataAutoTemporal.length > 0} anchorEl={anchorEl} transition style={{ zIndex: 1300, maxWidth: 500 }} >
                     {({ TransitionProps }) => (
                         <Fade {...TransitionProps} timeout={350}>
                             <Paper elevation={15}>
-                                <div style={{
-                                    display: 'flex',
-                                    flexDirection: 'row',
-                                    paddingLeft: 24,
-                                    paddingRight: 24,
-                                    paddingTop: 16,
-                                    width: '100%'
-                                }}
-                                >
-                                    <div style={{ width: '40%', paddingRight: 32 }}>
-                                        <Typography variant="subheading" gutterBottom>
-                                            Nombre
-                                        </Typography>
-                                    </div>
-                                    <div style={{ width: '40%', paddingRight: 32 }}>
-                                        <Typography variant="subheading" gutterBottom>
-                                            Tipo Proveedor
-                                        </Typography>
-                                    </div>
-                                    <div style={{ width: '50%', paddingRight: 32, display: 'flex', flexDirection: 'row' }}>
-                                        <Typography variant="subheading" gutterBottom>
-                                            Email
-                                        </Typography>
-                                        <div style={{ flex: 1 }}></div>
-                                        <Tooltip title="Agregar" placement="top">
-                                            <Button variant="raised" size='small' color="secondary" onClick={() => {
-                                                this.setState({
-                                                    openModalFullScreen: true,
-                                                    estadoModal: 'nuevo'
-                                                })
-                                            }}>
-                                                Nuevo Proveedor
-                                            </Button >
-                                        </Tooltip>
-                                    </div>
-                                </div>
-                                <Divider />
                                 {
-                                    <List style={{ maxHeight: 200, overflow: 'auto' }}>
+                                    <List style={{ maxHeight: 100, overflow: 'auto' }}>
                                         {
-                                            this.state.listaProvedoresTemporal.map((item) => {
+                                            this.state.dataAutoTemporal.map((item) => {
                                                 return (
                                                     <ListItem key={item.id} button onClick={() =>
                                                         this.handleToggle(item)
                                                     }
                                                     >
-                                                        <ListItemText style={{ width: '25vw' }} primary={`${item.nombre}`} />
-                                                        <ListItemText style={{ width: '15vw' }} primary={`${item.tipo}`} />
-                                                        <ListItemText style={{ width: '40vw' }} primary={`${item.email}`} />
+                                                        <ListItemText style={{ width: '15vw' }} primary={`${item.nombre}`} />
+
                                                     </ListItem>
                                                 )
                                             }
@@ -243,4 +231,4 @@ class AutoCompleteProveedores extends React.Component {
     }
 }
 
-export default AutoCompleteProveedores
+export default AutoCompleteCategoriaMarcas

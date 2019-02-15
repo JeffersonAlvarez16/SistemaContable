@@ -197,6 +197,7 @@ class Ventas_01 extends Component {
                     </IconButton>
                 </Tooltip>
                 {
+                    
                     n.urlpdf != 'genererando' &&
                     <Tooltip title="Descargar pdf">
                         <IconButton onClick={() => {
@@ -533,11 +534,12 @@ class Ventas_01 extends Component {
                 var productosRef = db.ref('users/' + user.uid + '/facturas_ventas/' + codigo);
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
-                        this.postSet(user.uid, snapshot.val(), codigo)
+                        console.log(snapshot.val());
+                         this.postSet(user.uid, snapshot.val(), codigo)
                         var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
                         venteRef.update({
                             factura_emitida: 'pendiente'
-                        })
+                        }) 
                         //setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
                     }
                 })

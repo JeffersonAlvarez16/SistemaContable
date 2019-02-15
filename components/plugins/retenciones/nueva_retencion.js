@@ -50,6 +50,7 @@ class NuevaRetencion extends Component {
         estadoModalEmitirRetencion: false,
         //ambientes
         ambienteFacturacion: 0,
+        numero_retencion:''
     }
 
     componentDidMount() {
@@ -75,6 +76,53 @@ class NuevaRetencion extends Component {
             }
         })
 
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var empresaRef = db.ref('users/' + user.uid + "/configuracion")
+                empresaRef.on('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_retencion
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        const sumaFinal = `${cadenaFinal}${suma}`
+                        this.setState({
+                            numero_retencion: sumaFinal,
+                        })
+                    }
+                })
+            }
+        })
+
+    }
+
+    sumarNumeroFactura = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var numeroRetencion = db.ref('users/' + user.uid + "/configuracion")
+                numeroRetencion.once('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_retencion
+                        const suma = Number(numero_factura) + 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        numeroRetencion.update({
+                            numero_retencion: `${cadenaFinal}${suma}`
+                        })
+                    }
+                })
+            }
+        })
     }
 
     escFunction = (event) => {
@@ -109,6 +157,7 @@ class NuevaRetencion extends Component {
                 this.props.handleClose()
             }
         })
+        this.sumarNumeroFactura()
     }
 
     emitirRetencionRenta = () => {
@@ -124,6 +173,7 @@ class NuevaRetencion extends Component {
                 this.props.handleClose()
             }
         })
+        this.sumarNumeroFactura()
     }
 
     guardarRetencionBaseDatos = (retencion, codigo) => {
@@ -141,7 +191,8 @@ class NuevaRetencion extends Component {
                     estado: 'pendiente',
                     error_emision: '',
                     empleado: this.props.usuario.code,
-                    order: '' + date
+                    order: '' + date,
+                    urlpdf: 'genererando'
                 })
             }
         })
@@ -151,7 +202,7 @@ class NuevaRetencion extends Component {
     postSet = async (uidUser, jsonData, codigo) => {
         //const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
         // const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
-        const rawResponse = await fetch('http://192.168.1.97:5000/retensincontabilidad', {
+        const rawResponse = await fetch('https://stormy-bayou-19844.herokuapp.com/retensincontabilidad', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -233,6 +284,7 @@ class NuevaRetencion extends Component {
 
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
+            "secuencial":this.state.numero_retencion,
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
@@ -285,6 +337,7 @@ class NuevaRetencion extends Component {
 
         var retencionIvaRenta = {
             "ambiente": 1,
+            "secuencial":this.state.numero_retencion,
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
