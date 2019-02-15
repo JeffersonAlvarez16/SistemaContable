@@ -91,7 +91,7 @@ class AutoCompleteSelectedProducto extends React.Component {
         productosRef.once('value', snap => {
             if (snap.val()) {
                 this.setState({
-                    listaBuscada: funtions.snapshotToArray(snap),
+                    listaProductosTemporal: funtions.snapshotToArray(snap),
                     textoBuscadoLoading : false
                 })
             }
@@ -104,7 +104,7 @@ class AutoCompleteSelectedProducto extends React.Component {
         productosRef.once('value', snap => {
             if (snap.val()) {
                 this.setState({
-                    listaBuscada: funtions.snapshotToArray(snap),
+                    listaProductosTemporal: funtions.snapshotToArray(snap),
                     textoBuscadoLoading : false
                 })
             }
@@ -121,11 +121,8 @@ class AutoCompleteSelectedProducto extends React.Component {
                 if (listainterna.length > 0) {
                     this.props.onChangue(listainterna[0])
                     this.setState({
-                        listaProductosTemporal: [],
+                        listaProductosTemporal: funtions.snapshotToArray(snap),
                         textoBuscado: ''
-                    })
-                    this.setState({
-                        listaBuscada: funtions.snapshotToArray(snap)
                     })
                 }
             }
@@ -144,10 +141,7 @@ class AutoCompleteSelectedProducto extends React.Component {
             }
             if (this.state.filtroBusqueda === 'codigoReferencia') {
                 this.resivirListaCodigoReferencia(text)
-            }
-            this.setState({
-                listaProductosTemporal: this.state.listaBuscada
-            })
+            }          
 
         }
     }
@@ -179,6 +173,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                     variant="contained"
                     value={this.state.textoBuscado}
                     onChange={event => {
+                        console.log("ejecuntando metodo buscar +:" + event.target.value)
                         this.handleSearchItems(event.target.value)
                     }}
                     style={styleText}
@@ -196,6 +191,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                                     ''}
                     margin={margin ? 'dense' : 'normal'}
                     variant="outlined"
+
                     onFocus={(event) => this.setState({ anchorEl: event.currentTarget })}
 
                     autoComplete='off'

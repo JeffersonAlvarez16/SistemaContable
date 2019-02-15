@@ -464,9 +464,18 @@ class Ventas_01 extends Component {
                     {
                         n.factura_emitida === 'error' &&
                         <div style={{ display: 'flex', flexDirection: 'row' }}>
-                            <IconButton disabled>
-                                <CloseIcon style={{ color: 'red' }} fontSize="small" />
-                            </IconButton>
+                            <Tooltip title="Devolver Venta">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        estadoacciones: 'devolver_venta'
+                                    })
+                                    setTimeout(() => {
+                                        this.comprobarUsuario(n)
+                                    }, 100)
+                                }}>
+                                    <CloseIcon style={{ color: '#EF5350' }} fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
                             <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error de emisión</div>
                         </div>
                     }

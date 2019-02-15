@@ -15,9 +15,7 @@ import 'firebase/auth'
 
 import setSnackBars from './setSnackBars';
 import ModalContainerNormal from '../modals_container/ModalContainerNormal';
-import DeleteActivarDesactivar from './deleteActivarDesactivar';
 import AutoCompleteSelectedProducto from './AutoCompleteSelectedProducto';
-import ModalNewVentaJs from './ModalNewVentaJs';
 import { TextField, MenuItem, Typography, FormControlLabel, Switch, Button, Tooltip } from '@material-ui/core';
 import ContenedorProductoVista from './ventas/ContenedorProductoVista';
 import TablaNormal from '../components/tables/TableNormal';
@@ -30,8 +28,6 @@ import ModalFinalizaPago from '../modals_container/ventas/ModalFinalizaPago';
 import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
 import colors from '../../utils/colors';
 import ContenedorNumeroFactura from './ventas/ContenedorNumeroFactura';
-import { async } from '@firebase/util';
-import RenderPropsMenu from './MenuFilter';
 
 class ModalNewVenta extends Component {
 
