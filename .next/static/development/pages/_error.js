@@ -6142,7 +6142,7 @@ module.exports = (__webpack_require__(/*! dll-reference dll_e8427f5b250f425a56e7
 /***/ (function(module, exports, __webpack_require__) {
 
 __NEXT_REGISTER_PAGE('/_error', function() {
-module.exports = __webpack_require__(/*! D:\next\SistemaContable\node_modules\next\dist\pages\_error.js */"./node_modules/next/dist/pages/_error.js");
+module.exports = __webpack_require__(/*! J:\next\SistemaContable\node_modules\next\dist\pages\_error.js */"./node_modules/next/dist/pages/_error.js");
 
 return { page: module.exports.default }});
 
