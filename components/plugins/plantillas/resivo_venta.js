@@ -7,6 +7,8 @@ class ResivoVenta extends Component {
             item,
         } = this.props
 
+        console.log(item);
+
         if (item != null) {
 
 
@@ -17,7 +19,7 @@ class ResivoVenta extends Component {
                     </div>
                     {
                         item.tipo_venta === 'factura' ?
-                            <div style={{ fontFamily: "Lucida Sans Typewriter", fontSize: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center',marginRight:10 }}>Revisa tu factura <br />electrónica en tu correo</div>
+                            <div style={{ fontFamily: "Lucida Sans Typewriter", fontSize: 10, display: 'flex', justifyContent: 'center', alignItems: 'center', textAlign: 'center', marginRight: 10 }}>Revisa tu factura <br />electrónica en tu correo</div>
                             :
                             <div style={{ fontFamily: "Lucida Sans Typewriter", fontSize: 10, display: 'flex', justifyContent: 'center' }}>Consumidor final</div>
                     }
@@ -32,39 +34,45 @@ class ResivoVenta extends Component {
                             <div style={{ fontSize: 8, display: 'flex' }}>{`Numero de venta: ${item.numero_venta}`}</div>
                         </div>
                     }
-                    <div style={{ fontFamily: "Lucida Sans Typewriter", borderBottom: '1px solid', borderTop: '1px solid', padding: 15, marginTop: 10, display: 'flex', flexDirection: 'row', fontSize: 8 }}>
-                        <div style={{ flex: .8 }}>Cant.</div>
+                    <div style={{ fontFamily: "Lucida Sans Typewriter", borderBottom: '1px solid', borderTop: '1px solid', paddingLeft: 15, paddingTop: 3, paddingBottom: 3, marginTop: 7, display: 'flex', flexDirection: 'row', fontSize: 6 }}>
+                        <div style={{ flex: .8 }}>C.</div>
                         <div style={{ flex: 2.5 }}>Descripción</div>
-                        <div style={{ flex: 1.7 }}>V. Unt.</div>
-                        <div style={{ flex: 2.5 }}>V. Tot.</div>
+                        <div style={{ flex: 1.7 }}>P. Unt.</div>
+                        <div style={{ flex: 2.5 }}>Valor</div>
                     </div>
                     <div>
                         {
                             item.productos.map(item =>
-                                <div key={item.codigo} style={{ fontFamily: "Lucida Sans Typewriter", paddingLeft: 15, paddingRight: 5, display: 'flex', flexDirection: 'row', fontSize: 8 }}>
+
+                                <div key={item.codigo} style={{ fontFamily: "Lucida Sans Typewriter", paddingLeft: 15, paddingRight: 5, paddingTop: 5, display: 'flex', flexDirection: 'row', fontSize: 6 }}>
+                                    {
+                                        console.log(item)
+                                    }
                                     <div style={{ flex: .5 }}>{item.cantidad}</div>
-                                    <div style={{ flex: 2.5 }}>{item.descripcion_producto}</div>
+                                    <div style={{ flex: 2.5 }}>{item.tiene_iva ? "*" + item.descripcion_producto : item.descripcion_producto}</div>
                                     <div style={{ flex: .3 }}></div>
-                                    <div style={{ flex: 1.7 }}>{`$ ${Number(item.precio_venta).toFixed(2)}`}</div>
-                                    <div style={{ flex: 2.5 }}>{`$ ${(Number(item.precio_venta) * Number(item.cantidad)).toFixed(2)}`}</div>
+                                    <div style={{ flex: 1.7 }}>{`$ ${item.tiene_iva ? ((Number(item.precio_venta) / 1.12) * Number(item.cantidad)).toFixed(3) : (Number(item.precio_venta) * Number(item.cantidad)).toFixed(3)}`}</div>
+                                    <div style={{ flex: 2.5 }}>{`$ ${item.tiene_iva ? ((Number(item.precio_venta) / 1.12) * Number(item.cantidad)).toFixed(2) : (Number(item.precio_venta) * Number(item.cantidad)).toFixed(2)}`}</div>
                                 </div>
                             )
                         }
                     </div>
                     <div style={{ borderBottom: '1px solid', marginTop: 5, marginBottom: 5 }}></div>
                     <div>
-                        <div style={{ fontFamily: "Lucida Sans Typewriter", paddingLeft: 10, paddingRight: 8, display: 'flex', flexDirection: 'row', fontSize: 8 }}>
-                            <div style={{ flex: 2 }}></div>
-                            <div style={{ flex: 2 }}>
+                        <div style={{ fontFamily: "Lucida Sans Typewriter", paddingLeft: 10, paddingRight: 8, display: 'flex', flexDirection: 'row', fontSize: 6 }}>
+                            <div style={{ flex: 1 }}></div>
+                            <div style={{ flex: 3.2 }}>
+                                <div>Subtotal sin impuestos</div>
+                                <div>Subtotal iva 12%</div>
+                                <div>Valor Iva 12%:</div>
                                 <div>Descuento</div>
-                                <div>Subtotal</div>
-                                <div>Valor Iva:</div>
                                 <div>Valor Total:</div>
                             </div>
-                            <div style={{ flex: 2, fontFamily: "Lucida Sans Typewriter" }}>
-                                <div>{`$ ${Number(item.descuento).toFixed(2)}`}</div>
+                            <div style={{ flex: 2, fontFamily: "Lucida Sans Typewriter", fontSize: 7 }}>
+                                <div>{`$ ${Number(Number(item.total) - (Number(item.subtotal) + Number(item.iva))) + Number(item.subtotal)}`}</div>
                                 <div>{`$ ${item.subtotal}`}</div>
                                 <div>{`$ ${item.iva}`}</div>
+                                <div>{`$ ${Number(item.descuento).toFixed(2)}`}</div>
                                 <div>{`$ ${item.total}`}</div>
                             </div>
                         </div>

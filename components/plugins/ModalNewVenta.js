@@ -31,6 +31,7 @@ import ModalSettingsPrices from '../modals_container/ModalSettingsPrices';
 import colors from '../../utils/colors';
 import ContenedorNumeroFactura from './ventas/ContenedorNumeroFactura';
 import { async } from '@firebase/util';
+import RenderPropsMenu from './MenuFilter';
 
 class ModalNewVenta extends Component {
 
@@ -445,13 +446,13 @@ class ModalNewVenta extends Component {
             descuento: descuento
         })
         setTimeout(() => {
-            const { sumaSubTotal, sumaIva, dinero_resibido } = this.state
-            var sumaDescuento = ((Number(sumaSubTotal) + Number(sumaIva)) - Number(descuento)).toFixed(2)
+            const { sumaSubTotal, sumaIva, dinero_resibido, precioProductosSinIva } = this.state
+            var sumaDescuento = (Number(Number(sumaSubTotal) + Number(sumaIva) + Number(precioProductosSinIva) - Number(descuento)).toFixed(2))
+            console.log(sumaDescuento);
             this.setState({
                 sumaTotal: sumaDescuento
             })
-            this.handleDineroResibido(dinero_resibido)
-        }, 100)
+        }, 50);
     }
 
     handleDineroResibido = dinero_resibido => {
@@ -464,7 +465,7 @@ class ModalNewVenta extends Component {
             this.setState({
                 cambio: sumaCambio
             })
-        }, 100)
+        }, 10)
     }
 
     handleObservacion = observacion => {
@@ -865,9 +866,6 @@ class ModalNewVenta extends Component {
     }
     ////////////////////////
     setVentaCaja(itemVenta, tipo_pago, item) {
-        console.log(itemVenta)
-        console.log(tipo_pago)
-        console.log(item)
         var db = firebase.database();
         var codigoVentaCaja = funtions.guidGenerator()
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
@@ -963,7 +961,7 @@ class ModalNewVenta extends Component {
                                             usuario: this.props.usuario.code,
                                         })
 
-                                       
+
                                         var deudaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + this.state.clienteSeleccionado.codigo + '/lista_deudas/' + itemVenta.codigo)
                                         deudaRef.set({
                                             codigo: itemVenta.codigo,
@@ -1169,7 +1167,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(sumaSubTotal),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal) + Number(precioProductosSinIva)).toFixed(2)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1178,13 +1176,13 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(precioProductosConIva),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(sumaTotal),
+                "importe_total": Number(Number(sumaTotal).toFixed(2)),
                 "propina": 0.0,
                 "descuento": Number(Number(descuento).toFixed(2))
             },
@@ -1273,7 +1271,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(sumaSubTotal),
+                "total_sin_impuestos":Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1282,13 +1280,13 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(precioProductosConIva),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(sumaTotal),
+                "importe_total":Number(Number(sumaTotal).toFixed(2)),
                 "propina": 0.0,
                 "descuento": Number(Number(descuento).toFixed(2))
             },
@@ -1381,7 +1379,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(sumaSubTotal),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1390,13 +1388,13 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(precioProductosConIva),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(sumaTotal),
+                "importe_total": Number(Number(sumaTotal).toFixed(2)),
                 "propina": 0.0,
                 "descuento": Number(Number(descuento).toFixed(2))
             },
@@ -1490,7 +1488,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(sumaSubTotal),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1499,13 +1497,13 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(precioProductosConIva),
+                        "base_imponible":Number(Number(sumaSubTotal).toFixed(2)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(sumaTotal),
+                "importe_total": Number(Number(sumaTotal).toFixed(2)),
                 "propina": 0.0,
                 "descuento": Number(Number(descuento).toFixed(2))
             },
@@ -1582,7 +1580,7 @@ class ModalNewVenta extends Component {
                         }
                     }
 
-                    var precioP =0;
+                    var precioP = 0;
                     if (Boolean(item.tipo_precio_seleccionado)) {
                         precioP = await this.obtenerPreciosPersonalizados(item.codigo)
                     }
@@ -1699,6 +1697,7 @@ class ModalNewVenta extends Component {
         var sumatotal = 0
         var sumatotalProductosSinIva = 0
         var sumatotalProductosConIva = 0
+        var iva = 0
         this.state.listaProductosSeleccionadosEditados.forEach(item => {
             var stock = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].cantidad
             var precioCosto = this.state.listaProductosSeleccionadosEditados.filter(it => it.codigo === item.codigo)[0].precio_costo
@@ -1709,7 +1708,6 @@ class ModalNewVenta extends Component {
                 reultado = (precioCosto * Number(this.obtenerPorcentajePrecio(this.state.listaProductosSeleccionados.filter(it => it.codigo === item.codigo)[0].precio_por_defecto))) + Number(precioCosto)
             }
             var precio = reultado
-
             var precioIva = 0
             if (item.tiene_iva === true) {
                 precioIva = (precio * Number(item.porcentaje_iva)) / 100
@@ -1720,17 +1718,27 @@ class ModalNewVenta extends Component {
             }
 
             sumatotalConIVA = sumatotalConIVA + (Number(stock) * Number(precioIva))
-            sumatotal = sumatotal + (Number(stock) * Number(precio)-sumatotalConIVA)
+            iva = (Number(stock) * Number(precioIva))
+            var cantidad = (Number(stock) * Number(precio))
+            sumatotal = sumatotal + cantidad
         })
-        this.setState({ sumaTotal: (sumatotal + sumatotalConIVA).toFixed(2) })
-        this.setState({ sumaIva: sumatotalConIVA.toFixed(2) })
-        this.setState({ sumaSubTotal: sumatotal.toFixed(2) })
-        this.setState({ precioProductosSinIva: sumatotalProductosSinIva.toFixed(2) })
-        this.setState({ precioProductosConIva: sumatotalProductosConIva.toFixed(2) })
+        var subtotal = Number(Number(sumatotalProductosConIva.toFixed(2)) / 1.12).toFixed(2)
+        var iva = Number(subtotal * 0.12).toFixed(2)
+        setTimeout(() => {
+            console.log(this.state.sumaTotal);
+            this.setState({
+                sumaSubTotal: subtotal,
+                sumaIva: iva,
+                sumaTotal: Number(subtotal) + Number(iva) + Number(sumatotalProductosSinIva),
+                precioProductosSinIva: sumatotalProductosSinIva.toFixed(2),
+                precioProductosConIva: sumatotalProductosConIva.toFixed(2)
+            })
 
+        }, 10);
         // this.setState({ productosSeleccionados: this.state.listaProductosSeleccionadosEditados })
-        this.handleDineroResibido(this.state.dinero_resibido)
-        this.handleDescontar(this.state.descuento)
+
+
+
     }
 
 
@@ -1764,7 +1772,7 @@ class ModalNewVenta extends Component {
         }
     }
 
-    handleDescontar = descuento => {
+    /* handleDescontar = descuento => {
         this.setState({
             descuento: descuento
         })
@@ -1776,7 +1784,7 @@ class ModalNewVenta extends Component {
             })
             this.handleDineroResibido(dinero_resibido)
         }, 100)
-    }
+    } */
 
     handleDineroResibido = dinero_resibido => {
         this.setState({
@@ -1854,8 +1862,6 @@ class ModalNewVenta extends Component {
             }
         }
 
-        console.log(this.state.listaProductosSeleccionadosEditados);
-
         return <>
             <div style={{
                 zIndex: 30,
@@ -1928,7 +1934,7 @@ class ModalNewVenta extends Component {
                                     itemProductoCargado={this.state.itemProductoCargado}
                                     cargaAutomatica={this.state.cargaAutomatica}
                                     cargaAutomaticaCambiar={() => this.setState({ cargaAutomatica: !this.state.cargaAutomatica })}
-                                    agregarItemSeleccionadoVista={this.agregarItemSeleccionadoVista}
+                                    agregarItemSeleccionadoVista={(item) => this.agregarItemSeleccionadoVista(item)}
 
                                     precios={this.state.precios}
                                     preciosPerzonalizadosProducto={this.state.preciosPerzonalizadosProducto}
@@ -1939,7 +1945,6 @@ class ModalNewVenta extends Component {
                                             itemProductoCargado: producto
                                         })
                                     }}
-
                                     seleccionarProductoPordefecto={this.state.seleccionarProductoPordefecto}
                                     seleccionarProductoPordefectoCambiar={() => this.setState({ seleccionarProductoPordefecto: !this.state.seleccionarProductoPordefecto })}
 
@@ -1991,7 +1996,7 @@ class ModalNewVenta extends Component {
                             tipo_venta={this.state.tipo_venta}
                             facturaElectronica={this.state.facturaElectronica}
 
-                            handleDescontar={this.handleDescontar}
+                            handleDescontar={(descuento) => this.handleDescontar(descuento)}
                             handleDineroResibido={this.handleDineroResibido}
                             handleObservacion={this.handleObservacion}
                             handleFacturaElectronica={this.handleFacturaElectronica}

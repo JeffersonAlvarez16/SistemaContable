@@ -28,6 +28,8 @@ import AutoCompleteProveedores from '../plugins/AutoCompleteRetenciones';
 import ContainerSelectPrecios from '../plugins/ContainerSelectPrecios';
 import ContainerSelectPreciosPersonalizados from '../plugins/ContainerSelectPreciosPersonalizados';
 import ModalSettingsPricesPersonalizados from './ModalSettingsPricesPersonalizados';
+import AutoCompleteCategoriaMarcas from '../plugins/AutocompleteCategoriasMarcas';
+import AutoCompleteCategoria from '../plugins/AutocompleteCategoria';
 
 
 
@@ -39,9 +41,9 @@ class ModalNewProducto extends Component {
         codigo_referencia: '',
 
         descripcion_producto: '',
-        categoria_producto: 'null',
+        categoria_producto: '',
         proveedor: '',
-        marca_producto: 'null',
+        marca_producto: '',
         porcentaje_iva: '',
         localizacion_producto: '',
         numero_ventas: '',
@@ -77,10 +79,31 @@ class ModalNewProducto extends Component {
         //cantidad actual para actualizar
         cantidad_actual_temporal: '',
 
+        //repetido codigo de barras
+        errorCodigoBarrasRepetido: false,
+        errorCodigoBarrasRepetidoMensaje: '',
+        //repetido codigo de referencia        
+        errorCodigoReferenciaRepetido: false,
+        errorCodigoReferenciaRepetidoMensaje: '',
 
+        //categoria
+
+        categoria: '',
+        marca: ''
+    }
+
+    loadUserUID = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                this.setState({
+                    uidUser: user.uid
+                })
+            }
+        })
     }
 
     componentDidMount() {
+        this.loadUserUID()
         this.obtenerPrecios()
         this.obtenerPreciosPersonalizados()
         document.addEventListener("keydown", this.escFunction, false);
@@ -187,7 +210,7 @@ class ModalNewProducto extends Component {
                     }
                 })
                 productosRef.once('value', (snapshot) => {
-                    if (snapshot.val()) {                       
+                    if (snapshot.val()) {
                     } else {
                         var codigo1 = funtions.guidGenerator()
                         var precio1 = {
@@ -237,6 +260,7 @@ class ModalNewProducto extends Component {
                         ]
                         this.setState({
                             preciosPerzonalizados: lista,
+                            precio_por_defecto: lista[0].codigo
                         })
                     }
                 })
@@ -291,6 +315,48 @@ class ModalNewProducto extends Component {
             ...producto
         })
         this.guardarPreciosPersonalizados()
+        this.setOperacionStock()
+    }
+
+    
+    setOperacionStock = () => {
+        var codigoStock = funtions.guidGenerator()
+        var arrayProductos = []
+       
+            arrayProductos.push({
+                codigo: this.state.codigo,
+                cantidad: this.state.stock_actual,
+                precio_costo: this.state.precio_costo
+            })
+       
+        var order = new Date()
+        var db = firebase.database();
+        var operacionStockRef = db.ref('users/' + firebase.auth().currentUser.uid + '/operaciones_stock/' + codigoStock);
+
+        var itemOperacion = {
+            codigo: codigoStock,
+            tipo_operacion: 'ajuste_stock_entrada',
+            fecha: funtions.obtenerFechaActual(),
+            hora: `${new Date().getHours() + ":" + new Date().getMinutes() + ":" + new Date().getSeconds()}`,
+            cliente_proveedor: this.state.proveedor,
+            productos: arrayProductos,
+            total_final: `${(Number(this.state.precio_costo)*Number(this.state.stock_actual)).toFixed(2)}`,
+            empleado: this.props.usuario.code,
+            observacion: 'registro de productos',
+            subtotal: '0.00',
+            descuento: '0.00',
+            otros_gastos: '0.00',
+            flete: '0.00',
+            valor_pagado: '0.00',
+            medio_pago: '',
+            saldo_favor: '0.00',
+            en_deuda: '0.00',
+            vuelto: '0.00',
+            acreditado: '0.00',
+            order: order + ""
+        }
+        operacionStockRef.set(itemOperacion)
+
     }
 
 
@@ -306,7 +372,7 @@ class ModalNewProducto extends Component {
             this.state.unidad_medida.toString().length > 0 &&
             this.state.stock_actual.toString().length > 0 &&
             this.state.stock_minimo.toString().length > 0 &&
-            this.state.stock_maximo.toString().length > 0
+            this.state.stock_maximo.toString().length > 0          
         ) {
             var order = new Date()
             const item = {
@@ -369,6 +435,81 @@ class ModalNewProducto extends Component {
         })
     }
 
+
+
+    validar_codigo = (texto) => {
+        var regex = /^([a-zA-Z0-9])+$/;
+        return regex.test(texto) ? true : false;
+    }
+
+    onChangeCodigoBarras = (event) => {
+        if (this.validar_codigo(event.target.value)) {
+            this.setState({ codigo_barras: event.target.value })
+        }
+        this.resivirItemCodigoBarras(event.target.value)
+    }
+
+    resivirItemCodigoBarras = (texto) => {
+        var db = firebase.database()
+        var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('codigo_barras').equalTo(texto)
+        productosRef.once('value', snap => {
+            if (snap.val()) {
+                var listainterna = funtions.snapshotToArray(snap)
+                if (listainterna[0].codigo === this.state.codigo) {
+                    this.setState({
+                        errorCodigoBarrasRepetido: false,
+                        errorCodigoBarrasRepetidoMensaje: 'El codigo pertenece a este producto'
+                    })
+                } else {
+                    this.setState({
+                        errorCodigoBarrasRepetido: true,
+                        errorCodigoBarrasRepetidoMensaje: 'El codigo esta utilizado por otro producto'
+                    })
+                }
+            } else {
+                this.setState({
+                    errorCodigoBarrasRepetido: false,
+                    errorCodigoBarrasRepetidoMensaje: 'El codigo es único'
+                })
+            }
+        })
+    }
+
+    onChangeCodigoReferencia = (event) => {
+        if (this.validar_codigo(event.target.value)) {
+            this.setState({ codigo_referencia: event.target.value })
+        } else {
+            this.validar_codigo(event.target.value)
+        }
+        this.resivirItemCodigoReferencia(event.target.value)
+    }
+
+    resivirItemCodigoReferencia = (texto) => {
+        var db = firebase.database()
+        var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('codigo_referencia').equalTo(texto)
+        productosRef.once('value', snap => {
+            if (snap.val()) {
+                var listainterna = funtions.snapshotToArray(snap)
+                if (listainterna[0].codigo === this.state.codigo) {
+                    this.setState({
+                        errorCodigoReferenciaRepetido: false,
+                        errorCodigoReferenciaRepetidoMensaje: 'El codigo pertenece a este producto'
+                    })
+                } else {
+                    this.setState({
+                        errorCodigoReferenciaRepetido: true,
+                        errorCodigoReferenciaRepetidoMensaje: 'El codigo esta utilizado por otro producto'
+                    })
+                }
+            } else {
+                this.setState({
+                    errorCodigoReferenciaRepetido: false,
+                    errorCodigoReferenciaRepetidoMensaje: 'El codigo es único'
+                })
+            }
+        })
+    }
+
     render() {
 
         const styles = {
@@ -381,8 +522,6 @@ class ModalNewProducto extends Component {
                 width: '96%'
             }
         }
-
-        console.log(this.state.preciosPerzonalizados)
 
         return (
             <div>
@@ -425,10 +564,13 @@ class ModalNewProducto extends Component {
                                 <TextField
                                     style={styles.styleText}
                                     id="standard-codigo-barras"
+                                    autoComplete='off'
                                     label="Codigo de barras"
                                     autoFocus
+                                    error={this.state.errorCodigoBarrasRepetido}
+                                    helperText={this.state.errorCodigoBarrasRepetidoMensaje}
                                     required
-                                    onChange={(event) => this.setState({ codigo_barras: event.target.value })}
+                                    onChange={(event) => this.onChangeCodigoBarras(event)}
                                     value={this.state.codigo_barras}
                                     margin="normal"
                                     variant="filled"
@@ -438,8 +580,10 @@ class ModalNewProducto extends Component {
                                     style={styles.styleText}
                                     id="standard-codigo-referencia"
                                     label="Codigo de referencia"
+                                    error={this.state.errorCodigoReferenciaRepetido}
+                                    helperText={this.state.errorCodigoReferenciaRepetidoMensaje}
                                     required
-                                    onChange={(event) => this.setState({ codigo_referencia: event.target.value })}
+                                    onChange={(event) => this.onChangeCodigoReferencia(event)}
                                     value={this.state.codigo_referencia}
                                     margin="normal"
                                     variant="filled" />
@@ -503,6 +647,7 @@ class ModalNewProducto extends Component {
                                     codigoProveedor={this.state.proveedor}
                                 />
 
+
                                 <Grid container spacing={24}>
                                     <Grid item xs={12}>
                                         <TextField
@@ -535,9 +680,9 @@ class ModalNewProducto extends Component {
                                             >
                                                 {
                                                     this.state.preciosPerzonalizados != null &&
-                                                    this.state.preciosPerzonalizados.map((item,i) => {
+                                                    this.state.preciosPerzonalizados.map((item, i) => {
                                                         var itemR =
-                                                        itemR = <MenuItem selected key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
+                                                            itemR = <MenuItem selected key={item.codigo} value={item.codigo}>{`${item.nombre}`}</MenuItem>
                                                         return itemR
                                                     })
                                                 }
@@ -574,7 +719,25 @@ class ModalNewProducto extends Component {
                                             margin="normal"
                                             variant="filled"
                                         />
-                                        <AutoCompleteAdmin
+                                        <AutoCompleteCategoria
+                                            id="standard-categoria-productos1"
+                                            styleText={styles.styleText}
+                                            dataRef="categorias"
+                                            dataRefObject="categoria"
+                                            error={this.state.categoria_producto.length === 0}
+                                            onChangue={(item) => this.setState({ categoria_producto: item.id })}
+                                            codigocategoria={this.state.categoria_producto}
+                                        />
+                                        <AutoCompleteCategoriaMarcas
+                                            id="standard-categoria-productos1"
+                                            styleText={styles.styleText}
+                                            dataRef="marcas"
+                                            dataRefObject="marca"
+                                            error={this.state.marca_producto.length === 0}
+                                            onChangue={(item) => this.setState({ marca_producto: item.id })}
+                                            codigomarca={this.state.marca_producto}
+                                        />
+                                        {/* <AutoCompleteAdmin
                                             id="standard-categoria-productos"
                                             styleText={styles.styleText}
                                             nameTextFiel="Categoria"
@@ -583,9 +746,9 @@ class ModalNewProducto extends Component {
                                             itemCategoria={this.state.categoria_producto}
                                             changueText={itemCodigo => this.setState({ categoria_producto: itemCodigo })}
                                             textItemVacio='Categorias vacias'
-                                        />
+                                        /> */}
 
-                                        <AutoCompleteAdmin
+                                       {/*  <AutoCompleteAdmin
                                             id="standard-categoria-marcas"
                                             styleText={styles.styleText}
                                             nameTextFiel="Marca"
@@ -594,7 +757,7 @@ class ModalNewProducto extends Component {
                                             itemCategoria={this.state.marca_producto}
                                             changueText={itemCodigo => this.setState({ marca_producto: itemCodigo })}
                                             textItemVacio='Marcas vacias'
-                                        />
+                                        /> */}
                                     </Grid>
                                 </Grid>
                                 <Grid container spacing={24}>
@@ -616,15 +779,15 @@ class ModalNewProducto extends Component {
                                     label="Precios personalizados"
                                 />
                                 { */}
-                                    {/* Boolean(this.state.tipo_precio_seleccionado) === true && */}
-                                    <ModalSettingsPricesPersonalizados
-                                        codigoProducto={this.state.codigo}
-                                        precio_costo={this.state.precio_costo}
-                                        preciosPerzonalizados={this.state.preciosPerzonalizados}
-                                        setPreciosPerzonalizados={(preciosPerzonalizados)=>this.setState({preciosPerzonalizados})}
-                                    >
-                                    </ModalSettingsPricesPersonalizados>
-                               {/*  } 
+                                {/* Boolean(this.state.tipo_precio_seleccionado) === true && */}
+                                <ModalSettingsPricesPersonalizados
+                                    codigoProducto={this.state.codigo}
+                                    precio_costo={this.state.precio_costo}
+                                    preciosPerzonalizados={this.state.preciosPerzonalizados}
+                                    setPreciosPerzonalizados={(preciosPerzonalizados) => this.setState({ preciosPerzonalizados })}
+                                >
+                                </ModalSettingsPricesPersonalizados>
+                                {/*  } 
                                  {
                                     Boolean(this.state.tipo_precio_seleccionado) === false &&
                                     <ContainerSelectPrecios
@@ -633,7 +796,7 @@ class ModalNewProducto extends Component {
                                     />
                                 } */}
                             </Grid>
-                            <Grid item xs={6} style={{marginTop:25}}>
+                            <Grid item xs={6} style={{ marginTop: 25 }}>
                                 <TextField
                                     id="filled-unidad-medida"
                                     select
@@ -660,8 +823,7 @@ class ModalNewProducto extends Component {
                                             id="standard-stock-actual-item"
                                             label="Stock actual"
                                             error={this.state.stock_actual.length === 0}
-                                            required
-                                            disabled
+                                            required                                            
                                             onChange={(event) => this.setState({ stock_actual: event.target.value })}
                                             value={this.state.stock_actual}
                                             margin="normal"
@@ -724,22 +886,22 @@ class ModalNewProducto extends Component {
 
 function NumberFormatCustom(props) {
     const { inputRef, onChange, ...other } = props;
-  
+
     return (
-      <NumberFormat
-        {...other}
-        getInputRef={inputRef}
-        onValueChange={values => {
-          onChange({
-            target: {
-              value: values.value,
-            },
-          });
-        }}
-        thousandSeparator
-        prefix=""
-      />
+        <NumberFormat
+            {...other}
+            getInputRef={inputRef}
+            onValueChange={values => {
+                onChange({
+                    target: {
+                        value: values.value,
+                    },
+                });
+            }}
+            thousandSeparator
+            prefix=""
+        />
     );
-  }
+}
 
 export default ModalNewProducto;

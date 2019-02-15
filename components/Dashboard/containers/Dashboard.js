@@ -19,7 +19,7 @@ class Dashboard extends Component {
                   <Typography variant='title' style={{ paddingBottom: 5,paddingTop:15, fontFamily: 'Roboto', fontWeight: 100, fontSize: 16 }}>
                     Ventas diarias
                   </Typography>
-                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
+                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' ,marginLeft:-10}}>
                     $ {Number(this.props.ventaDiaria).toFixed(2)}
                   </Typography>
                 </CardContent>
@@ -37,7 +37,7 @@ class Dashboard extends Component {
                   <Typography variant='title' style={{ paddingBottom: 5,paddingTop:15, fontFamily: 'Roboto', fontWeight: 100, fontSize: 16 }}>
                     Gastos diarios
                   </Typography>
-                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
+                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' ,marginLeft:-10}}>
                     $ {Number(this.props.gostosDiarios).toFixed(2)}
                   </Typography>
                 </CardContent>
@@ -55,7 +55,7 @@ class Dashboard extends Component {
                   <Typography variant='title' style={{ paddingBottom: 5,paddingTop:15, fontFamily: 'Roboto', fontWeight: 100, fontSize: 14, }}>
                     Ventas Mensuales
                   </Typography>
-                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
+                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black',marginLeft:-10 }}>
                     $ {Number(this.props.total_ventas_mensuales).toFixed(2)}
                   </Typography>
                 </CardContent>
@@ -74,7 +74,7 @@ class Dashboard extends Component {
                   <Typography variant='title' style={{ paddingBottom: 5,paddingTop:15, fontFamily: 'Roboto', fontWeight: 100, fontSize: 14 }}>
                     Gastos Mensuales
                   </Typography>
-                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black' }}>
+                  <Typography variant='display1' style={{ fontFamily: 'Roboto', fontWeight: 200, color: 'black',marginLeft:-10 }}>
                     $ {Number(this.props.gastosMensuales).toFixed(2)}
                   </Typography>
                 </CardContent>

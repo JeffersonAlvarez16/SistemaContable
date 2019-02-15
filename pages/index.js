@@ -104,7 +104,6 @@ class Main extends Component {
                             var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
                             refVentasDiariasVa.once('value', snapshot => {
                                 if (snapshot.val()) {
-                                    console.log(this.state.idex_of)
                                     var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
                                     refVentasDiarias.update({
                                         valor: this.state.total_ventas_diarias
@@ -133,7 +132,6 @@ class Main extends Component {
                                     refVentasDiariasTotal.on('value', snapshot => {
                                         if (snapshot.val()) {
                                             var listaVentasPorDia = funtions.snapshotToArray(snapshot)
-                                            console.log(listaVentasPorDia)
                                             this.setState({
                                                 listaVentasPorDia: listaVentasPorDia
                                             })
@@ -281,7 +279,6 @@ class Main extends Component {
                             var refVentasDiariasVa = db.ref(`users/${user.uid}/ventas_diarias`)
                             refVentasDiariasVa.once('value', snapshot => {
                                 if (snapshot.val()) {
-                                    console.log(this.state.idex_of)
                                     var refVentasDiarias = db.ref(`users/${user.uid}/ventas_diarias/${this.state.idex_of}`)
                                     refVentasDiarias.update({
                                         valor: this.state.total_ventas_diarias
@@ -311,7 +308,6 @@ class Main extends Component {
                                     refVentasDiariasTotal.on('value', snapshot => {
                                         if (snapshot.val()) {
                                             var listaVentasPorDia = funtions.snapshotToArray(snapshot)
-                                            console.log(listaVentasPorDia)
                                             this.setState({
                                                 listaVentasPorDia: listaVentasPorDia
                                             })
@@ -422,7 +418,6 @@ class Main extends Component {
     }
 
     devolverDiaActual = (valor) => {
-        console.log(valor)
         switch (valor) {
             case 'Lunes':
                 this.setState({
@@ -465,7 +460,6 @@ class Main extends Component {
                 break;
         }
 
-        console.log(this.state.idex_of)
     }
     devolverMesActual = (valor) => {
         switch (valor) {
@@ -591,7 +585,6 @@ class Main extends Component {
                                                 {
 
                                                     this.state.listaVentasPorDia.map((items) => {
-                                                        console.log(items)
                                                         if (this.state.idex_of === Number(items.id)) {
                                                             return <Chip style={{ fontSize: 11, fontFamily: "cursive", backgroundColor: '#009688', color: 'white' }} label={'$ ' + Number(items.valor).toFixed(2)} />
                                                         } else {

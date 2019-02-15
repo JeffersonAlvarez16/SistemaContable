@@ -12,6 +12,7 @@ import CloseIcon from '@material-ui/icons/Close';
 import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
 import LoopIcon from '@material-ui/icons/Loop';
 import CircularProgress from '@material-ui/core/CircularProgress';
@@ -144,7 +145,7 @@ class Retencion extends Component {
             return n.codigo
         }
         if (item.id === 'accions') {
-            return <>
+            return <div style={{ display: 'flex', flexDirection: 'row' }}>
                 <ReactToPrint
                     ref={el => (this.refEventoImprimir = el)}
                     trigger={() => <></>}
@@ -156,7 +157,32 @@ class Retencion extends Component {
                 >
                     <LocalPrintshopIcon />
                 </IconButton>
-            </>
+
+                {
+                    
+                    n.urlpdf != 'genererando' &&
+                    <Tooltip title="Descargar pdf">
+                        <IconButton onClick={() => {
+                            window.open(
+                                n.urlpdf,
+                                '_blank'
+                            );
+                        }}
+                        >
+                            <PictureAsPdfIcon fontSize="small" />
+                        </IconButton>
+                    </Tooltip>
+                }
+                {
+                    n.urlpdf === 'genererando' &&
+                    <div style={{ display: 'flex', flexDirection: 'row' }}>
+                        <IconButton disabled>
+                            <CircularProgress size={20} thickness={5} style={{ color: colors.getColorPrymaryBlue300() }} />
+                        </IconButton>
+                        <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pdf...</div>
+                    </div>
+                }
+                </div>
         }
         if (item.id === 'estado') {
             return <div style={{ width: 'max-content' }}>

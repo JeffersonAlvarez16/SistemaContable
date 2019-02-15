@@ -12,6 +12,7 @@ const ContenedorPreciosTotalesVista = (props) => {
             width: '100%',
         }
     }
+    console.log(props);
     return (
         <div>
             <TextField
