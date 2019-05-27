@@ -27,7 +27,9 @@ import { withStyles } from '@material-ui/core/styles';
 
 // firebase
 import firebase from 'firebase/app'
+import 'firebase/firestore'
 import 'firebase/auth'
+import Contador from '../plugins/plugins/Contador';
 
 
 const drawerWidth = 260;
@@ -122,6 +124,27 @@ class ClippedDrawer extends React.Component {
     this.setState({ anchorEl: null });
   };
 
+  controlClick = (item) => {
+    event.preventDefault()
+    var db = firebase.database()
+    firebase.auth().onAuthStateChanged((user) => {
+      if (user) {
+        var ref = db.ref(`users/${user.uid}/control_interaccion/${item}`)
+        ref.once('value', snap => {
+          if (snap.val()) {
+            ref.update({
+              contador: snap.val().contador + 1
+            })
+          } else {
+            ref.update({
+              contador: 1
+            })
+          }
+        })
+      }
+    })
+  }
+
   render() {
     const { anchorEl } = this.state;
     const { classes, theme, user } = this.props;
@@ -144,8 +167,12 @@ class ClippedDrawer extends React.Component {
             <Typography variant="title" color="inherit" noWrap style={{ flex: 1 }}>
               {this.props.title}
             </Typography>
-
-
+            {
+              this.props.fecha != undefined ?
+                <Contador fecha={this.props.fecha} />
+                :
+                <></>
+            }
 
             <ButtonBase onClick={this.handleClick} style={{ marginRight: 20 }}>
               <Typography variant="subheading" color="inherit" noWrap style={{ marginRight: 10 }}>
@@ -174,7 +201,7 @@ class ClippedDrawer extends React.Component {
           classes={{
             paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
           }}
-          style={{backgroundColor:'#009688'}}
+          style={{ backgroundColor: '#009688' }}
           open={this.state.open}
         >
           <div className={classes.toolbar}>
@@ -187,9 +214,11 @@ class ClippedDrawer extends React.Component {
             marginTop: 64,
             width: drawerWidth
           }} /> */}
-     
-          <List style={{backgroundColor:'#009688',height:'100vh',opacity:'.9'}}><MailFolderListItems /></List>
-        
+
+          <List style={{ backgroundColor: '#009688', height: '100vh', opacity: '.9' }}><MailFolderListItems click={(item) => {
+            this.controlClick(item)
+          }} /></List>
+
         </Drawer>
 
         <main className={classes.content}>
@@ -198,14 +227,14 @@ class ClippedDrawer extends React.Component {
             display: 'flex',
             flexDirection: 'row'
           }}>
-            
+
             <div style={{
               display: 'flex',
               flexDirection: 'column',
               width: '95%',
-              height:'100%',
-              position:'fixed',
-              paddingLeft:'5%',
+              height: '100%',
+              position: 'fixed',
+              paddingLeft: '5%',
             }}>
               {this.props.children}
             </div>

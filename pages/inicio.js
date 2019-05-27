@@ -7,7 +7,7 @@ import 'firebase/database';
 import 'firebase/auth'
 import funtions from '../utils/funtions';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
-
+import ReactGA from 'react-ga';
 
 class Inicio extends Component {
 
@@ -28,6 +28,7 @@ class Inicio extends Component {
     }
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         this.cargarData()
     }
 

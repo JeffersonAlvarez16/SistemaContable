@@ -16,7 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import CloseIcon from '@material-ui/icons/Close';
 
 
-
+import ReactGA from 'react-ga';
 
 //firebase 
 import firebase from 'firebase/app';
@@ -50,7 +50,7 @@ class NuevaRetencion extends Component {
         estadoModalEmitirRetencion: false,
         //ambientes
         ambienteFacturacion: 0,
-        numero_retencion:''
+        numero_retencion: ''
     }
 
     componentDidMount() {
@@ -145,6 +145,10 @@ class NuevaRetencion extends Component {
     }
 
     emitirRetencionIvaRenta = () => {
+        ReactGA.event({
+            category: 'retencion',
+            action: 'nuevaRetencionGuardada'
+        })
         this.setState({ estadoModalEmitirRetencion: true })
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -161,6 +165,10 @@ class NuevaRetencion extends Component {
     }
 
     emitirRetencionRenta = () => {
+        ReactGA.event({
+            category: 'retencion',
+            action: 'nuevaRetencionGuardada'
+        })
         this.setState({ estadoModalEmitirRetencion: true })
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -247,7 +255,7 @@ class NuevaRetencion extends Component {
     getPorcentajeCodigoRenta = codigo => {
         var numero = 0
         switch (Number(codigo)) {
-            case 343: {
+            case 312: {
                 numero = 1
                 break
             }
@@ -284,7 +292,7 @@ class NuevaRetencion extends Component {
 
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
-            "secuencial":this.state.numero_retencion,
+            "secuencial": this.state.numero_retencion,
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
@@ -337,7 +345,7 @@ class NuevaRetencion extends Component {
 
         var retencionIvaRenta = {
             "ambiente": 1,
-            "secuencial":this.state.numero_retencion,
+            "secuencial": this.state.numero_retencion,
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
@@ -424,7 +432,7 @@ class NuevaRetencion extends Component {
     setValorRenta = () => {
         var multiplia = 0
         switch (Number(this.state.retencionRenta.tipo_porcentaje)) {
-            case 343: {
+            case 312: {
                 multiplia = Number(this.state.base_disponible) * 0.01
                 break
             }
@@ -736,6 +744,7 @@ class NuevaRetencion extends Component {
                             this.state.estado_contabilidad === false &&
                             <Grid item xs={12}>
                                 <div style={{ padding: 16 }}>
+                                
                                     <ImpuestoRetencion
                                         impuesto={1}
                                         changueData={data => {

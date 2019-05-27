@@ -2,7 +2,6 @@ import React, { Component } from 'react';
 import Layout from '../components/containers/Layout';
 import Search from '../components/components/Search';
 import SimpleTable from '../components/components/TableList';
-
 import AppBar from '@material-ui/core/AppBar';
 import Tabs from '@material-ui/core/Tabs';
 import Tab from '@material-ui/core/Tab';
@@ -26,6 +25,8 @@ import { CircularProgress } from '@material-ui/core';
 import Ventas_01 from '../components/components/ventas/Ventas_01'
 import VentasDevueltas_01 from '../components/components/ventas/VentasDevueltas_01'
 import HistorialVentas_01 from '../components/components/ventas/HistorialVentas_01'
+import ReactGA from 'react-ga';
+import PuntoVenta from '../components/components/ventas/PuntoVenta';
 
 class VentasFac extends Component {
 
@@ -37,7 +38,7 @@ class VentasFac extends Component {
         estadoPermisos: null
     }
     componentDidMount() {
-        
+        ReactGA.pageview(location.pathname)
     }
 
     obtenerDataBaseDatos = () => {
@@ -63,7 +64,71 @@ class VentasFac extends Component {
     }
 
     handleChangeTab = (event, valueTab) => {
+        var db = firebase.database()
+
+        if (valueTab === 0) {
+          
+
+            ReactGA.event({
+                category: 'ventas',
+                action: 'VentasDiarias'
+            })
+            var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/ventasDiarias`)
+            controlCaja.once('value', (snapshot) => {
+                if (snapshot.val()) {
+                    controlCaja.update({
+                        contador: snapshot.val().contador + 1,
+                    })
+
+                } else {
+                    controlCaja.update({
+                        contador: 1,
+                    })
+
+                }
+            });
+        } else if (valueTab === 1) {
+            ReactGA.event({
+                category: 'ventas',
+                action: 'VentasCanceladas'
+            })
+            var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/ventas-canceladas`)
+            controlCaja.once('value', (snapshot) => {
+                if (snapshot.val()) {
+                    controlCaja.update({
+                        contador: snapshot.val().contador + 1,
+                    })
+
+                } else {
+                    controlCaja.update({
+                        contador: 1,
+                    })
+
+                }
+            });
+        } else {
+            ReactGA.event({
+                category: 'ventas',
+                action: 'HistorialVentas'
+            })
+            var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/historial-ventas`)
+            controlCaja.once('value', (snapshot) => {
+                if (snapshot.val()) {
+                    controlCaja.update({
+                        contador: snapshot.val().contador + 1,
+                    })
+
+                } else {
+                    controlCaja.update({
+                        contador: 1,
+                    })
+
+                }
+            });
+        }
+
         this.setState({ valueTab });
+
     };
 
     render() {
@@ -84,12 +149,14 @@ class VentasFac extends Component {
                     <>
                         <AppBar position="static" color="inherit">
                             <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
-                                <Tab label="Ventas" />
+                              {/*   <Tab label="Punto de Venta" /> */}
+                                <Tab label="Facturar" />
                                 <Tab label="Ventas canceladas" />
                                 <Tab label="Historial de ventas" />
                             </Tabs>
                         </AppBar>
                         <div>
+                          {/*   {this.state.valueTab === 0 && <PuntoVenta usuario={this.state.usuario}></PuntoVenta>} */}
                             {this.state.valueTab === 0 && <Ventas_01 usuario={this.state.usuario} />}
                             {this.state.valueTab === 1 && <VentasDevueltas_01 usuario={this.state.usuario} />}
                             {this.state.valueTab === 2 && <HistorialVentas_01 usuario={this.state.usuario} />}

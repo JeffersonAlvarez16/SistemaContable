@@ -21,7 +21,7 @@ import ModalContainerNormal from "../../modals_container/ModalContainerNormal";
 import ModalEliminarUsuario from "../../modals_container/usuarios/ModalEliminarUsuario";
 import setSnackBars from "../setSnackBars";
 
-
+import ReactGA from 'react-ga';
 
 
 
@@ -34,10 +34,10 @@ class ModalUsuarios extends React.Component {
         password: '',
         clientes: false,
         productos: false,
-        devolucion_cliente:false,
-        devolucion_proveedor:false,
-        ajuste_stock:false,
-        compra_productos:false,       
+        devolucion_cliente: false,
+        devolucion_proveedor: false,
+        ajuste_stock: false,
+        compra_productos: false,
         proveedores: false,
         ventas: false,
         retenciones: false,
@@ -46,8 +46,8 @@ class ModalUsuarios extends React.Component {
         openTipo: null,
         anchorEl: null,
         title: '',
-        cuentas_cobrar:false,
-        caja:false
+        cuentas_cobrar: false,
+        caja: false
     };
 
     componentDidMount() {
@@ -62,16 +62,16 @@ class ModalUsuarios extends React.Component {
                 password: this.props.item.password,
                 tipo_usuario: this.props.item.tipo_usuario,
                 productos: this.props.item.privilegios.productos,
-                devolucion_cliente:this.props.item.privilegios.stock.devolucion_cliente,
-                devolucion_proveedor:this.props.item.privilegios.stock.devolucion_proveedor,
-                ajuste_stock:this.props.item.privilegios.stock.ajuste_stock,
-                compra_productos:this.props.item.privilegios.stock.compra_productos,                 
+                devolucion_cliente: this.props.item.privilegios.stock.devolucion_cliente,
+                devolucion_proveedor: this.props.item.privilegios.stock.devolucion_proveedor,
+                ajuste_stock: this.props.item.privilegios.stock.ajuste_stock,
+                compra_productos: this.props.item.privilegios.stock.compra_productos,
                 ventas: this.props.item.privilegios.ventas,
                 retenciones: this.props.item.privilegios.retenciones,
                 proveedores: this.props.item.privilegios.proveedores,
                 clientes: this.props.item.privilegios.clientes,
-                cuentas_cobrar:this.props.item.privilegios.cuentas_cobrar,
-                caja:this.props.item.privilegios.caja,
+                cuentas_cobrar: this.props.item.privilegios.cuentas_cobrar,
+                caja: this.props.item.privilegios.caja,
                 usuarios: this.props.item.privilegios.usuarios,
                 generales: this.props.item.privilegiosGenerales.generales,
 
@@ -96,6 +96,11 @@ class ModalUsuarios extends React.Component {
     }
 
     agregarNuevoUsuario = () => {
+
+        ReactGA.event({
+            category: 'usuarios',
+            action: 'nuevoUsuarioGuardado'
+        })
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
@@ -111,13 +116,13 @@ class ModalUsuarios extends React.Component {
                         privilegios: {
                             productos: this.state.productos,
                             stock: {
-                                devolucion_cliente:this.state.devolucion_cliente,
-                                devolucion_proveedor:this.state.devolucion_proveedor,
-                                compra_productos:this.state.compra_productos,
-                                ajuste_stock:this.state.ajuste_stock
+                                devolucion_cliente: this.state.devolucion_cliente,
+                                devolucion_proveedor: this.state.devolucion_proveedor,
+                                compra_productos: this.state.compra_productos,
+                                ajuste_stock: this.state.ajuste_stock
                             },
-                            cuentas_cobrar:this.state.cuentas_cobrar,
-                            caja:this.state.caja,
+                            cuentas_cobrar: this.state.cuentas_cobrar,
+                            caja: this.state.caja,
                             proveedores: this.state.proveedores,
                             clientes: this.state.clientes,
                             ventas: this.state.ventas,
@@ -143,13 +148,13 @@ class ModalUsuarios extends React.Component {
                         privilegios: {
                             productos: this.state.productos,
                             stock: {
-                                devolucion_cliente:this.state.devolucion_cliente,
-                                devolucion_proveedor:this.state.devolucion_proveedor,
-                                compra_productos:this.state.compra_productos,
-                                ajuste_stock:this.state.ajuste_stock
+                                devolucion_cliente: this.state.devolucion_cliente,
+                                devolucion_proveedor: this.state.devolucion_proveedor,
+                                compra_productos: this.state.compra_productos,
+                                ajuste_stock: this.state.ajuste_stock
                             },
-                            cuentas_cobrar:this.state.cuentas_cobrar,
-                            caja:this.state.caja,
+                            cuentas_cobrar: this.state.cuentas_cobrar,
+                            caja: this.state.caja,
                             proveedores: this.state.proveedores,
                             clientes: this.state.clientes,
                             ventas: this.state.ventas,
@@ -175,7 +180,7 @@ class ModalUsuarios extends React.Component {
     render() {
 
         const { classes } = this.props;
-        const { cuentas_cobrar,caja,compra_productos,devolucion_cliente,devolucion_proveedor,ajuste_stock, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
+        const { cuentas_cobrar, caja, compra_productos, devolucion_cliente, devolucion_proveedor, ajuste_stock, nombre, tipo_usuario, password, generales, ventas, productos, stock, proveedores, clientes, retenciones, usuarios } = this.state
 
         return (
             <div style={{ width: 600, maxHeight: 650 }}>
@@ -354,7 +359,7 @@ class ModalUsuarios extends React.Component {
                                         }
                                         label="Usuarios"
                                     />
-                                     <FormControlLabel
+                                    <FormControlLabel
                                         control={
                                             <Checkbox
                                                 icon={<CheckBoxOutlineBlankIcon fontSize="small" />}
@@ -412,7 +417,7 @@ class ModalUsuarios extends React.Component {
                                             />
                                         }
                                         label="Compra Productos"
-                                    />                                    
+                                    />
                                 </Grid>
                                 <Grid item xs={6}>
 

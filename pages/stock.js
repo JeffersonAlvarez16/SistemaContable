@@ -32,6 +32,7 @@ import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '
 import setSnackBars from '../components/plugins/setSnackBars';
 import colors from '../utils/colors';
 import Dolar from '../components/plugins/plugins/Dolar'
+import ReactGA from 'react-ga';
 
 class Stock extends Component {
 
@@ -87,6 +88,7 @@ class Stock extends Component {
 
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })

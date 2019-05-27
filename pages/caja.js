@@ -33,6 +33,7 @@ import ChipTabla from '../components/modals_container/caja/ChipTabla';
 import VerTotales from '../components/modals_container/caja/VerTotales';
 import Dolar from '../components/plugins/plugins/Dolar';
 
+import ReactGA from 'react-ga';
 class Caja extends Component {
 
     state = {
@@ -82,7 +83,11 @@ class Caja extends Component {
     }
 
     componentDidMount() {
-
+        ReactGA.pageview(location.pathname)
+        ReactGA.event({
+            category: 'caja',
+            action: 'ventana-caja'
+        })
     }
 
     getCajasBaseDeDatos = () => {

@@ -20,7 +20,7 @@ class LoginContenedor extends Component {
         this.setState({
             stateUsers: 'cargando',
         })
-
+        this.traerfecha()
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
@@ -45,6 +45,35 @@ class LoginContenedor extends Component {
                 })
             }
         })
+    }
+
+    traerfecha = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database()
+                var ref = db.ref(`users/${user.uid}/estado_usuario`)
+                ref.on('value', snapshot => {
+                    if (snapshot.val()) {
+                        var fecha=snapshot.val().fecha
+                        var separador =':'
+                        var arreglo =[]
+                        arreglo.push(fecha.split(separador))
+                        var date=new Date(`${arreglo[0][0]}`,`${arreglo[0][1]}`,`${arreglo[0][2]}`,`${arreglo[0][3]}`,`${arreglo[0][4]}`,`${arreglo[0][5]}`)
+                        this.setState({
+                            fecha:date
+                        })
+                    } 
+                    setTimeout(() => {
+                    console.log(this.state.fecha);
+                    }, 100);                  
+                })
+              
+
+            } else {
+                this.setState({ sesionState: 'cerrada' })
+            }
+        })
+
     }
 
     checkStatusSession = (array) => {
@@ -101,6 +130,7 @@ class LoginContenedor extends Component {
                     idUser ?
                         <ClippedDrawer
                             title={title}
+                            fecha={this.state.fecha}
                             user={this.state.userSelected}
                             closeSesion={this.closeStatusSesionUser}
                         >
@@ -111,6 +141,7 @@ class LoginContenedor extends Component {
                         :
                         <LoginUsuarios
                             stateUsers={stateUsers}
+                            fecha={this.state.fecha}
                             users={users}
                             onChangueStatusSession={this.changueStatusSesionUser}
                         />

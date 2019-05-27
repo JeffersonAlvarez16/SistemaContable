@@ -9,6 +9,7 @@ import funtions from '../../../utils/funtions';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
+import ReactGA from 'react-ga';
 
 class AbrirCaja extends Component {
 
@@ -36,6 +37,10 @@ class AbrirCaja extends Component {
     }
 
     abrirCaja = () => {
+        ReactGA.event({
+            category: 'caja',
+            action: 'Abrir caja'
+        })
         const { usuario } = this.props
         const { saldo_inicial } = this.state
         const codigo = funtions.guidGenerator()
@@ -61,8 +66,34 @@ class AbrirCaja extends Component {
                     order: '' + order,
                     valor_caja: saldo_inicial,
                 }
+                var cajaFechas = db.ref(`users/${user.uid}/control_interaccion/caja/abrir_caja/${funtions.guidGenerator()}`)
+                var controlCaja = db.ref(`users/${user.uid}/control_interaccion/caja/abrir_caja`)
+                controlCaja.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        controlCaja.update({
+                            contador: snapshot.val().contador + 1,
+                        })
+
+                    } else {
+                        controlCaja.update({
+                            contador: 1,
+                        })
+                    }
+                });
+                cajaFechas.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        cajaFechas.update({
+                            order: order + ""
+                        })
+
+                    } else {
+                        cajaFechas.update({
+                            order: order + ""
+                        })
+                    }
+                });
                 cajaUsuarioRef.set(item)
-                cajaUsuarioAbiertaRef.set(item)                
+                cajaUsuarioAbiertaRef.set(item)
             }
         })
     }

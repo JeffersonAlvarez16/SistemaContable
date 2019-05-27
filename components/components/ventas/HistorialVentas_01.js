@@ -180,8 +180,21 @@ class HistorialVentas_01 extends Component {
 
         if (item.id === 'accions') {
             return <div style={{ display: 'flex', flexDirection: 'row' }}>
+                <ReactToPrint
+                    ref={el => (this.refEventoImprimir = el)}
+                    trigger={() => <></>}
+                    content={() => this.refImprimirResivo}
+                />
+                <Tooltip title="Imprimir resivo">
+                    <IconButton onClick={() => {
+                        this.enviarToPlantillaData(n)
+                    }}
+                    >
+                        <LocalPrintshopIcon fontSize="small" />
+                    </IconButton>
+                </Tooltip>
                 {
-                    n.urlpdf != 'genererando' &&
+                    n.urlpdf != 'genererando' && n.urlpdf != '' &&
                     <Tooltip title="Descargar pdf">
                         <IconButton onClick={() => {
                             window.open(
@@ -195,7 +208,11 @@ class HistorialVentas_01 extends Component {
                     </Tooltip>
                 }
                 {
-                    n.urlpdf === 'genererando' &&
+                    n.urlpdf === '' &&
+                    <></>
+                }
+                {
+                    n.urlpdf === 'genererando' && n.cliente != 'Consumidor Final' &&
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pdf</div>
                     </div>
@@ -393,7 +410,21 @@ class HistorialVentas_01 extends Component {
                     }
                     {
                         n.factura_emitida === 'reenviar' &&
-                        <div style={{ display: 'flex', alignItems: 'center' }}>Reenviar</div>
+                        <>
+                            <Tooltip title="Emitir Factura">
+                                <IconButton onClick={() => {
+                                    this.setState({
+                                        estadoacciones: 'emitir_factura'
+                                    })
+                                    setTimeout(() => {
+                                        this.comprobarUsuario(n)
+                                    }, 100)
+                                }}>
+                                    <InputIcon color='primary' fontSize="small" />
+                                </IconButton>
+                            </Tooltip>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>Pendiente</div>
+                        </>
                     }
                     {
                         n.factura_emitida === 'pendiente' &&
@@ -401,9 +432,12 @@ class HistorialVentas_01 extends Component {
                     }
                     {
                         n.factura_emitida === 'error' &&
-                        <div style={{ display: 'flex', alignItems: 'center' }}>Error al emitir</div>
+                        <>
+                            <div style={{ display: 'flex', alignItems: 'center' }}>Comunicarse con el Administrador</div>
+
+                        </>
                     }
-                </div >
+                </div>
         }
 
         if (item.id === 'total') {

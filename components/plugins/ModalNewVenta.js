@@ -546,6 +546,7 @@ class ModalNewVenta extends Component {
             }
         })
     }
+    
 
     enviarFacturaElectronica = (codigoRegistroVenta, uidUser, tipo_venta, facturaElectronica, item) => {
         if (tipo_venta === 'factura') {
@@ -1163,7 +1164,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(Number(Number(sumaSubTotal) + Number(precioProductosSinIva)).toFixed(2)),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal) + Number(precioProductosSinIva)).toFixed(3)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1172,15 +1173,15 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(3)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(Number(sumaTotal).toFixed(2)),
+                "importe_total": Number(Number(sumaTotal).toFixed(3)),
                 "propina": 0.0,
-                "descuento": Number(Number(descuento).toFixed(2))
+                "descuento": Number(Number(descuento).toFixed(3))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1201,13 +1202,13 @@ class ModalNewVenta extends Component {
                     cantidad: Number(item.cantidad),
                     codigo_principal: item.codigo_barras.length > 0 ? item.codigo_barras : '0',
                     codigo_auxiliar: item.codigo,
-                    precio_unitario: Number(((Number(item.precio_costo) * Number(porcentaje)) + Number(item.precio_costo)).toFixed(2)),
+                    precio_unitario: Number(Number(((Number(item.precio_costo) * Number(porcentaje)) + Number(item.precio_costo)).toFixed(3)/1.12).toFixed(3)),
                     descripcion: Boolean(item.tiene_iva) ? '* ' + item.descripcion_producto : item.descripcion_producto,
-                    precio_total_sin_impuestos: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
+                    precio_total_sin_impuestos: Number(Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(3)/1.12).toFixed(3)),
                     impuestos: [
                         {
-                            base_imponible: Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(2)),
-                            valor: Boolean(item.tiene_iva) ? Number(((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.porcentaje_iva)) / 100).toFixed(2)) : 0,
+                            base_imponible: Number(Number((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo)) * Number(item.cantidad)).toFixed(3)/1.12).toFixed(3)),
+                            valor: Boolean(item.tiene_iva) ? Number((((((Number(item.precio_costo) * Number(Number(porcentaje))) + Number(item.precio_costo))/1.12) * Number(item.porcentaje_iva)) / 100).toFixed(3)) : 0,
                             tarifa: Boolean(item.tiene_iva) ? Number(item.porcentaje_iva) : 0,
                             codigo: '2',
                             codigo_porcentaje: Boolean(item.tiene_iva) ? '2' : '0'
@@ -1267,7 +1268,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos":Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
+                "total_sin_impuestos":Number(Number(Number(sumaSubTotal) + Number(precioProductosSinIva)).toFixed(3)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1276,15 +1277,15 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(3)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total":Number(Number(sumaTotal).toFixed(2)),
+                "importe_total":Number(Number(sumaTotal).toFixed(3)),
                 "propina": 0.0,
-                "descuento": Number(Number(descuento).toFixed(2))
+                "descuento": Number(Number(descuento).toFixed(3))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1375,7 +1376,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(3) + Number(precioProductosSinIva).toFixed(3)).toFixed(3)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1384,15 +1385,15 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible": Number(Number(sumaSubTotal).toFixed(2)),
+                        "base_imponible": Number(Number(sumaSubTotal).toFixed(3)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(Number(sumaTotal).toFixed(2)),
+                "importe_total": Number(Number(sumaTotal).toFixed(3)),
                 "propina": 0.0,
-                "descuento": Number(Number(descuento).toFixed(2))
+                "descuento": Number(Number(descuento).toFixed(3))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1484,7 +1485,7 @@ class ModalNewVenta extends Component {
             },
             "moneda": "USD",
             "totales": {
-                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(2) + Number(precioProductosSinIva).toFixed(2)).toFixed(2)),
+                "total_sin_impuestos": Number(Number(Number(sumaSubTotal).toFixed(3) + Number(precioProductosSinIva).toFixed(3)).toFixed(3)),
                 "impuestos": [
                     {
                         "base_imponible": Number(precioProductosSinIva),
@@ -1493,15 +1494,15 @@ class ModalNewVenta extends Component {
                         "codigo_porcentaje": "0"
                     },
                     {
-                        "base_imponible":Number(Number(sumaSubTotal).toFixed(2)),
+                        "base_imponible":Number(Number(sumaSubTotal).toFixed(3)),
                         "valor": Number(sumaIva),
                         "codigo": "2",
                         "codigo_porcentaje": "2"
                     }
                 ],
-                "importe_total": Number(Number(sumaTotal).toFixed(2)),
+                "importe_total": Number(Number(sumaTotal).toFixed(3)),
                 "propina": 0.0,
-                "descuento": Number(Number(descuento).toFixed(2))
+                "descuento": Number(Number(descuento).toFixed(3))
             },
             "comprador": {
                 "email": clienteSeleccionado.email,
@@ -1543,7 +1544,7 @@ class ModalNewVenta extends Component {
             "pagos": [
                 {
                     "medio": "transferencia",
-                    "total": Number(sumaTotal)
+                    "total": Number(Number(sumaTotal).toFixed(2))
                 }
             ]
         }
@@ -1552,6 +1553,7 @@ class ModalNewVenta extends Component {
     }
     ///////////////////////////
     onChangueSelecteccionarProducto = async item => {
+        
         var array = this.state.listaProductosSeleccionados
         var arrayValoresSelecionados = this.state.listaProductosSeleccionadosEditados
         var array2 = array.filter(item2 => item2.codigo === item.codigo)
@@ -1718,18 +1720,16 @@ class ModalNewVenta extends Component {
             var cantidad = (Number(stock) * Number(precio))
             sumatotal = sumatotal + cantidad
         })
-        var subtotal = Number(Number(sumatotalProductosConIva.toFixed(2)) / 1.12).toFixed(2)
-        var iva = Number(subtotal * 0.12).toFixed(2)
+        var subtotal = Number(Number(sumatotalProductosConIva.toFixed(3)) / 1.12).toFixed(3)
+        var iva = Number(subtotal * 0.12).toFixed(3)
         setTimeout(() => {
-            console.log(this.state.sumaTotal);
             this.setState({
                 sumaSubTotal: subtotal,
                 sumaIva: iva,
-                sumaTotal: Number(subtotal) + Number(iva) + Number(sumatotalProductosSinIva),
-                precioProductosSinIva: sumatotalProductosSinIva.toFixed(2),
-                precioProductosConIva: sumatotalProductosConIva.toFixed(2)
+                sumaTotal: Number((Number(subtotal) + Number(iva) + Number(sumatotalProductosSinIva)).toFixed(2)),
+                precioProductosSinIva: sumatotalProductosSinIva.toFixed(3),
+                precioProductosConIva: sumatotalProductosConIva.toFixed(3)
             })
-
         }, 10);
         // this.setState({ productosSeleccionados: this.state.listaProductosSeleccionadosEditados })
 
@@ -1788,7 +1788,7 @@ class ModalNewVenta extends Component {
         })
         setTimeout(() => {
             const { sumaTotal } = this.state
-            var sumaCambio = Number(dinero_resibido) > 0 ? (Number(dinero_resibido) - Number(sumaTotal)).toFixed(2) : 0
+            var sumaCambio = Number(dinero_resibido) > 0 ? Number((Number(dinero_resibido) - Number(sumaTotal)).toFixed(2)) : 0
             this.setState({
                 cambio: sumaCambio
             })
@@ -1906,6 +1906,7 @@ class ModalNewVenta extends Component {
                                         styleText={styles.styleText}
                                         onChangue={this.onChangueSelecteccionarProducto}
                                     >
+
                                     </AutoCompleteSelectedProducto>
                                 </div>
 

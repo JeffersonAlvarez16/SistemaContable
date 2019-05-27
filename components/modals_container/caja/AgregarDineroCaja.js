@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import funtions from '../../../utils/funtions';
 import { Divider } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 class AgregarDineroCaja extends Component {
 
@@ -20,6 +21,11 @@ class AgregarDineroCaja extends Component {
 
 
     agregarDinero = () => {
+
+        ReactGA.event({
+            category: 'caja',
+            action: 'Agregar-dinero'
+        })
         const { usuario, handleClose, caja } = this.props
         const { saldoAgregado, observacion } = this.state
         const codigo = funtions.guidGenerator()
@@ -43,7 +49,33 @@ class AgregarDineroCaja extends Component {
                         })
 
                     }
-                })                
+                })
+                var cajaFechas = db.ref(`users/${user.uid}/control_interaccion/caja/agregar_dinero/${funtions.guidGenerator()}`)
+                var controlCaja = db.ref(`users/${user.uid}/control_interaccion/caja/agregar_dinero`)
+                controlCaja.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        controlCaja.update({
+                            contador: snapshot.val().contador + 1,
+                        })
+
+                    } else {
+                        controlCaja.update({
+                            contador: 1,
+                        })
+                    }
+                });
+                cajaFechas.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        cajaFechas.update({
+                            order: new Date() + ""
+                        })
+
+                    } else {
+                        cajaFechas.update({
+                            order: new Date() + ""
+                        })
+                    }
+                });
             }
         })
     }
@@ -97,7 +129,7 @@ class AgregarDineroCaja extends Component {
                     marginBottom: 16,
                     marginTop: 16,
                 }}>
-                    <Button color="primary" variant="contained" onClick={() =>{
+                    <Button color="primary" variant="contained" onClick={() => {
                         this.agregarDinero()
                         this.props.handleClose()
                     }}>

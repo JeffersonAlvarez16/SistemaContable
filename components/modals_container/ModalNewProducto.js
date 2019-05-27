@@ -30,6 +30,8 @@ import ContainerSelectPreciosPersonalizados from '../plugins/ContainerSelectPrec
 import ModalSettingsPricesPersonalizados from './ModalSettingsPricesPersonalizados';
 import AutoCompleteCategoriaMarcas from '../plugins/AutocompleteCategoriasMarcas';
 import AutoCompleteCategoria from '../plugins/AutocompleteCategoria';
+import ReactGA from 'react-ga';
+
 
 
 
@@ -308,7 +310,39 @@ class ModalNewProducto extends Component {
         this.guardarPreciosPersonalizados()
     }
 
-    setNewProducto = (producto) => {
+    setNewProducto = (producto) => {    
+        ReactGA.event({
+            category: 'productos',
+            action: 'nuevoProductoGuardado'
+        })
+        var db=firebase.database()    
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/guardados`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/cancelados`)
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto`)
+        controlProductosGuardados.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlProductosGuardados.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosCancelados.once('value', (snap) => {
+                    if (snap.val()) {
+                        controlProductosCancelados.update({
+                            contador: snap.val().contador-1 ,
+                        })
+                    } else {
+                       
+                    }
+                });
+              
+            } else {
+                controlProductosGuardados.update({
+                    contador: 1,
+                })
+            }
+        });
+       
+        
+        
         var db = firebase.database();
         var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + producto.codigo);
         productosRef.set({

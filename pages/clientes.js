@@ -20,13 +20,14 @@ import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
 import TablaNormal from '../components/components/tables/TableNormal';
 
+
 import Divider from '@material-ui/core/Divider';
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactivar';
 import ReturnTextTable from '../components/components/tables/ReturnTextTable';
 import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
 import colors from '../utils/colors';
-
+import ReactGA from 'react-ga';
 
 class Clientes extends Component {
 
@@ -65,6 +66,7 @@ class Clientes extends Component {
     }
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 var db = firebase.database();
@@ -409,6 +411,43 @@ class Clientes extends Component {
         }
     }
 
+    nuevoCliente=()=>{  
+        ReactGA.event({
+            category: 'clientes',
+            action: 'nuevoCliente'
+        })
+        var db=firebase.database()        
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/clientes/nuevoclientes`)
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/clientes/nuevoclientes/guardados`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/clientes/nuevoclientes/cancelados`)
+        controlCaja.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlCaja.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosGuardados.once('value',snap=>{
+                    if(snap.val()){
+                        controlProductosCancelados.update({
+                            contador:(snapshot.val().contador+1)-snap.val().contador
+                        })
+                    }
+                })
+              
+            } else {
+                controlCaja.update({
+                    contador: 1,
+                })
+                controlProductosCancelados.update({
+                    contador: 1
+                })
+                controlProductosGuardados.update({
+                    contador: 0
+                })
+            }
+        });
+        this.setState({ itemSeleccionado: null, openModalNewCliente: true })
+    }
+
     render() {
         return (
             <Layout title="Clientes" onChangueUserState={usuario => {
@@ -426,7 +465,9 @@ class Clientes extends Component {
                                 titleButton="Nuevo Cliente"
                                 color="primary"
                                 visible={true}
-                                onClick={() => this.setState({ itemSeleccionado: null, openModalNewCliente: true })}
+                                onClick={() => 
+                                this.nuevoCliente()
+                              }
                             >
                                 <AddIcon />
                             </ItemMenuHerramienta>

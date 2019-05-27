@@ -14,7 +14,7 @@ import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AddIcon from '@material-ui/icons/Add';
 import { TextField, Button, Chip } from '@material-ui/core';
-
+import ReactGA from 'react-ga';
 
 
 //firebase 
@@ -55,6 +55,8 @@ class Usuarios extends Component {
     }
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
+
         this.obtenerDataBaseDatos()
     }
 
@@ -183,7 +185,7 @@ class Usuarios extends Component {
                 {
                     n.tipo_usuario === 'administrador' &&
                     <Chip
-                        label={<div style={{color:colors.getColorWhite()}}>{this.MaysPrimera(n.tipo_usuario)}</div>}
+                        label={<div style={{ color: colors.getColorWhite() }}>{this.MaysPrimera(n.tipo_usuario)}</div>}
                         clickable
                         style={{ background: colors.getColorPrymary(), marginRight: 8 }}
                     />
@@ -191,7 +193,7 @@ class Usuarios extends Component {
                 {
                     n.tipo_usuario === 'vendedor' &&
                     <Chip
-                        label={<div style={{color:colors.getColorWhite()}}>{this.MaysPrimera(n.tipo_usuario)}</div>}
+                        label={<div style={{ color: colors.getColorWhite() }}>{this.MaysPrimera(n.tipo_usuario)}</div>}
                         clickable
                         style={{ background: colors.getColorPrymaryLight(), marginRight: 8 }}
                     />
@@ -527,6 +529,11 @@ class Usuarios extends Component {
                                 color="primary"
                                 visible={true}
                                 onClick={() => {
+
+                                    ReactGA.event({
+                                        category: 'usuarios',
+                                        action: 'nuevoUsuario'
+                                    })
                                     this.setState({ itemEditar: null })
                                     this.setState({ openModalNewUsuario: true })
                                 }}

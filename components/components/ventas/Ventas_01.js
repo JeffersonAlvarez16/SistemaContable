@@ -44,6 +44,7 @@ import ContainerPlantillas from '../../plugins/plantillas/container_plantillas';
 import ModalNewVenta from '../../plugins/ModalNewVenta';
 import colors from '../../../utils/colors';
 import ErrorEstado from '../../plugins/plugins/ErrorEstado';
+import ReactGA from 'react-ga';
 
 class Ventas_01 extends Component {
     state = {
@@ -100,11 +101,33 @@ class Ventas_01 extends Component {
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
-        //setTimeout(() => { this.obtenerDataBaseDatos() }, 100)
         this.obteberCajaSeleccionada()
         this.obtenerPermisosusuarios()
         this.comprobarUsuario()
+    }
 
+    restarNumeroFactura = () => {
+        firebase.auth().onAuthStateChanged((user) => {
+            if (user) {
+                var db = firebase.database();
+                var numeroFactura = db.ref('users/' + user.uid + "/configuracion")
+                numeroFactura.once('value', (snap) => {
+                    if (snap.val()) {
+                        const numero_factura = snap.val().numero_factura
+                        const suma = Number(numero_factura) - 1
+                        const tamaño = String(suma).length
+                        const restaTamaño = 9 - Number(tamaño)
+                        var cadenaFinal = ''
+                        for (var i = 0; i < restaTamaño; i++) {
+                            cadenaFinal = cadenaFinal + '0'
+                        }
+                        numeroFactura.update({
+                            numero_factura: `${cadenaFinal}${suma}`
+                        })
+                    }
+                })
+            }
+        })
     }
 
     obtenerDataBaseDatos = () => {
@@ -197,8 +220,8 @@ class Ventas_01 extends Component {
                     </IconButton>
                 </Tooltip>
                 {
-                    
-                    n.urlpdf != 'genererando' &&
+
+                    n.urlpdf != 'genererando' && n.urlpdf != '' &&
                     <Tooltip title="Descargar pdf">
                         <IconButton onClick={() => {
                             window.open(
@@ -212,13 +235,21 @@ class Ventas_01 extends Component {
                     </Tooltip>
                 }
                 {
-                    n.urlpdf === 'genererando' &&
+
+                    n.urlpdf === '' &&
+                    <></>
+                }
+                {
+                    n.urlpdf === 'genererando' && n.cliente != 'Consumidor Final' &&
                     <div style={{ display: 'flex', flexDirection: 'row' }}>
                         <IconButton disabled>
                             <CircularProgress size={20} thickness={5} style={{ color: colors.getColorPrymaryBlue300() }} />
                         </IconButton>
                         <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pdf...</div>
                     </div>
+                }
+                {
+
                 }
             </div>
         }
@@ -477,10 +508,12 @@ class Ventas_01 extends Component {
                                 </IconButton>
                             </Tooltip>
                             <div style={{ color: 'red', display: 'flex', alignItems: 'center' }}>Error de emisión</div>
+                            
                         </div>
                     }
-                    <ErrorEstado>{n.error_factura_emitida}</ErrorEstado>
-                </div >
+                    <ErrorEstado>{n.error_factura_emitida}
+              </ErrorEstado>
+                </div>
         }
 
         if (item.id === 'total') {
@@ -544,11 +577,11 @@ class Ventas_01 extends Component {
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         console.log(snapshot.val());
-                         this.postSet(user.uid, snapshot.val(), codigo)
+                        this.postSet(user.uid, snapshot.val(), codigo)
                         var venteRef = db.ref('users/' + user.uid + '/ventas/' + codigo);
                         venteRef.update({
                             factura_emitida: 'pendiente'
-                        }) 
+                        })
                         //setSnackBars.openSnack('success', 'rootSnackBar', 'Factura emitida con exito', 2000)
                     }
                 })
@@ -573,7 +606,8 @@ class Ventas_01 extends Component {
         var db = firebase.database();
         var ventaRef = db.ref('users/' + firebase.auth().currentUser.uid + '/ventas/' + codigoVenta);
         var operacionVentaRefCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_abiertas_usuario')
-
+        //cambiar numero factura
+        this.restarNumeroFactura()
         ventaRef.on('value', (snapshot) => {
             if (snapshot.val()) {
 
@@ -630,7 +664,7 @@ class Ventas_01 extends Component {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
 
-                    if(itemVenta.tipo_pago==='efectivo'){
+                    if (itemVenta.tipo_pago === 'efectivo') {
                         var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/ventas_devueltas/' + itemVenta.codigo)
                         operacionVentaCaja.set(itemVenta)
                     }
@@ -642,9 +676,9 @@ class Ventas_01 extends Component {
                     cajaRefValorAcreditado.remove()
 
                     var cajaRefValorActual = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo)
-                   
+
                     var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/').orderByChild('cliente/codigo').equalTo(itemVenta.cliente.codigo)
-                  
+
                     cuentaCobrarDeudaQuitarRef.once('value', (snap2) => {
                         if (snap2.val()) {
                             var cuentaCobrarDeudaQuitarRef = db.ref('users/' + firebase.auth().currentUser.uid + '/cuentas_por_cobrar/cuentas_por_cobrar_basicas/' + funtions.snapshotToArray(snap2)[0].cliente.codigo + '/lista_deudas/' + itemVenta.codigo)
@@ -891,6 +925,49 @@ class Ventas_01 extends Component {
         }
     }
 
+    nuevaVenta = () => {
+        if (this.state.estadoCaja) {
+
+            ReactGA.event({
+                category: 'ventas',
+                action: 'nuevaVenta'
+            })
+            var db = firebase.database()
+            var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta`)
+            var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta/guardadas`)
+            var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta/canceladas`)
+            controlCaja.once('value', (snapshot) => {
+                if (snapshot.val()) {
+                    controlCaja.update({
+                        contador: snapshot.val().contador + 1,
+                    })
+                    controlProductosGuardados.once('value', snap => {
+                        if (snap.val()) {
+                            controlProductosCancelados.update({
+                                contador: (snapshot.val().contador + 1) - snap.val().contador
+                            })
+                        }
+                    })
+                } else {
+                    controlCaja.update({
+                        contador: 1,
+                    })
+                    controlProductosGuardados.update({
+                        contador: 0,
+                    })
+                    controlProductosCancelados.update({
+                        contador: 1,
+                    })
+
+                }
+            });
+            this.setState({ itemEditar: null })
+            this.setState({ openModalNewVentaFinal: true })
+        } else {
+            setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
+        }
+    }
+
     render() {
         return (
             <div >
@@ -925,12 +1002,7 @@ class Ventas_01 extends Component {
                                 color="primary"
                                 visible={true}
                                 onClick={() => {
-                                    if (this.state.estadoCaja) {
-                                        this.setState({ itemEditar: null })
-                                        this.setState({ openModalNewVentaFinal: true })
-                                    } else {
-                                        setSnackBars.openSnack('error', 'rootSnackBar', 'Abrir caja!', 2000)
-                                    }
+                                    this.nuevaVenta()
                                 }}
                             >
                                 <AddIcon />

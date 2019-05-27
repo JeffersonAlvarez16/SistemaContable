@@ -14,7 +14,7 @@ import Checkbox from '@material-ui/core/Checkbox';
 import setSnackBars from '../plugins/setSnackBars';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
-
+import ReactGA from 'react-ga';
 //firebase 
 import firebase from 'firebase/app';
 import 'firebase/database';
@@ -58,6 +58,21 @@ class ModalCompraProductos extends Component {
     componentDidMount() {
         document.addEventListener("keydown", this.escFunction, false);
         this.dineroEnCaja()
+        var db=firebase.database()
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/stock/general/${this.props.tipoAjuste}`)
+
+        controlCaja.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlCaja.update({
+                    contador: snapshot.val().contador + 1,
+                })
+
+            } else {
+                controlCaja.update({
+                    contador: 1,
+                })
+            }
+        });
     }
 
     dineroEnCaja = () => {
@@ -115,14 +130,35 @@ class ModalCompraProductos extends Component {
     }
 
     updateDataProductos = () => {
+      
+
+  ReactGA.event({
+            category: 'stock',
+            action: this.props.tipoAjuste
+        })
+        var db = firebase.database();
         this.state.listaSeleccionados.forEach(item => {
-            var db = firebase.database();
             var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/productos/' + item.codigo);
             productosRef.update({
                 stock_actual: this.getNumeroStockActual(item),
                 precio_costo: Number(this.state.listaSeleccionadosValoresEditados.filter(item2 => item2.codigo === item.codigo)[0].precio_costo_nuevo)
             });
         })
+
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/stock/${this.props.tipoAjuste}`)
+
+        controlCaja.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlCaja.update({
+                    contador: snapshot.val().contador + 1,
+                })
+
+            } else {
+                controlCaja.update({
+                    contador: 1,
+                })
+            }
+        });
         this.setOperacionStock(this.state.listaSeleccionadosValoresEditados)
         setSnackBars.openSnack('info', 'rootSnackBar', 'Compra relizada con éxito', 2000)
         this.props.handleClose()
@@ -150,8 +186,9 @@ class ModalCompraProductos extends Component {
         }
     }
 
-    
+
     handleDescontarCaja = () => {
+        console.log('asads');
         var db = firebase.database();
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -171,7 +208,9 @@ class ModalCompraProductos extends Component {
                 })
 
             }
+
         })
+
     }
     // guardar venta caja
     setOperacionCaja(itemVenta) {
@@ -183,7 +222,7 @@ class ModalCompraProductos extends Component {
                 var caja = funtions.snapshotToArray(snap).filter(it => it.usuario === this.props.usuario.code)[0]
                 if (Boolean(caja.estado)) {
                     var operacionVentaCaja = db.ref('users/' + firebase.auth().currentUser.uid + '/caja/cajas_normales/' + caja.codigo + '/' + this.obtenerReferenciaTipo() + '/' + codigoVentaCaja)
-                    var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/'+codigoVentaCaja)
+                    var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/' + codigoVentaCaja)
                     operacionVentaCaja.set(itemVenta)
                     operacionGastos.set(itemVenta)
 
@@ -795,17 +834,17 @@ class ModalCompraProductos extends Component {
                                 this.setState({ operarEnCaja: true })
                                 setTimeout(() => {
                                     this.updateDataProductos()
-                                  //this.handleDescontarCaja()
+                                    //this.handleDescontarCaja()
                                 }, 100)
                             } else {
                                 setSnackBars.openSnack('error', 'rootSnackBar', 'Dinero insuficiente en caja', 2000)
                             }
                         }}
                         handleEvitarCaja={() => {
-                                this.setState({ operarEnCaja: false })
-                                setTimeout(() => {
-                                    this.handleEvitarCaja()
-                                }, 100)
+                            this.setState({ operarEnCaja: false })
+                            setTimeout(() => {
+                                this.handleEvitarCaja()
+                            }, 100)
                         }}
 
                     />

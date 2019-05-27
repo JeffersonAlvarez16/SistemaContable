@@ -11,7 +11,7 @@ import funtions from '../../utils/funtions';
 import Grid from '@material-ui/core/Grid';
 import MenuItem from '@material-ui/core/MenuItem';
 
-
+import ReactGA from 'react-ga';
 import NumberFormat from 'react-number-format';
 
 //firebase 
@@ -94,7 +94,40 @@ class ModalNewEditProveedor extends Component {
     }
 
     setNewProveedor = (proveedor) => {
-        var db = firebase.database();
+        event.preventDefault()
+
+      
+
+  ReactGA.event({
+            category: 'proveedores',
+            action: 'nuevoProveedorGuardado'
+        })
+        var db = firebase.database(); 
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedor/guardados`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedor/cancelados`)
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedores`)
+        controlProductosGuardados.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlProductosGuardados.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosCancelados.once('value', (snap) => {
+                    if (snap.val()) {                        
+                        controlProductosCancelados.update({
+                            contador: snap.val().contador-1 ,
+                        })
+                       
+                    } else {
+                       
+                    }
+                });
+              
+            } else {
+                controlProductosGuardados.update({
+                    contador: 1,
+                })
+            }
+        });
         var productosRef = db.ref('users/' + firebase.auth().currentUser.uid + '/proveedores/' + proveedor.codigo);
         productosRef.set({
             ...proveedor

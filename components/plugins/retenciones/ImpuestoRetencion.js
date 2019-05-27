@@ -18,7 +18,7 @@ class ImpuestoRetencion extends Component {
         setTimeout(() => { this.props.changueData(this.state) }, 100)
         if (Number(this.props.impuesto) === 1) {
             this.setState({
-                tipo_porcentaje: "343"
+                tipo_porcentaje: "312"
             })
         } else {
             this.setState({
@@ -100,7 +100,7 @@ class ImpuestoRetencion extends Component {
                                 variant="filled"
                                 style={style.styleText}
                             >
-                                <MenuItem value={'343'}>0.1%</MenuItem>
+                                <MenuItem value={'312'}>0.1%</MenuItem>
                                 <MenuItem value={'327'}>0.2%</MenuItem>
                                 <MenuItem value={'304'}>0.8%</MenuItem>
                                 <MenuItem value={'308'}>0.10%</MenuItem>

@@ -4,7 +4,7 @@ import DialogTitle from '@material-ui/core/DialogTitle'
 import Button from '@material-ui/core/Button';
 import DialogContent from '@material-ui/core/DialogContent';
 import { Typography, TextField } from '@material-ui/core';
-
+import ReactGA from 'react-ga';
 import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
@@ -22,7 +22,7 @@ class ModalFinalizaPago extends React.Component {
         monto: '',
 
         valor_acreditado: '',
-        buttonEstadoAceptar:false,
+        buttonEstadoAceptar: false,
     }
 
     componentDidMount() {
@@ -68,17 +68,45 @@ class ModalFinalizaPago extends React.Component {
 
     }
 
-    finalizarPago = (event) => {
-       
+    finalizarPago = (event) => {     
+        ReactGA.event({
+            category: 'ventas',
+            action: 'nuevaVentaGuardada'
+        })
+
+        var db = firebase.database()
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta/guardadas`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta/canceladas`)
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/ventas/nueva-venta`)
+        controlProductosGuardados.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlProductosGuardados.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosCancelados.once('value', (snap) => {
+                    if (snap.val()) {
+                        controlProductosCancelados.update({
+                            contador: snap.val().contador - 1,
+                        })
+
+                    } else {
+                    }
+                });
+            } else {
+                controlProductosGuardados.update({
+                    contador: 1,
+                })
+            }
+        });
         switch (this.props.tipo_pago) {
             case 'efectivo': {
-                this.setState({buttonEstadoAceptar:true})
+                this.setState({ buttonEstadoAceptar: true })
                 this.props.handleClose()
                 this.props.handleAceptar({ tipo_pago: 'efectivo' })
                 break
             }
             case 'credito': {
-                this.setState({buttonEstadoAceptar:true})
+                this.setState({ buttonEstadoAceptar: true })
                 this.props.handleClose()
                 this.props.handleAceptar({
                     tipo_pago: 'credito',
@@ -90,7 +118,7 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-credito': {
                 if (this.comprobarTextLlenos()) {
-                    this.setState({buttonEstadoAceptar:true})
+                    this.setState({ buttonEstadoAceptar: true })
                     this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-credito',
@@ -104,7 +132,7 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'tarjeta-debito': {
                 if (this.comprobarTextLlenos()) {
-                    this.setState({buttonEstadoAceptar:true})
+                    this.setState({ buttonEstadoAceptar: true })
                     this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'tarjeta-debito',
@@ -118,7 +146,7 @@ class ModalFinalizaPago extends React.Component {
             }
             case 'cheque': {
                 if (this.comprobarTextLlenos()) {
-                    this.setState({buttonEstadoAceptar:true})
+                    this.setState({ buttonEstadoAceptar: true })
                     this.props.handleClose()
                     this.props.handleAceptar({
                         tipo_pago: 'cheque',
@@ -131,7 +159,7 @@ class ModalFinalizaPago extends React.Component {
                 break
             }
             case 'transferencia': {
-                this.setState({buttonEstadoAceptar:true})
+                this.setState({ buttonEstadoAceptar: true })
                 this.props.handleClose()
                 this.props.handleAceptar({ tipo_pago: 'transferencia' })
                 break
@@ -358,7 +386,7 @@ const NumberFormatCustomTarjeta = (props) => {
             format="####  ####  ####  ####"
             mask="_"
         />
-        
+
     );
 }
 

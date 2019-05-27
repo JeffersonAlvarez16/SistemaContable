@@ -22,7 +22,7 @@ import Stock from '../components/components/productos/components/Stock'
 import Proveedores from '../components/components/productos/components/Proveedores'
 import ControlVencimiento from '../components/components/productos/components/ControlVencimiento'
 import { CircularProgress } from '@material-ui/core';
-
+import ReactGA from 'react-ga';
 
 
 class Productos extends Component {
@@ -35,7 +35,7 @@ class Productos extends Component {
         estadoPermisos: null
     }
     componentDidMount() {
-
+        ReactGA.pageview(location.pathname)
     }
 
     obtenerDataBaseDatos = () => {

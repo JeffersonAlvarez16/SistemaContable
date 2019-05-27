@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import Layout from '../components/containers/Layout';
 import { CircularProgress, Divider, Chip, Avatar } from '@material-ui/core';
 import Button from '@material-ui/core/Button';
-
+import ReactGA from 'react-ga';
 
 import MenuHerramientas from '../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
@@ -375,6 +375,10 @@ class DeudasCobrar extends Component {
             :
             numero = 0.00).toFixed(2)
         return numero.toFixed(2)
+    }
+
+    componentDidMount(){
+        ReactGA.pageview(location.pathname)
     }
 
     getValorTotalPagarAcreditado = () => {

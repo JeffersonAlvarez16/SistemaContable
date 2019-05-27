@@ -22,7 +22,7 @@ class LoginUsuarios extends Component {
     state = {
         stateUsers: 'vacia',
         users: [],
-
+        hoy:new Date,
         opendialog: false,
         userSelecionado: {},
         userSelecionadoPassword: ''
@@ -118,10 +118,18 @@ class LoginUsuarios extends Component {
                         Cerrar Sesion
                     </Button>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                {
+                    this.props.fecha<this.state.hoy?
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
+                    <Typography  variant="title" gutterBottom style={{width:500,textAlign:'justify'}}>
+                            Sus dias de prueba an terminado, para seguir disfrutando de nuetros servicios adquiera unos de nuestros planes. telefono: 0985874084
+                        </Typography>
+                    </div>
+                    :
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh' }}>
                     <div>
                         <Typography component="h1" variant="display2" gutterBottom>
-                            Usuarios del sistema
+                            
                         </Typography>
                         <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center' }}>
                             {
@@ -149,6 +157,7 @@ class LoginUsuarios extends Component {
                     </div>
                 </div>
 
+                }
 
                 <style jsx global>{`
                     .paperstyle { 

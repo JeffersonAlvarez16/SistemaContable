@@ -27,7 +27,7 @@ import DeleteActivarDesactivar from '../components/plugins/deleteActivarDesactiv
 import setSnackBars from '../components/plugins/setSnackBars';
 import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
 import colors from '../utils/colors';
-
+import ReactGA from 'react-ga';
 
 class Proveedores extends Component {
 
@@ -69,6 +69,7 @@ class Proveedores extends Component {
     }
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 this.setState({ usuarioUID: user.uid })
@@ -416,6 +417,45 @@ class Proveedores extends Component {
         })
     }
 
+    nuevoProveedor = () => {
+
+     
+
+        ReactGA.event({
+            category: 'proveedores',
+            action: 'nuevoProveedor'
+        })
+        var db = firebase.database()
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedor`)
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedor/guardados`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/proveedores/nuevoproveedor/cancelados`)
+        controlCaja.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlCaja.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosGuardados.once('value', snap => {
+                    if (snap.val()) {
+                        controlProductosCancelados.update({
+                            contador: (snapshot.val().contador + 1) - snap.val().contador
+                        })
+                    }
+                })
+
+            } else {
+                controlCaja.update({
+                    contador: 1,
+                })
+                controlProductosCancelados.update({
+                    contador: 1
+                })
+                controlProductosGuardados.update({
+                    contador: 0
+                })
+            }
+        });
+        this.setState({ itemSeleccionado: null, openModalFullScreen: true })
+    }
 
     render() {
         return (
@@ -434,8 +474,10 @@ class Proveedores extends Component {
                                 color="primary"
                                 visible={true}
                                 disabled={this.state.itemsSeleccionados.length > 0}
-                                onClick={() => this.setState({ itemSeleccionado: null, openModalFullScreen: true })}
-                            >
+                                onClick={() =>
+                                    this.nuevoProveedor()
+
+                                }>
                                 <AddIcon />
                             </ItemMenuHerramienta>
 

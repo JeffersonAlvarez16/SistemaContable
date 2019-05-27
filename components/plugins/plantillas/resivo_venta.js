@@ -5,9 +5,7 @@ class ResivoVenta extends Component {
     render() {
         const {
             item,
-        } = this.props
-
-        console.log(item);
+        } = this.props        
 
         if (item != null) {
 
@@ -38,7 +36,7 @@ class ResivoVenta extends Component {
                         <div style={{ flex: .8 }}>C.</div>
                         <div style={{ flex: 2.5 }}>Descripción</div>
                         <div style={{ flex: 1.7 }}>P. Unt.</div>
-                        <div style={{ flex: 2.5 }}>Valor</div>
+                        <div style={{ flex: 2.3 }}>Valor</div>
                     </div>
                     <div>
                         {
@@ -52,7 +50,10 @@ class ResivoVenta extends Component {
                                     <div style={{ flex: 2.5 }}>{item.tiene_iva ? "*" + item.descripcion_producto : item.descripcion_producto}</div>
                                     <div style={{ flex: .3 }}></div>
                                     <div style={{ flex: 1.7 }}>{`$ ${item.tiene_iva ? ((Number(item.precio_venta) / 1.12) * Number(item.cantidad)).toFixed(3) : (Number(item.precio_venta) * Number(item.cantidad)).toFixed(3)}`}</div>
-                                    <div style={{ flex: 2.5 }}>{`$ ${item.tiene_iva ? ((Number(item.precio_venta) / 1.12) * Number(item.cantidad)).toFixed(2) : (Number(item.precio_venta) * Number(item.cantidad)).toFixed(2)}`}</div>
+                                    <div style={{ flex: 2. }}>{`$ ${item.tiene_iva ?
+                                     ((Number(item.precio_venta) / 1.12) * Number(item.cantidad)).toFixed(2) 
+                                    :
+                                     (Number(item.precio_venta) * Number(item.cantidad)).toFixed(2)}`}</div>
                                 </div>
                             )
                         }
@@ -69,7 +70,7 @@ class ResivoVenta extends Component {
                                 <div>Valor Total:</div>
                             </div>
                             <div style={{ flex: 2, fontFamily: "Lucida Sans Typewriter", fontSize: 7 }}>
-                                <div>{`$ ${Number(Number(item.total) - (Number(item.subtotal) + Number(item.iva))) + Number(item.subtotal)}`}</div>
+                                <div>{`$ ${Number(Number(item.total).toFixed(2) - (Number(item.subtotal) + Number(item.iva)).toFixed(2) + Number(item.subtotal).toFixed(2))}`}</div>
                                 <div>{`$ ${item.subtotal}`}</div>
                                 <div>{`$ ${item.iva}`}</div>
                                 <div>{`$ ${Number(item.descuento).toFixed(2)}`}</div>
@@ -102,8 +103,8 @@ class ResivoVenta extends Component {
 
                     }
                     <div style={{ fontFamily: "Lucida Sans Typewriter", paddingLeft: 15, paddingRight: 10, paddingTop: 10, fontSize: 8 }}>
-                        <div>Generado por: RapiFac</div>
-                        <div>www.rapifac.com</div>
+                        <div>Generado por: ServiFac</div>
+                        
                     </div>
 
                 </div>

@@ -9,6 +9,7 @@ import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import funtions from '../../../utils/funtions';
+import ReactGA from 'react-ga';
 
 class CerrarCaja extends Component {
 
@@ -24,6 +25,12 @@ class CerrarCaja extends Component {
     }
 
     componentDidMount() {
+       
+            ReactGA.event({
+                category: 'caja',
+                action: 'Cerrar caja'
+            })
+      
         const { cajaSeleccionada,sumaTotalVentas } = this.props
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
@@ -87,6 +94,7 @@ class CerrarCaja extends Component {
     }
 
     cerrarCaja = () => {
+
         const { usuario, handleClose } = this.props
         const { codigoReferencia, saldoFinal, observacion } = this.state
         firebase.auth().onAuthStateChanged((user) => {
@@ -105,6 +113,32 @@ class CerrarCaja extends Component {
                 })
                 cajaUsuarioAbiertaRef.remove()                
             }
+            var cajaFechas = db.ref(`users/${user.uid}/control_interaccion/caja/cerrar_caja/${funtions.guidGenerator()}`)
+            var controlCaja = db.ref(`users/${user.uid}/control_interaccion/caja/cerrar_caja`)
+            controlCaja.once('value', (snapshot) => {
+                if (snapshot.val()) {                        
+                    controlCaja.update({
+                        contador: snapshot.val().contador + 1,                          
+                    })
+
+                } else {
+                    controlCaja.update({
+                        contador: 1,                           
+                    })
+                }
+            });
+            cajaFechas.once('value', (snapshot) => {
+                if (snapshot.val()) {                        
+                    cajaFechas.update({                           
+                        order:new Date()+""
+                    })
+
+                } else {
+                    cajaFechas.update({                           
+                        order:new Date()+""
+                    })
+                }
+            });
         })
     }
 

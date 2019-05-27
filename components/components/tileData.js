@@ -43,7 +43,9 @@ class MailFolderListItems extends Component {
         return (
             <div>
                 <Link prefetch href="/">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('inicio')
+                    }}>
                         <Tooltip title="Inicio" placement="right">
                             <ListItemIcon>
                                 <Trending style={{ color: '#fff' }} />
@@ -54,7 +56,9 @@ class MailFolderListItems extends Component {
                 </Link>
                 {/*     <Divider style={{backgroundColor:'#fff'}} /> */}
                 <Link prefetch href="/caja">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('caja')
+                    }}>
                         <Tooltip title="Caja" placement="right">
                             <ListItemIcon>
                                 <MonetizationOn style={{ color: '#fff' }} />
@@ -64,7 +68,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/productos">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('productos')
+                    }}>
                         <Tooltip title="Productos" placement="right">
                             <ListItemIcon>
                                 <ShoppingBasket style={{ color: '#fff' }} />
@@ -74,7 +80,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/stock">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('stock')
+                    }}>
                         <Tooltip title="Stock" placement="right">
                             <ListItemIcon>
                                 <History style={{ color: '#fff' }} />
@@ -84,7 +92,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/proveedores">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('proveedores')
+                    }}>
                         <Tooltip title="Proveedores" placement="right">
                             <ListItemIcon>
                                 <DriveEta style={{ color: '#fff' }} />
@@ -94,7 +104,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/clientes">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('clientes')
+                    }}>
                         <Tooltip title="Clientes" placement="right">
                             <ListItemIcon>
                                 <SupervisedUserCircle style={{ color: '#fff' }} />
@@ -104,7 +116,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/ventasFac">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('ventas')
+                    }}>
                         <Tooltip title="Ventas" placement="right">
                             <ListItemIcon>
                                 <ShoppingCart style={{ color: '#fff' }} />
@@ -114,7 +128,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/retencion">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('retenciones')
+                    }}>
                         <Tooltip title="Retenciones" placement="right">
                             <ListItemIcon>
                                 <DonutSmall style={{ color: '#fff' }} />
@@ -124,7 +140,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/cuentas_cobrar">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('cuentas_cobrar')
+                    }}>
                         <Tooltip title="Cuentas Cobrar" placement="right">
                             <ListItemIcon>
                                 <Style style={{ color: '#fff' }} />
@@ -134,7 +152,9 @@ class MailFolderListItems extends Component {
                     </ListItem>
                 </Link>
                 <Link prefetch href="/usuarios">
-                    <ListItem button>
+                    <ListItem button onClick={()=>{
+                    this.props.click('usuarios')
+                    }}>
                         <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
                             <ListItemIcon>
                                 <Usuarios style={{ color: '#fff' }} />

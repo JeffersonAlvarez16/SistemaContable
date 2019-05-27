@@ -9,16 +9,18 @@ import funtions from '../utils/funtions';
 import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
-
+import Contador from '../components/plugins/plugins/Contador';
+import ReactGA from 'react-ga';
 class Main extends Component {
 
     state = {
         initialState: false,
+        fecha: "",
         usuario: {
             nombre: ''
         },
         ventasDiarias: {
-            labels: ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
+            labels: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado"],
             series: [[0, 0, 0, 0, 0, 0, 0]]
         },
         ventasMensauales: {
@@ -59,6 +61,7 @@ class Main extends Component {
     }
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         setTimeout(() => {
             this.setState({
                 initialState: true
@@ -238,6 +241,8 @@ class Main extends Component {
 
     }
 
+   
+
     refrescar = () => {
         var db = firebase.database()
         firebase.auth().onAuthStateChanged((user) => {
@@ -326,7 +331,7 @@ class Main extends Component {
 
                             var refVentasMensualesVa = db.ref(`users/${user.uid}/ventas_mensuales`)
                             refVentasMensualesVa.once('value', snapshot => {
-                                if (snapshot.val()) {                                 
+                                if (snapshot.val()) {
                                     var refVentasMensuales = db.ref(`users/${user.uid}/ventas_mensuales/${this.state.index_des}`)
                                     refVentasMensuales.update({
                                         valor: this.state.total_ventas_mensuales
@@ -423,7 +428,7 @@ class Main extends Component {
                 this.setState({
                     idex_of: 1,
                     data: {
-                        labels: ["Domingo","Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado", ],
+                        labels: ["Domingo", "Lunes", "Martes", "Miercoles", "Jueves", "Viernes", "Sabado",],
                         series: [[0, 0, 0, 0, 0, 0, 0]]
                     },
                 })
@@ -554,8 +559,10 @@ class Main extends Component {
                 {
                     this.state.initialState ?
                         <Layout title="Bienvenido" onChangueUserState={usuario => this.setState({ usuario: usuario })}>
-                            <div style={{ marginTop: -15, marginLeft: 75, fontFamily: "cursive", }}>
+                            <div style={{ marginTop: -15, marginLeft: 75, fontFamily: "cursive",display:'flex',flexDirection:'row',width:"100%" }}>
                                 <h6 style={{ fontSize: 14, fontWeight: 100 }}> {funtions.fecha()}</h6>
+                                <div style={{flex:.8}}></div>
+
                             </div>
                             <Dashboard
                                 ventaDiaria={this.state.total_ventas_diarias}
@@ -567,7 +574,7 @@ class Main extends Component {
                             <br />
                             <br />
                             <div style={{ margin: 2, display: 'flex', flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
-                                <Grid container style={{ width: '93%', display: 'flex', justifyContent: 'space-between' }}>
+                                {/* <Grid container style={{ width: '93%', display: 'flex', justifyContent: 'space-between' }}>
                                     <Grid item xs={5} style={{ margin: 0 }}>
                                         <Card style={{ backgroundColor: '#eee', }}>
 
@@ -598,9 +605,9 @@ class Main extends Component {
                                             </div>
                                             <ChartistGraph data={this.state.ventasDiarias} options={this.state.options} type={this.state.type} style={{ fill: 'blue' }} />
                                         </Card>
-                                    </Grid>
+                                    </Grid> */}
 
-                                    <Grid item xs={7} style={{ margin: 0 }}>
+                                {/*   <Grid item xs={7} style={{ margin: 0 }}>
                                         <Card style={{ backgroundColor: '#eee', }}>
                                             <div style={{ marginTop: -15, marginLeft: 50, fontFamily: "cursive", display: 'flex', }}>
                                                 <h6 style={{ fontSize: 14 }}>Grafico de ventas musuales</h6>
@@ -625,10 +632,10 @@ class Main extends Component {
                                             </div>
                                             <ChartistGraph data={this.state.ventasMensauales} options={this.state.options} type={this.state.typeMensuales} />
                                         </Card>
-
-                                    </Grid>
+                                    </Grid> 
 
                                 </Grid>
+                                    */}
                             </div>
 
 

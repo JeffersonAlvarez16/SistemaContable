@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Typography from '@material-ui/core/Typography';
 import funtions from '../../../utils/funtions';
 import { Divider } from '@material-ui/core';
+import ReactGA from 'react-ga';
 
 class RetirarDineroCaja extends Component {
 
@@ -20,6 +21,10 @@ class RetirarDineroCaja extends Component {
 
 
     retirarDinero = () => {
+        ReactGA.event({
+            category: 'caja',
+            action: 'Retirar-dinero'
+        })
         const { usuario, handleClose, caja } = this.props
         const { saldoAgregado, observacion } = this.state
         const codigo = funtions.guidGenerator()
@@ -27,7 +32,7 @@ class RetirarDineroCaja extends Component {
             if (user) {
                 var db = firebase.database();
                 var cajaUsuarioRef = db.ref('users/' + user.uid + '/caja/cajas_normales/' + caja.codigo + '/retiro_dinero/' + codigo)
-                var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/'+codigo)               
+                var operacionGastos = db.ref('users/' + firebase.auth().currentUser.uid + '/gastos/' + codigo)
                 operacionGastos.set({
                     fecha: funtions.obtenerFechaActual(),
                     usuario: usuario.code,
@@ -47,11 +52,38 @@ class RetirarDineroCaja extends Component {
                 cajaRefValorActual.once('value', (snap) => {
                     if (snap.val()) {
                         cajaRefValorActual.update({
-                            valor_caja: Number( Number(snap.val().valor_caja)-Number(saldoAgregado) ).toFixed(2)
+                            valor_caja: Number(Number(snap.val().valor_caja) - Number(saldoAgregado)).toFixed(2)
                         })
 
                     }
                 })
+
+                var cajaFechas = db.ref(`users/${user.uid}/control_interaccion/caja/retirar_dinero/${funtions.guidGenerator()}`)
+                var controlCaja = db.ref(`users/${user.uid}/control_interaccion/caja/retirar_dinero`)
+                controlCaja.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        controlCaja.update({
+                            contador: snapshot.val().contador + 1,
+                        })
+
+                    } else {
+                        controlCaja.update({
+                            contador: 1,
+                        })
+                    }
+                });
+                cajaFechas.once('value', (snapshot) => {
+                    if (snapshot.val()) {
+                        cajaFechas.update({
+                            order: new Date() + ""
+                        })
+
+                    } else {
+                        cajaFechas.update({
+                            order: new Date() + ""
+                        })
+                    }
+                });
             }
         })
     }
@@ -105,7 +137,7 @@ class RetirarDineroCaja extends Component {
                     marginBottom: 16,
                     marginTop: 16,
                 }}>
-                    <Button color="primary" variant="contained" onClick={() =>{
+                    <Button color="primary" variant="contained" onClick={() => {
                         this.retirarDinero()
                         this.props.handleClose()
                     }}>

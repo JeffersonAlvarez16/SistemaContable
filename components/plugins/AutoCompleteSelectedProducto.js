@@ -1,33 +1,37 @@
-import React from 'react';
-
-import Popper from '@material-ui/core/Popper';
-import Fade from '@material-ui/core/Fade';
-import Paper from '@material-ui/core/Paper';
-
-import List from '@material-ui/core/List';
-import ListItem from '@material-ui/core/ListItem';
-import ListItemText from '@material-ui/core/ListItemText';
-import TextField from '@material-ui/core/TextField';
-import Typography from '@material-ui/core/Typography';
-
-import IconButton from '@material-ui/core/IconButton';
-import InputAdornment from '@material-ui/core/InputAdornment';
-import CloseIcon from '@material-ui/icons/Close';
-import Checkbox from '@material-ui/core/Checkbox';
-
-import Tooltip from '@material-ui/core/Tooltip';
-
-
-//firebase 
-import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 
-import funtions from '../../utils/funtions';
-import Divider from '@material-ui/core/Divider';
-import { async } from '@firebase/util';
-import RenderPropsMenu from './MenuFilter';
+import Checkbox from '@material-ui/core/Checkbox';
 import { CircularProgress } from '@material-ui/core';
+import CloseIcon from '@material-ui/icons/Close';
+import Divider from '@material-ui/core/Divider';
+import Fade from '@material-ui/core/Fade';
+import IconButton from '@material-ui/core/IconButton';
+import InputAdornment from '@material-ui/core/InputAdornment';
+import List from '@material-ui/core/List';
+import ListItem from '@material-ui/core/ListItem';
+import ListItemText from '@material-ui/core/ListItemText';
+import Paper from '@material-ui/core/Paper';
+import Popper from '@material-ui/core/Popper';
+import React from 'react';
+import RenderPropsMenu from './MenuFilter';
+import TextField from '@material-ui/core/TextField';
+import Tooltip from '@material-ui/core/Tooltip';
+import Typography from '@material-ui/core/Typography';
+import { async } from '@firebase/util';
+import firebase from 'firebase/app';
+import funtions from '../../utils/funtions';
+
+//firebase 
+
+
+
+
+
+
+
+
+
 
 
 class AutoCompleteSelectedProducto extends React.Component {
@@ -38,22 +42,30 @@ class AutoCompleteSelectedProducto extends React.Component {
         listaBuscada: [],
 
         //estado lista 
-        estadoListaLoader: 'vacia',
+        estadoListaLoader: 'llena',
         //texto buscado
         textoBuscado: '',
         //selecciona automatica
         checkedSeleccionAutomatica: false,
         //estado para mostrar el loader
-        textoBuscadoLoading : false,
+        textoBuscadoLoading: false,
 
     };
 
 
     componentDidMount() {
-        this.setState({
-            filtroBusqueda: 'nombreProducto',
-            checkedSeleccionAutomatica: false,
-        })
+        if (this.props.puntoVenta === true) {
+            console.log('paso');
+            this.setState({
+                filtroBusqueda: '',
+                checkedSeleccionAutomatica: true,
+            })
+        } else {
+            this.setState({
+                filtroBusqueda: '',
+                checkedSeleccionAutomatica: false,
+            })
+        }
         firebase.auth().onAuthStateChanged((user) => {
             if (user) {
                 this.setState({
@@ -61,7 +73,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                 })
 
                 var db = firebase.database();
-                var productosRef = db.ref('users/' + user.uid + "/productos");
+                var productosRef = db.ref('users/' + user.uid + "/productos").orderByChild('descripcion_producto');
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
                         this.setState({
@@ -70,6 +82,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                         })
                         var lista = funtions.snapshotToArray(snapshot)
                         var listaFiltrada = lista.filter(item => item.estado === true)
+                        listaFiltrada.sort()
                         this.setState({
                             listaProductos: listaFiltrada,
                             estadoListaLoader: 'llena'
@@ -85,6 +98,71 @@ class AutoCompleteSelectedProducto extends React.Component {
         });
     }
 
+    handleSearch = (nombre) => {
+        this.setState({ listaProductosTemporal: [] })
+        if (isNaN(nombre)) {
+            if (nombre.length > 3) {
+              
+                this.setState({ textoBuscadoLoading: true })
+                let array = funtions.filterObjectsNombre(this.state.listaProductos, nombre)
+
+                if (array.length > 0) {
+                    this.setState({
+                        listaProductosTemporal: array.sort(),
+                        textoBuscadoLoading: false,
+                    })
+                } else {
+
+                    this.setState({ estadoTabla: 'sin_resultados' })
+                    this.setState({
+                        listaProductosTemporal: [],
+                        textoBuscadoLoading: false,
+                        filtroBusqueda: 'NO EXISTEN COINCIDENCIAS'
+                    })
+                }
+
+            } else {
+                this.setState({
+                    listaProductosTemporal: [],
+                    textoBuscadoLoading: false,
+                    filtroBusqueda: ''
+                })
+            }
+        } else if (nombre.length === 13) {
+            this.setState({
+                checkedSeleccionAutomatica:true
+            })
+            let array = funtions.filterObjectsCodigoBarras(this.state.listaProductos, nombre)
+
+            if (array.length > 0) {
+                this.props.onChangue(array[0])               
+            }
+            this.setState({ textoBuscado: '' })
+        } else if (nombre.length === 7) {
+            let array = funtions.filterObjectsCodigoReferencia(this.state.listaProductos, nombre)
+
+            if (array.length > 0) {
+                this.setState({
+                    listaProductosTemporal: array,
+                    textoBuscadoLoading: false
+                })
+            }
+        } else {
+            this.setState({
+                listaProductosTemporal: [],
+                textoBuscadoLoading: false,
+                filtroBusqueda: ''
+            })
+        }
+
+        7785698423651
+        7785698423652
+        7785698423653
+
+
+
+    }
+
     resivirListaDescripcion = (texto) => {
         var db = firebase.database()
         var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('descripcion_producto').startAt(texto)
@@ -92,7 +170,7 @@ class AutoCompleteSelectedProducto extends React.Component {
             if (snap.val()) {
                 this.setState({
                     listaProductosTemporal: funtions.snapshotToArray(snap),
-                    textoBuscadoLoading : false
+                    textoBuscadoLoading: false
                 })
             }
         })
@@ -105,7 +183,7 @@ class AutoCompleteSelectedProducto extends React.Component {
             if (snap.val()) {
                 this.setState({
                     listaProductosTemporal: funtions.snapshotToArray(snap),
-                    textoBuscadoLoading : false
+                    textoBuscadoLoading: false
                 })
             }
         })
@@ -116,7 +194,7 @@ class AutoCompleteSelectedProducto extends React.Component {
         var productosRef = db.ref('users/' + this.state.uidUser + "/productos").orderByChild('codigo_barras').equalTo(texto)
         productosRef.once('value', snap => {
             if (snap.val()) {
-                this.setState({textoBuscadoLoading : false})
+                this.setState({ textoBuscadoLoading: false })
                 var listainterna = funtions.snapshotToArray(snap)
                 if (listainterna.length > 0) {
                     this.props.onChangue(listainterna[0])
@@ -131,19 +209,11 @@ class AutoCompleteSelectedProducto extends React.Component {
 
     handleSearchItems = (text) => {
         this.setState({ textoBuscado: text })
-        if (this.state.checkedSeleccionAutomatica) {
-            this.setState({textoBuscadoLoading : true})
-            this.resivirListaCodigoBarras(text)
-        } else {
-            this.setState({textoBuscadoLoading : true})
-            if (this.state.filtroBusqueda === 'nombreProducto') {
-                this.resivirListaDescripcion(text)
-            }
-            if (this.state.filtroBusqueda === 'codigoReferencia') {
-                this.resivirListaCodigoReferencia(text)
-            }          
 
-        }
+
+
+        this.handleSearch(text)
+
     }
 
     handleToggle = (item) => {
@@ -173,22 +243,12 @@ class AutoCompleteSelectedProducto extends React.Component {
                     variant="contained"
                     value={this.state.textoBuscado}
                     onChange={event => {
-                        console.log("ejecuntando metodo buscar +:" + event.target.value)
                         this.handleSearchItems(event.target.value)
                     }}
                     style={styleText}
                     label='Buscar producto...'
                     helperText={
-                        this.state.filtroBusqueda === 'nombreProducto' ?
-                            'Buscando por nombre del producto'
-                            :
-                            this.state.filtroBusqueda === 'codigobarras' ?
-                                'Buscando por codigo de barras'
-                                :
-                                this.state.filtroBusqueda === 'codigoReferencia' ?
-                                    'Buscando por codigo de referencia'
-                                    :
-                                    ''}
+                        this.state.filtroBusqueda}
                     margin={margin ? 'dense' : 'normal'}
                     variant="outlined"
 
@@ -200,15 +260,15 @@ class AutoCompleteSelectedProducto extends React.Component {
                             <InputAdornment variant="filled" position="end">
                                 {
                                     this.state.textoBuscadoLoading === true &&
-                                    
-                                        <CircularProgress size={15}/>
+
+                                    <CircularProgress size={15} />
                                 }
                                 {
                                     this.state.textoBuscado.length > 0 &&
                                     <Tooltip title="Borrar busqueda" >
                                         <IconButton
                                             aria-label="Toggle clean text"
-                                            onClick={() => this.setState({ textoBuscado: '', listaProductosTemporal: [], textoBuscadoLoading : false })}
+                                            onClick={() => this.setState({ textoBuscado: '', listaProductosTemporal: [], textoBuscadoLoading: false })}
                                         >
                                             <CloseIcon />
                                         </IconButton>
@@ -222,7 +282,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                                     />
                                 </Tooltip> */}
 
-                                <RenderPropsMenu
+                                {/*   <RenderPropsMenu
                                     handleNombreProducto={() =>
                                         this.setState({
                                             filtroBusqueda: 'nombreProducto',
@@ -241,7 +301,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                                             checkedSeleccionAutomatica: false,
                                         })
                                     }
-                                ></RenderPropsMenu>
+                                ></RenderPropsMenu> */}
 
                             </InputAdornment>
                         ),
@@ -295,7 +355,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                         </Fade>
                     )}
                 </Popper>
-            </div >
+            </div>
         );
     }
 }

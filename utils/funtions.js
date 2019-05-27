@@ -8,6 +8,16 @@ class FUNTIONS {
         return array.filter((item) => item.tipo === tipo)
     }
 
+    filterObjectsCodigoBarras = (array, codigo) => {
+        return array.filter((item) => item.codigo_barras === codigo)
+    }
+    filterObjectsNombreP = (array, nombre) => {
+        return array.filter((item) => item.descripcion_producto.toLowerCase() == nombre.toLowerCase())
+    }
+    filterObjectsCodigoReferencia = (array, codigoRe) => {
+        return array.filter((item) => item.codigo_referencia === codigoRe)
+    }
+
     filterObjectsCodigo = (array, codigo) => {
         var arrayReturn = []
 
@@ -15,6 +25,20 @@ class FUNTIONS {
             var itemData = JSON.stringify(item);
             itemData = itemData.toLowerCase()
             var itemFilter = itemData.includes(codigo)
+            if (itemFilter) {
+                arrayReturn.push(item)
+            }
+        })
+        return arrayReturn
+    }
+    filterObjectsNombre = (array, nombre) => {
+        var arrayReturn = []
+
+        array.forEach(item => {
+            console.log(item);
+            var itemData = JSON.stringify(item.descripcion_producto);
+            itemData = itemData
+            var itemFilter = itemData.includes(nombre.toLowerCase())
             if (itemFilter) {
                 arrayReturn.push(item)
             }

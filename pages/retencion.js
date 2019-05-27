@@ -31,9 +31,8 @@ import ContainerPlantillas from '../components/plugins/plantillas/container_plan
 import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
 import ModalEliminarRetencion from '../components/modals_container/retenciones/ModalEliminarRetencion';
 import colors from '../utils/colors';
+import ReactGA from 'react-ga';
 
-
-//librerias Imprimir
 
 
 class Retencion extends Component {
@@ -79,6 +78,7 @@ class Retencion extends Component {
 
 
     componentDidMount() {
+        ReactGA.pageview(location.pathname)
         this.setState({
             fechaActual: funtions.obtenerFechaActual()
         })
@@ -120,7 +120,7 @@ class Retencion extends Component {
     }
 
     cambiarListaPorFecha = fecha => {
-        this.setState({ fechaActual: fecha, estadoTabla:'cargando' })
+        this.setState({ fechaActual: fecha, estadoTabla: 'cargando' })
         setTimeout(() => { this.obtenerDataBaseDatos(fecha) }, 200)
     }
 
@@ -159,7 +159,7 @@ class Retencion extends Component {
                 </IconButton>
 
                 {
-                    
+
                     n.urlpdf != 'genererando' &&
                     <Tooltip title="Descargar pdf">
                         <IconButton onClick={() => {
@@ -182,7 +182,7 @@ class Retencion extends Component {
                         <div style={{ color: '#42A5F5', display: 'flex', alignItems: 'center' }}>Pdf...</div>
                     </div>
                 }
-                </div>
+            </div>
         }
         if (item.id === 'estado') {
             return <div style={{ width: 'max-content' }}>
@@ -258,7 +258,7 @@ class Retencion extends Component {
                     label={<div>{n.retencion.sujeto.telefono}</div>}
                     clickable
                     style={{ background: colors.getColorPrymaryGrey200() }}
-                />                
+                />
             </div>
         }
         if (item.id === 'identificacion') {
@@ -344,6 +344,16 @@ class Retencion extends Component {
         });
     }
 
+    nuevaRetencion = () => {
+
+        ReactGA.event({
+            category: 'retencion',
+            action: 'nuevaRetencion'
+        })
+        this.setState({ itemEditar: null })
+        this.setState({ openModalNewRetencion: true })
+    }
+
     render() {
         return (
             <Layout title="Retenciones" onChangueUserState={usuario => {
@@ -363,8 +373,7 @@ class Retencion extends Component {
                                 color="primary"
                                 visible={true}
                                 onClick={() => {
-                                    this.setState({ itemEditar: null })
-                                    this.setState({ openModalNewRetencion: true })
+                                    this.nuevaRetencion()
                                 }}
                             >
                                 <AddIcon />

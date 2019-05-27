@@ -18,6 +18,7 @@ import 'firebase/auth'
 
 import funtions from '../../../../utils/funtions';
 import colors from '../../../../utils/colors';
+import ReactGA from 'react-ga';
 
 //dialogs
 import FullScreenDialog from '../../../../components/components/FullScreenDialog';
@@ -422,6 +423,48 @@ class ListaProductos extends Component {
         })
     }
 
+    nuevoProducto = () => {
+
+
+  ReactGA.event({
+            category: 'productos',
+            action: 'nuevoProducto'
+        })
+        var db=firebase.database()        
+        var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto`)
+        var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/guardados`)
+        var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/cancelados`)
+        controlCaja.once('value', (snapshot) => {
+            if (snapshot.val()) {
+                controlCaja.update({
+                    contador: snapshot.val().contador + 1,
+                })
+                controlProductosGuardados.once('value',snap=>{
+                    if(snap.val()){
+                        controlProductosCancelados.update({
+                            contador:(snapshot.val().contador+1)-snap.val().contador
+                        })
+                    }
+                })
+              
+            } else {
+                controlCaja.update({
+                    contador: 1,
+                })
+                controlProductosCancelados.update({
+                    contador: 1
+                })
+                controlProductosGuardados.update({
+                    contador: 0
+                })
+            }
+        });
+       
+
+        this.setState({ itemSeleccionado: null })
+        this.setState({ openModalFullScreen: true })
+    }
+
     render() {
         return (
             <div >
@@ -434,11 +477,10 @@ class ListaProductos extends Component {
                         color="primary"
                         visible={true}
                         onClick={() => {
-                            this.setState({ itemSeleccionado: null })
-                            this.setState({ openModalFullScreen: true })
+                            this.nuevoProducto()
                         }}
                     >
-                        <AddIcon/>
+                        <AddIcon />
                     </ItemMenuHerramienta>
 
                     <div style={{ flex: 0.95 }}></div>
