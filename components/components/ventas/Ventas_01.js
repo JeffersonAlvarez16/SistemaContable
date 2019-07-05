@@ -1,50 +1,71 @@
-import React, { Component } from 'react';
-import MenuHerramientas from '../menus/MenuHerramientas';
-import Search from '../Search';
-import TablaNormal from '../tables/TableNormal';
-import Divider from '@material-ui/core/Divider';
-import ItemMenuHerramienta from '../menus/ItemMenuHerramienta';
-import Tooltip from '@material-ui/core/Tooltip';
-import MonetizationOn from '@material-ui/icons/MonetizationOn';
-
-import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
-import InputIcon from '@material-ui/icons/Input';
-import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
-import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
-import CloseIcon from '@material-ui/icons/Close';
-import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
-import SubtitlesIcon from '@material-ui/icons/Subtitles';
-import LocalAtmIcon from '@material-ui/icons/LocalAtm';
-import CreditCardIcon from '@material-ui/icons/CreditCard';
-import PaymentIcon from '@material-ui/icons/Payment';
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
-import DoneAllIcon from '@material-ui/icons/DoneAll';
-import DoneIcon from '@material-ui/icons/Done';
-
-//firebase 
-import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 
-import ReturnTextTable from '../tables/ReturnTextTable';
-import FullScreenDialog from '../FullScreenDialog';
-import funtions from '../../../utils/funtions';
-import ModalCompraProductos from '../../modals_container/ModalCompraProductos';
-import setSnackBars from '../../plugins/setSnackBars';
-import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
-import EmitirFacturaModal from '../../plugins/EmitirFacturaModal';
-import ModalCancelarVenta from '../../modals_container/ventas/ModalCancelarVenta';
-import ModalEditarVenta from '../../modals_container/ventas/ModalEditarVenta';
-import { CircularProgress, Chip, Avatar } from '@material-ui/core';
+import { Avatar, Chip, CircularProgress } from '@material-ui/core';
+import React, { Component } from 'react';
 
+import AddIcon from '@material-ui/icons/Add';
+import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
+import CloseIcon from '@material-ui/icons/Close';
+import ContainerPlantillas from '../../plugins/plantillas/container_plantillas';
+import CreditCardIcon from '@material-ui/icons/CreditCard';
+import Divider from '@material-ui/core/Divider';
+import DoneAllIcon from '@material-ui/icons/DoneAll';
+import DoneIcon from '@material-ui/icons/Done';
+import EmitirFacturaModal from '../../plugins/EmitirFacturaModal';
+import ErrorEstado from '../../plugins/plugins/ErrorEstado';
+import FullScreenDialog from '../FullScreenDialog';
+import IconButton from '@material-ui/core/IconButton';
+import InputIcon from '@material-ui/icons/Input';
+import ItemMenuHerramienta from '../menus/ItemMenuHerramienta';
+import LocalAtmIcon from '@material-ui/icons/LocalAtm';
+import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
+import MenuHerramientas from '../menus/MenuHerramientas';
+import ModalCancelarVenta from '../../modals_container/ventas/ModalCancelarVenta';
+import ModalCompraProductos from '../../modals_container/ModalCompraProductos';
+import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
+import ModalEditarVenta from '../../modals_container/ventas/ModalEditarVenta';
+import ModalNewVenta from '../../plugins/ModalNewVenta';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
+import PaymentIcon from '@material-ui/icons/Payment';
+import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
+import ReactGA from 'react-ga';
 import ReactToPrint from "react-to-print";
 import ResivoVenta from '../../plugins/plantillas/resivo_venta';
-import ContainerPlantillas from '../../plugins/plantillas/container_plantillas';
-import ModalNewVenta from '../../plugins/ModalNewVenta';
+import ReturnTextTable from '../tables/ReturnTextTable';
+import Search from '../Search';
+import SubtitlesIcon from '@material-ui/icons/Subtitles';
+import SwapHorizIcon from '@material-ui/icons/SwapHoriz';
+import TablaNormal from '../tables/TableNormal';
+import Tooltip from '@material-ui/core/Tooltip';
 import colors from '../../../utils/colors';
-import ErrorEstado from '../../plugins/plugins/ErrorEstado';
-import ReactGA from 'react-ga';
+import firebase from 'firebase/app';
+import funtions from '../../../utils/funtions';
+import setSnackBars from '../../plugins/setSnackBars';
+
+//firebase 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 class Ventas_01 extends Component {
     state = {
@@ -177,6 +198,7 @@ class Ventas_01 extends Component {
                         if (caja != null) {
                             this.setState({
                                 cajaSeleccionada: caja,
+                                
                                 estadoCaja: caja.estado,
                             })
                             this.obtenerDataBaseDatos()
@@ -1075,6 +1097,7 @@ class Ventas_01 extends Component {
                             <ModalCancelarVenta
                                 handleClose={() => this.setState({ estadoModalCancelarVenta: false })}
                                 handleCancelarVenta={() => {
+                                    
                                     // this.recuperarJsonFactura(this.state.codigoEmitirFactura)
                                     this.updateDataProductos(this.state.codigoEmitirFactura)
                                     this.setState({ estadoModalCancelarVenta: false })

@@ -1,24 +1,25 @@
+import 'firebase/auth'
+
 import React, { Component } from 'react';
 
-import Paper from '@material-ui/core/Paper';
-import Typography from '@material-ui/core/Typography';
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
-
+import CircularProgress from '@material-ui/core/CircularProgress';
+import FormControl from '@material-ui/core/FormControl';
 import IconButton from '@material-ui/core/IconButton';
 import Input from '@material-ui/core/Input';
-import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
-import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Paper from '@material-ui/core/Paper';
+import TextField from '@material-ui/core/TextField';
+import Typography from '@material-ui/core/Typography';
 import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
-import CircularProgress from '@material-ui/core/CircularProgress';
-
+import firebase from 'firebase/app'
 import setSnackBars from '../../plugins/setSnackBars'
 
 // firebase
-import firebase from 'firebase/app'
-import 'firebase/auth'
+
+
 
 
 class Login extends Component {
@@ -68,32 +69,32 @@ class Login extends Component {
             })
         }
         if (this.state.usuario.length > 0 &&
-             this.state.password.length > 0) {
+            this.state.password.length > 0) {
             this.setState({
                 success: false,
                 loading: true,
             })
             firebase.auth().signInWithEmailAndPassword(
-                this.state.usuario, 
+                this.state.usuario,
                 this.state.password).catch((error) => {
-                var errorCode = error.code;
-                if (errorCode === 'auth/invalid-email') {
-                    setSnackBars.openSnack('error', 'rootSnackBar',
-                     'Formato de correo electrónico erroneo', 2000)
-                }
-                if (errorCode === 'auth/user-not-found') {
-                    setSnackBars.openSnack('error', 'rootSnackBar',
-                     'Usuario no registrado', 2000)
-                }
-                if (errorCode === 'auth/wrong-password') {
-                    setSnackBars.openSnack('error', 'rootSnackBar',
-                     'Contraseña erronea', 2000)
-                }
-                this.setState({
-                    loading: false,
-                    success: true,
+                    var errorCode = error.code;
+                    if (errorCode === 'auth/invalid-email') {
+                        setSnackBars.openSnack('error', 'rootSnackBar',
+                            'Formato de correo electrónico erroneo', 2000)
+                    }
+                    if (errorCode === 'auth/user-not-found') {
+                        setSnackBars.openSnack('error', 'rootSnackBar',
+                            'Usuario no registrado', 2000)
+                    }
+                    if (errorCode === 'auth/wrong-password') {
+                        setSnackBars.openSnack('error', 'rootSnackBar',
+                            'Contraseña erronea', 2000)
+                    }
+                    this.setState({
+                        loading: false,
+                        success: true,
+                    });
                 });
-            });
         }
 
     }
@@ -128,17 +129,17 @@ class Login extends Component {
                 >
                     <Typography variant="display2" component="h1" style={{
                         marginTop: 20,
-                        textAlign:'center',
-                        color:'black'
+                        textAlign: 'center',
+                        color: 'black'
                     }}>
                         ServiFac
                     </Typography>
                     <Typography variant="headline" component="h1" style={{
-                        textAlign:'center',
-                        color:'gray',
-                        fontSize:15,
-                        marginBottom:20,
-                        marginTop:18
+                        textAlign: 'center',
+                        color: 'gray',
+                        fontSize: 15,
+                        marginBottom: 20,
+                        marginTop: 18
                     }}>
                         Ingresa al sistema
                     </Typography>
@@ -234,12 +235,25 @@ class Login extends Component {
                     </div>
 
                     <Button size="small" color="primary" style={{
-                        marginBottom: 20
+                        marginBottom: 0
                     }}
-                    onClick={()=> setSnackBars.openSnack('info', 'rootSnackBar', 'Por favor comuniquese con soporte', 2000)}
+                        onClick={() => setSnackBars.openSnack('info', 'rootSnackBar', 'Por favor comuniquese con soporte', 2000)}
                     >
                         No recuerdo mi contraseña
                     </Button>
+                    <Button
+                        size="small"
+                        variant="contained"
+                        color="default"
+                        style={{
+                            marginTop: 20,
+                            marginBottom: 20
+                        }}
+                        onClick={() => { location.href='https://puntoventa.facbtaapps.now.sh' }
+                        }
+                    >
+                        Punto de venta
+            </Button>
                 </Paper>
             </div>
         )

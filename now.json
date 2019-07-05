@@ -1,6 +1,6 @@
 {
     "version": 2,
-    "name": "Servifac",
+    "alias":"servifac.com",
     "builds": [
         { "src": "package.json", "use": "@now/static-build" }
     ]

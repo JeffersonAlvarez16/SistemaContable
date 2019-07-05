@@ -24,16 +24,6 @@ import funtions from '../../utils/funtions';
 
 //firebase 
 
-
-
-
-
-
-
-
-
-
-
 class AutoCompleteSelectedProducto extends React.Component {
     state = {
         anchorEl: null,
@@ -55,7 +45,7 @@ class AutoCompleteSelectedProducto extends React.Component {
 
     componentDidMount() {
         if (this.props.puntoVenta === true) {
-            console.log('paso');
+            
             this.setState({
                 filtroBusqueda: '',
                 checkedSeleccionAutomatica: true,
@@ -76,6 +66,7 @@ class AutoCompleteSelectedProducto extends React.Component {
                 var productosRef = db.ref('users/' + user.uid + "/productos").orderByChild('descripcion_producto');
                 productosRef.on('value', (snapshot) => {
                     if (snapshot.val()) {
+                        
                         this.setState({
                             listaProductos: [],
                             estadoListaLoader: 'cargando'
@@ -101,11 +92,12 @@ class AutoCompleteSelectedProducto extends React.Component {
     handleSearch = (nombre) => {
         this.setState({ listaProductosTemporal: [] })
         if (isNaN(nombre)) {
-            if (nombre.length > 3) {
+            if (nombre.length > 2) {
               
                 this.setState({ textoBuscadoLoading: true })
+                console.log(nombre)
                 let array = funtions.filterObjectsNombre(this.state.listaProductos, nombre)
-
+                console.log(Object.values(array))
                 if (array.length > 0) {
                     this.setState({
                         listaProductosTemporal: array.sort(),

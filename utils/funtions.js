@@ -35,10 +35,8 @@ class FUNTIONS {
         var arrayReturn = []
 
         array.forEach(item => {
-            console.log(item);
             var itemData = JSON.stringify(item.descripcion_producto);
-            itemData = itemData
-            var itemFilter = itemData.includes(nombre.toLowerCase())
+            var itemFilter = itemData.toLowerCase().includes(nombre.toLowerCase())
             if (itemFilter) {
                 arrayReturn.push(item)
             }

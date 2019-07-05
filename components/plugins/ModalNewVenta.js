@@ -1007,6 +1007,8 @@ class ModalNewVenta extends Component {
             }
         })
     }
+    
+    
     ////////////////////////////////////////
     // actualizar el stok de los productos
     updateDataProductos = () => {

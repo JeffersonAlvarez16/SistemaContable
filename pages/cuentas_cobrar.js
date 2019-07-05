@@ -1,30 +1,42 @@
-import React, { Component } from 'react';
-import Layout from '../components/containers/Layout';
-import { CircularProgress, Divider, Chip, Avatar } from '@material-ui/core';
-import Button from '@material-ui/core/Button';
-import ReactGA from 'react-ga';
-
-import MenuHerramientas from '../components/components/menus/MenuHerramientas';
-import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
-import Search from '../components/components/Search';
-
-import Tooltip from '@material-ui/core/Tooltip';
-import MonetizationOn from '@material-ui/icons/MonetizationOn';
-import IconButton from '@material-ui/core/IconButton';
-
-//firebase 
-import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
-import funtions from '../utils/funtions';
-import TablaNormal from '../components/components/tables/TableNormal';
-import colors from '../utils/colors';
-import ReturnTextTable from '../components/components/tables/ReturnTextTable';
+
+import { Avatar, Chip, CircularProgress, Divider } from '@material-ui/core';
+import React, { Component } from 'react';
+
+import Button from '@material-ui/core/Button';
 import ChipTabla from '../components/modals_container/caja/ChipTabla';
-import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
-import PagarDeuda from '../components/modals_container/cuentas_por_cobrar/PagarDeuda';
-import setSnackBars from '../components/plugins/setSnackBars';
 import Dolar from '../components/plugins/plugins/Dolar';
+import IconButton from '@material-ui/core/IconButton';
+import ItemMenuHerramienta from '../components/components/menus/ItemMenuHerramienta';
+import Layout from '../components/containers/Layout';
+import MenuHerramientas from '../components/components/menus/MenuHerramientas';
+import ModalContainerNormal from '../components/modals_container/ModalContainerNormal';
+import MonetizationOn from '@material-ui/icons/MonetizationOn';
+import PagarDeuda from '../components/modals_container/cuentas_por_cobrar/PagarDeuda';
+import ReactGA from 'react-ga';
+import ReturnTextTable from '../components/components/tables/ReturnTextTable';
+import Search from '../components/components/Search';
+import TablaNormal from '../components/components/tables/TableNormal';
+import Tooltip from '@material-ui/core/Tooltip';
+import colors from '../utils/colors';
+import firebase from 'firebase/app';
+import funtions from '../utils/funtions';
+import setSnackBars from '../components/plugins/setSnackBars';
+
+//firebase 
+
+
+
+
+
+
+
+
+
+
+
+
 
 class DeudasCobrar extends Component {
 
@@ -104,7 +116,9 @@ class DeudasCobrar extends Component {
         var newArray = this.state.sumaTotalListaDeudas
         if (deudas != null) {
             var array = Object.values(deudas)
+            console.log(array);
             array.forEach(element => {
+                console.log(Number(element.valor))
                 suma = Number(element.valor) + Number(suma),
                     acreditado = Number(element.valor_acreditado) + Number(acreditado)
             });
@@ -377,7 +391,7 @@ class DeudasCobrar extends Component {
         return numero.toFixed(2)
     }
 
-    componentDidMount(){
+    componentDidMount() {
         ReactGA.pageview(location.pathname)
     }
 

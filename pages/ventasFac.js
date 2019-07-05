@@ -1,32 +1,30 @@
-import React, { Component } from 'react';
-import Layout from '../components/containers/Layout';
-import Search from '../components/components/Search';
-import SimpleTable from '../components/components/TableList';
-import AppBar from '@material-ui/core/AppBar';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-
-import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
 
+import React, { Component } from 'react';
+
+import AppBar from '@material-ui/core/AppBar';
 import ChipsArray from '../components/components/ChipArray';
-import funtions from '../utils/funtions';
-import FullScreenDialog from '../components/components/FullScreenDialog';
-import ModalNewProducto from '../components/modals_container/ModalNewProducto';
-import setSnackBars from '../components/plugins/setSnackBars';
-
-import ListaProductos from '../components/components/productos/components/ListaProductos'
-import Stock from '../components/components/productos/components/Stock'
-import Proveedores from '../components/components/productos/components/Proveedores'
-import ControlVencimiento from '../components/components/productos/components/ControlVencimiento'
 import { CircularProgress } from '@material-ui/core';
-
-import Ventas_01 from '../components/components/ventas/Ventas_01'
-import VentasDevueltas_01 from '../components/components/ventas/VentasDevueltas_01'
+import ControlVencimiento from '../components/components/productos/components/ControlVencimiento'
+import FullScreenDialog from '../components/components/FullScreenDialog';
 import HistorialVentas_01 from '../components/components/ventas/HistorialVentas_01'
-import ReactGA from 'react-ga';
+import Layout from '../components/containers/Layout';
+import ListaProductos from '../components/components/productos/components/ListaProductos'
+import ModalNewProducto from '../components/modals_container/ModalNewProducto';
+import Proveedores from '../components/components/productos/components/Proveedores'
 import PuntoVenta from '../components/components/ventas/PuntoVenta';
+import ReactGA from 'react-ga';
+import Search from '../components/components/Search';
+import SimpleTable from '../components/components/TableList';
+import Stock from '../components/components/productos/components/Stock'
+import Tab from '@material-ui/core/Tab';
+import Tabs from '@material-ui/core/Tabs';
+import VentasDevueltas_01 from '../components/components/ventas/VentasDevueltas_01'
+import Ventas_01 from '../components/components/ventas/Ventas_01'
+import firebase from 'firebase/app';
+import funtions from '../utils/funtions';
+import setSnackBars from '../components/plugins/setSnackBars';
 
 class VentasFac extends Component {
 
@@ -158,6 +156,7 @@ class VentasFac extends Component {
                         <div>
                           {/*   {this.state.valueTab === 0 && <PuntoVenta usuario={this.state.usuario}></PuntoVenta>} */}
                             {this.state.valueTab === 0 && <Ventas_01 usuario={this.state.usuario} />}
+                            
                             {this.state.valueTab === 1 && <VentasDevueltas_01 usuario={this.state.usuario} />}
                             {this.state.valueTab === 2 && <HistorialVentas_01 usuario={this.state.usuario} />}
                         </div>

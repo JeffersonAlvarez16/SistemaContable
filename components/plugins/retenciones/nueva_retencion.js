@@ -1,36 +1,45 @@
-import React, { Component } from 'react';
-import { Grid, CircularProgress, Input, FormControl, InputLabel, InputAdornment } from '@material-ui/core';
-import Search from '../../components/Search';
-import AutoCompleteRetenciones from '../AutoCompleteRetenciones'
-import AutoCompleteSelectedProducto from '../AutoCompleteSelectedProducto';
-import ImpuestoRetencion from './ImpuestoRetencion';
-import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import MenuItem from '@material-ui/core/MenuItem';
-import Divider from '@material-ui/core/Divider';
-
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import IconButton from '@material-ui/core/IconButton';
-import Typography from '@material-ui/core/Typography';
-import CloseIcon from '@material-ui/icons/Close';
-
-
-import ReactGA from 'react-ga';
-
-//firebase 
-import firebase from 'firebase/app';
 import 'firebase/database';
 import 'firebase/auth'
-import setSnackBars from '../setSnackBars';
-import funtions from '../../../utils/funtions';
-import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
+
+import { CircularProgress, FormControl, Grid, Input, InputAdornment, InputLabel } from '@material-ui/core';
+import React, { Component } from 'react';
+
+import AppBar from '@material-ui/core/AppBar';
+import AutoCompleteRetenciones from '../AutoCompleteRetenciones'
+import AutoCompleteSelectedProducto from '../AutoCompleteSelectedProducto';
+import Button from '@material-ui/core/Button';
+import CloseIcon from '@material-ui/icons/Close';
+import Divider from '@material-ui/core/Divider';
+import IconButton from '@material-ui/core/IconButton';
+import ImpuestoRetencion from './ImpuestoRetencion';
 import MaskedInput from "react-text-mask";
+import MenuItem from '@material-ui/core/MenuItem';
+import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
 import NumberFormat from 'react-number-format';
-
-
+import ReactGA from 'react-ga';
+import Search from '../../components/Search';
 import SeleccionarFecha from '../plugins/SeleccionarFecha';
 import SeleccionarHora from '../plugins/SeleccionarHora';
+import TextField from '@material-ui/core/TextField';
+import Toolbar from '@material-ui/core/Toolbar';
+import Typography from '@material-ui/core/Typography';
+import firebase from 'firebase/app';
+import funtions from '../../../utils/funtions';
+import setSnackBars from '../setSnackBars';
+
+//firebase 
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 class NuevaRetencion extends Component {
@@ -292,7 +301,7 @@ class NuevaRetencion extends Component {
 
         var retencionIvaRenta = {
             "ambiente": this.state.ambienteFacturacion,
-            "secuencial": this.state.numero_retencion,
+            "secuencial": Number(this.state.numero_retencion),
             "tipo_emision": 1,
             "fecha_emision": new Date().toISOString(),
             "periodo_fiscal": this.state.fecha_emision_mes + "/" + this.state.fecha_emision_year,
