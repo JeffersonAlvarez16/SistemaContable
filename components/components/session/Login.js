@@ -16,6 +16,8 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import firebase from 'firebase/app'
 import setSnackBars from '../../plugins/setSnackBars'
+import Grid from '@material-ui/core/Grid';
+
 
 // firebase
 
@@ -110,151 +112,162 @@ class Login extends Component {
         return (
             <div style={{
                 display: 'flex',
-                flexDirection: 'column',
+                flexDirection: 'row',
                 alignItems: 'center',
                 justifyContent: 'center',
                 width: '100%',
-                height: '100vh'
+                minHeight: '100vh'
             }}>
 
                 <div id='rootSnackBar'></div>
-                <Paper
-                    elevation={5}
-                    style={{
-                        minWidth: 300,
-                        padding: 30,
-                        display: 'flex',
-                        flexDirection: 'column',
-                    }}
-                >
-                    <Typography variant="display2" component="h1" style={{
-                        marginTop: 20,
-                        textAlign: 'center',
-                        color: 'black'
-                    }}>
-                        ServiFac
-                    </Typography>
-                    <Typography variant="headline" component="h1" style={{
-                        textAlign: 'center',
-                        color: 'gray',
-                        fontSize: 15,
-                        marginBottom: 20,
-                        marginTop: 18
-                    }}>
-                        Ingresa al sistema
-                    </Typography>
-                    <form
-                        noValidate
-                        autoComplete="off"
-                        style={{
-                            display: 'flex',
-                            flexDirection: 'column'
-                        }}
-                    >
-                        <TextField
-                            error={this.state.stateUsuario === 'normal' ? false : true}
-                            id="user"
-                            type='text'
-                            value={this.state.usuario}
-                            onChange={this.handleChangeUsuario}
-                            label="Correo Electronico"
-                            margin="normal"
-                            onFocus={() => {
-                                this.state.usuario.length === 0 &&
-                                    this.setState({ stateUsuario: 'error' })
-                            }}
-                            style={{
-                                marginTop: 10,
-                                marginBottom: 20
-                            }}
-                        />
-                        <FormControl
-                            style={{
-                                marginBottom: 20
-                            }}
-                        >
-                            <InputLabel error={this.state.statePassword === 'normal' ? false : true} htmlFor="adornment-password">Contraseña</InputLabel>
-                            <Input
-                                id="adornment-password"
-                                label="Nombre de usuario"
-                                error={this.state.statePassword === 'normal' ? false : true}
-                                type={this.state.showPassword ? 'text' : 'password'}
-                                value={this.state.password}
-                                onChange={this.handleChangePassword}
-                                onFocus={() => {
-                                    this.state.password.length === 0 &&
-                                        this.setState({ statePassword: 'error' })
-                                }}
-                                onKeyPress={this._onKeyPress}
-                                endAdornment={
-                                    <InputAdornment position="end">
-                                        <IconButton
-                                            aria-label="Toggle password visibility"
-                                            onClick={this.handleClickShowPassword}
-                                        >
-                                            {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
-                                        </IconButton>
-                                    </InputAdornment>
-                                }
-                            />
-                        </FormControl>
-                    </form>
-
-                    <div style={{
-                        marginLeft: 20,
-                        marginRight: 20,
-                        position: 'relative',
-                    }}
-                    >
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            style={{
-                                marginTop: 20,
-                                marginBottom: 10,
-                                width: '100%'
-                            }}
-                            disabled={this.state.stateUsuario === 'normal' && this.state.statePassword === 'normal' ? this.state.loading : true}
-                            onClick={this.handleSetInitSession}
-                        >
-                            Iniciar sesion
-                        </Button>
-                        {
-                            this.state.loading &&
-                            <CircularProgress size={24}
+                <Grid container>
+                    <Grid item xs={12} sm={6} style={{ height: "100vh", backgroundImage: "url(/static/fondo_inicio_secion.png)" }}>
+                        <div style={{ padding: '10% 10%', display: "flex", alignItems: "center", justifyContent: "center", flexDirection: "column" }}>
+                            <img style={{ width: 300 }} src="/static/logo-bienvenida-administracion.png" />
+                            <Typography variant="headline" component="h1" style={{
+                                textAlign: 'center',
+                                color: 'gray',
+                                fontSize: 18,
+                                marginBottom: 20,
+                                marginTop: 18
+                            }}>
+                                Panel de Administración
+                            </Typography>
+                            <form
+                                noValidate
+                                autoComplete="off"
                                 style={{
-                                    color: 'primary',
-                                    position: 'absolute',
-                                    top: '50%',
-                                    left: '50%',
-                                    marginTop: -8,
-                                    marginLeft: -12,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    width: "350px"
                                 }}
-                            />
-                        }
-                    </div>
+                            >
+                                <TextField
+                                    error={this.state.stateUsuario === 'normal' ? false : true}
+                                    id="user"
+                                    type='text'
+                                    value={this.state.usuario}
+                                    onChange={this.handleChangeUsuario}
+                                    label="Correo Electronico"
+                                    margin="normal"
+                                    onFocus={() => {
+                                        this.state.usuario.length === 0 &&
+                                            this.setState({ stateUsuario: 'error' })
+                                    }}
+                                    style={{
+                                        marginTop: 10,
+                                        marginBottom: 20
+                                    }}
+                                />
+                                <FormControl
+                                    style={{
+                                        marginBottom: 20
+                                    }}
+                                >
+                                    <InputLabel error={this.state.statePassword === 'normal' ? false : true} htmlFor="adornment-password">Contraseña</InputLabel>
+                                    <Input
+                                        id="adornment-password"
+                                        label="Nombre de usuario"
+                                        error={this.state.statePassword === 'normal' ? false : true}
+                                        type={this.state.showPassword ? 'text' : 'password'}
+                                        value={this.state.password}
+                                        onChange={this.handleChangePassword}
+                                        onFocus={() => {
+                                            this.state.password.length === 0 &&
+                                                this.setState({ statePassword: 'error' })
+                                        }}
+                                        onKeyPress={this._onKeyPress}
+                                        endAdornment={
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="Toggle password visibility"
+                                                    onClick={this.handleClickShowPassword}
+                                                >
+                                                    {this.state.showPassword ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        }
+                                    />
+                                </FormControl>
+                            </form>
 
-                    <Button size="small" color="primary" style={{
-                        marginBottom: 0
-                    }}
-                        onClick={() => setSnackBars.openSnack('info', 'rootSnackBar', 'Por favor comuniquese con soporte', 2000)}
-                    >
-                        No recuerdo mi contraseña
-                    </Button>
-                    <Button
-                        size="small"
-                        variant="contained"
-                        color="default"
-                        style={{
-                            marginTop: 20,
-                            marginBottom: 20
-                        }}
-                        onClick={() => { location.href='https://puntoventa.facbtaapps.now.sh' }
-                        }
-                    >
-                        Punto de venta
-            </Button>
-                </Paper>
+                            <div style={{
+                                marginLeft: 20,
+                                marginRight: 20,
+                                position: 'relative',
+                                width: "50%"
+                            }}
+                            >
+                                <Button
+                                    variant="contained"
+                                    color="primary"
+                                    style={{
+                                        marginTop: 20,
+                                        marginBottom: 10,
+                                        width: '100%'
+                                    }}
+                                    disabled={this.state.stateUsuario === 'normal' && this.state.statePassword === 'normal' ? this.state.loading : true}
+                                    onClick={this.handleSetInitSession}
+                                >
+                                    Iniciar sesion
+                                    </Button>
+                                {
+                                    this.state.loading &&
+                                    <CircularProgress size={24}
+                                        style={{
+                                            color: 'primary',
+                                            position: 'absolute',
+                                            top: '50%',
+                                            left: '50%',
+                                            marginTop: -8,
+                                            marginLeft: -12,
+                                        }}
+                                    />
+                                }
+                            </div>
+                            <Button size="small" color="primary" style={{
+                                marginBottom: 0
+                            }}
+                                onClick={() => setSnackBars.openSnack('info', 'rootSnackBar', 'Por favor comuniquese con soporte', 2000)}
+                            >
+                                No recuerdo mi contraseña
+                            </Button>
+                        </div>
+                    </Grid>
+                    <Grid container xs={12} sm={6} style={{ padding: "10% 10%", backgroundImage: "url(/static/fondo_inicio_secion_2.png)", height: "100vh" }}>
+                        <Grid item xs={12} sm={12}>
+                            <Typography variant="headline" component="h1" style={{ color: "white" }} >
+                                Más Aplicaciones
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={6}
+                            onClick={() => { window.open('https://puntoventa.facbtaapps.now.sh', '_blank'); }}
+                            style={{ cursor: "pointer", display: "flex", alignItems: "center", flexDirection: "column" }}
+                        >
+                            <img src="/static/logo-punto-de-venta.png" style={{ width: 120 }} />
+                            <Typography variant="headline" component="h1" style={{
+                                textAlign: 'center',
+                                fontSize: 18,
+                                marginBottom: 20,
+                                marginTop: 18,
+                                color: "white"
+                            }}>
+                                Punto de venta
+                            </Typography>
+                        </Grid>
+                        <Grid item xs={6} sm={6}
+                            onClick={() => { window.open('https://puntoventa.facbtaapps.now.sh', '_blank'); }}
+                        //style={{ cursor: "pointer", display: "flex", alignItems: "center", flexDirection: "column" }}
+                        >
+
+
+                        </Grid>
+
+                    </Grid>
+                </Grid>
+
+
+
             </div>
         )
     }

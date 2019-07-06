@@ -79,8 +79,7 @@ class LoginUsuarios extends Component {
         const { opendialog, stateUsers, users } = this.state;
 
         return (
-            <div>
-
+            <div style={{backgroundImage: "url(/static/fondo_inicio_secion.png)"}}>
                 <Dialog
                     open={opendialog}
                     onClose={this.handleClose}

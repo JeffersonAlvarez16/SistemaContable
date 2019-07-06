@@ -93,14 +93,15 @@ class Main extends Component {
                             }
                         })
                         listaVentas.map(item => {
-                            if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
+                            console.log(item);
+                       /*      if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
                                 if (item.tipo_pago != 'credito') {
                                     this.setState({
                                         total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
                                     })
                                 }
 
-                            }
+                            } */
                         })
 
                         setTimeout(() => {
