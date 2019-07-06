@@ -34,17 +34,17 @@ import { Divider } from '@material-ui/core';
 
 class MailFolderListItems extends Component {
 
-    state={
-        inicio:'red',
-        caja:'trasparent',
-        productos:'trasparent'
+    state = {
+        inicio: 'red',
+        caja: 'trasparent',
+        productos: 'trasparent'
     }
     render() {
         return (
             <div>
-                <Link prefetch href="/">
-                    <ListItem button onClick={()=>{
-                    this.props.click('inicio')
+                
+                    <ListItem button onClick={() => {
+                        this.props.click('inicio')
                     }}>
                         <Tooltip title="Inicio" placement="right">
                             <ListItemIcon>
@@ -53,47 +53,45 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Inicio" />
                     </ListItem>
-                </Link>
+                    
                 {/*     <Divider style={{backgroundColor:'#fff'}} /> */}
-                <Link prefetch href="/caja">
-                    <ListItem button onClick={()=>{
+
+                <ListItem button onClick={() => {
                     this.props.click('caja')
-                    }}>
-                        <Tooltip title="Caja" placement="right">
-                            <ListItemIcon>
-                                <MonetizationOn style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Caja" />
-                    </ListItem>
-                </Link>
-                <Link prefetch href="/productos">
-                    <ListItem button onClick={()=>{
+                }}>
+                    <Tooltip title="Caja" placement="right">
+                        <ListItemIcon>
+                            <MonetizationOn style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Caja" />
+                </ListItem>
+
+                <ListItem button onClick={() => {
                     this.props.click('productos')
-                    }}>
-                        <Tooltip title="Productos" placement="right">
-                            <ListItemIcon>
-                                <ShoppingBasket style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Productos" />
-                    </ListItem>
-                </Link>
-                <Link prefetch href="/stock">
-                    <ListItem button onClick={()=>{
+                }}>
+                    <Tooltip title="Productos" placement="right">
+                        <ListItemIcon>
+                            <ShoppingBasket style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Productos" />
+                </ListItem>
+
+
+                <ListItem button onClick={() => {
                     this.props.click('stock')
-                    }}>
-                        <Tooltip title="Stock" placement="right">
-                            <ListItemIcon>
-                                <History style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Stock" />
-                    </ListItem>
-                </Link>
-                <Link prefetch href="/proveedores">
-                    <ListItem button onClick={()=>{
-                    this.props.click('proveedores')
+                }}>
+                    <Tooltip title="Stock" placement="right">
+                        <ListItemIcon>
+                            <History style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Stock" />
+                </ListItem>
+
+                    <ListItem button onClick={() => {
+                        this.props.click('proveedores')
                     }}>
                         <Tooltip title="Proveedores" placement="right">
                             <ListItemIcon>
@@ -102,10 +100,10 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Proveedores" />
                     </ListItem>
-                </Link>
-                <Link prefetch href="/clientes">
-                    <ListItem button onClick={()=>{
-                    this.props.click('clientes')
+                    
+                
+                    <ListItem button onClick={() => {
+                        this.props.click('clientes')
                     }}>
                         <Tooltip title="Clientes" placement="right">
                             <ListItemIcon>
@@ -114,10 +112,10 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Clientes" />
                     </ListItem>
-                </Link>
-                <Link prefetch href="/ventasFac">
-                    <ListItem button onClick={()=>{
-                    this.props.click('ventas')
+                    
+                
+                    <ListItem button onClick={() => {
+                        this.props.click('ventas')
                     }}>
                         <Tooltip title="Ventas" placement="right">
                             <ListItemIcon>
@@ -126,10 +124,10 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Ventas" />
                     </ListItem>
-                </Link>
-                <Link prefetch href="/retencion">
-                    <ListItem button onClick={()=>{
-                    this.props.click('retenciones')
+                    
+                
+                    <ListItem button onClick={() => {
+                        this.props.click('retenciones')
                     }}>
                         <Tooltip title="Retenciones" placement="right">
                             <ListItemIcon>
@@ -138,10 +136,11 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Retenciones" />
                     </ListItem>
-                </Link>
-                <Link prefetch href="/cuentas_cobrar">
-                    <ListItem button onClick={()=>{
-                    this.props.click('cuentas_cobrar')
+                
+                
+                
+                    <ListItem button onClick={() => {
+                        this.props.click('cuentas_cobrar')
                     }}>
                         <Tooltip title="Cuentas Cobrar" placement="right">
                             <ListItemIcon>
@@ -150,10 +149,11 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Cuentas Cobrar" />
                     </ListItem>
-                </Link>
-                <Link prefetch href="/usuarios">
-                    <ListItem button onClick={()=>{
-                    this.props.click('usuarios')
+                    
+               
+               
+                    <ListItem button onClick={() => {
+                        this.props.click('usuarios')
                     }}>
                         <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
                             <ListItemIcon>
@@ -162,7 +162,7 @@ class MailFolderListItems extends Component {
                         </Tooltip>
                         <ListItemText primary="Usuarios" />
                     </ListItem>
-                </Link>
+                    
             </div>
         )
     }

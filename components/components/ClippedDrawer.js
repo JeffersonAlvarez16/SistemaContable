@@ -30,6 +30,16 @@ import firebase from 'firebase/app'
 import 'firebase/firestore'
 import 'firebase/auth'
 import Contador from '../plugins/plugins/Contador';
+import Caja from '../../components/pages-content/caja';
+import Clientes from '../../components/pages-content/clientes';
+import Inicio from '../pages-content/inicio';
+import Productos from '../pages-content/productos';
+import Stock from '../pages-content/stock';
+import Proveedores from '../pages-content/proveedores';
+import VentasFac from '../pages-content/ventasFac';
+import Retencion from '../pages-content/retencion';
+import DeudasCobrar from '../pages-content/cuentas_cobrar';
+import Usuarios from '../pages-content/usuarios';
 
 
 const drawerWidth = 260;
@@ -106,6 +116,7 @@ class ClippedDrawer extends React.Component {
   state = {
     open: false,
     anchorEl: null,
+    main_contenedor:'inicio'
   };
 
   handleDrawerOpen = () => {
@@ -142,6 +153,12 @@ class ClippedDrawer extends React.Component {
           }
         })
       }
+    })
+  }
+
+  cambiarPage=(item)=>{
+    this.setState({
+      main_contenedor: item
     })
   }
 
@@ -215,8 +232,10 @@ class ClippedDrawer extends React.Component {
             width: drawerWidth
           }} /> */}
 
-          <List style={{ backgroundColor: '#009688', height: '100vh', opacity: '.9' }}><MailFolderListItems click={(item) => {
+          <List style={{ backgroundColor: '#009688', height: '100vh', opacity: '.9' }}>
+            <MailFolderListItems click={(item) => {
             this.controlClick(item)
+            this.cambiarPage(item)
           }} /></List>
 
         </Drawer>
@@ -236,7 +255,37 @@ class ClippedDrawer extends React.Component {
               position: 'fixed',
               paddingLeft: '5%',
             }}>
-              {this.props.children}
+              {this.state.main_contenedor==='inicio'&&
+                <div><Inicio user={this.props.user}></Inicio></div>
+              }
+              {this.state.main_contenedor==='caja'&&
+                <div><Caja user={this.props.user}></Caja></div>
+              }
+              {this.state.main_contenedor==='clientes'&&
+                <div><Clientes user={this.props.user}></Clientes></div>
+              }
+              {this.state.main_contenedor==='productos'&&
+                <div><Productos user={this.props.user}></Productos></div>
+              }
+              {this.state.main_contenedor==='stock'&&
+                <div><Stock user={this.props.user}></Stock></div>
+              }
+              {this.state.main_contenedor==='proveedores'&&
+                <div><Proveedores user={this.props.user}></Proveedores></div>
+              }
+              {this.state.main_contenedor==='ventas'&&
+                <div><VentasFac user={this.props.user}></VentasFac></div>
+              }
+              {this.state.main_contenedor==='retenciones'&&
+                <div><Retencion user={this.props.user}></Retencion></div>
+              }
+              {this.state.main_contenedor==='cuentas_cobrar'&&
+                <div><DeudasCobrar user={this.props.user}></DeudasCobrar></div>
+              }
+              {this.state.main_contenedor==='usuarios'&&
+                <div><Usuarios user={this.props.user}></Usuarios></div>
+              }
+              
             </div>
           </div>
         </main>
