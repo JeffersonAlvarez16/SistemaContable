@@ -42,18 +42,18 @@ class MailFolderListItems extends Component {
     render() {
         return (
             <div>
-                
-                    <ListItem button onClick={() => {
-                        this.props.click('inicio')
-                    }}>
-                        <Tooltip title="Inicio" placement="right">
-                            <ListItemIcon>
-                                <Trending style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Inicio" />
-                    </ListItem>
-                    
+
+                <ListItem button onClick={() => {
+                    this.props.click('inicio')
+                }}>
+                    <Tooltip title="Inicio" placement="right">
+                        <ListItemIcon>
+                            <Trending style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Inicio" />
+                </ListItem>
+
                 {/*     <Divider style={{backgroundColor:'#fff'}} /> */}
 
                 <ListItem button onClick={() => {
@@ -90,79 +90,79 @@ class MailFolderListItems extends Component {
                     <ListItemText primary="Stock" />
                 </ListItem>
 
-                    <ListItem button onClick={() => {
-                        this.props.click('proveedores')
-                    }}>
-                        <Tooltip title="Proveedores" placement="right">
-                            <ListItemIcon>
-                                <DriveEta style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Proveedores" />
-                    </ListItem>
-                    
-                
-                    <ListItem button onClick={() => {
-                        this.props.click('clientes')
-                    }}>
-                        <Tooltip title="Clientes" placement="right">
-                            <ListItemIcon>
-                                <SupervisedUserCircle style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Clientes" />
-                    </ListItem>
-                    
-                
-                    <ListItem button onClick={() => {
-                        this.props.click('ventas')
-                    }}>
-                        <Tooltip title="Ventas" placement="right">
-                            <ListItemIcon>
-                                <ShoppingCart style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Ventas" />
-                    </ListItem>
-                    
-                
-                    <ListItem button onClick={() => {
-                        this.props.click('retenciones')
-                    }}>
-                        <Tooltip title="Retenciones" placement="right">
-                            <ListItemIcon>
-                                <DonutSmall style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Retenciones" />
-                    </ListItem>
-                
-                
-                
-                    <ListItem button onClick={() => {
-                        this.props.click('cuentas_cobrar')
-                    }}>
-                        <Tooltip title="Cuentas Cobrar" placement="right">
-                            <ListItemIcon>
-                                <Style style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Cuentas Cobrar" />
-                    </ListItem>
-                    
-               
-               
-                    <ListItem button onClick={() => {
-                        this.props.click('usuarios')
-                    }}>
-                        <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
-                            <ListItemIcon>
-                                <Usuarios style={{ color: '#fff' }} />
-                            </ListItemIcon>
-                        </Tooltip>
-                        <ListItemText primary="Usuarios" />
-                    </ListItem>
-                    
+                <ListItem button onClick={() => {
+                    this.props.click('proveedores')
+                }}>
+                    <Tooltip title="Proveedores" placement="right">
+                        <ListItemIcon>
+                            <DriveEta style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Proveedores" />
+                </ListItem>
+
+
+                <ListItem button onClick={() => {
+                    this.props.click('clientes')
+                }}>
+                    <Tooltip title="Clientes" placement="right">
+                        <ListItemIcon>
+                            <SupervisedUserCircle style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Clientes" />
+                </ListItem>
+
+
+                <ListItem button onClick={() => {
+                    this.props.click('ventas')
+                }}>
+                    <Tooltip title="Ventas" placement="right">
+                        <ListItemIcon>
+                            <ShoppingCart style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Ventas" />
+                </ListItem>
+
+
+                <ListItem button onClick={() => {
+                    this.props.click('retenciones')
+                }}>
+                    <Tooltip title="Retenciones" placement="right">
+                        <ListItemIcon>
+                            <DonutSmall style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Retenciones" />
+                </ListItem>
+
+
+
+                <ListItem button onClick={() => {
+                    this.props.click('cuentas_cobrar')
+                }}>
+                    <Tooltip title="Cuentas Cobrar" placement="right">
+                        <ListItemIcon>
+                            <Style style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Cuentas Cobrar" />
+                </ListItem>
+
+
+
+                <ListItem button onClick={() => {
+                    this.props.click('usuarios')
+                }}>
+                    <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
+                        <ListItemIcon>
+                            <Usuarios style={{ color: '#fff' }} />
+                        </ListItemIcon>
+                    </Tooltip>
+                    <ListItemText primary="Usuarios" />
+                </ListItem>
+
             </div>
         )
     }
