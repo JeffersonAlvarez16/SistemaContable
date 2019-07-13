@@ -32,12 +32,13 @@
     "nprogress": "0.2.0",
     "pdfmake": "0.1.39",
     "popper.js": "1.14.4",
-    "react": "16.6.3",
+    "react": "^16.8.6",
     "react-chartist": "^0.13.1",
-    "react-dom": "16.6.3",
+    "react-dom": "^16.8.6",
     "react-ga": "^2.5.7",
     "react-number-format": "3.6.0",
     "react-pdf-js": "4.0.2",
+    "react-scrollbars-custom": "^4.0.12",
     "react-text-mask": "5.4.3",
     "react-to-print": "2.0.0-alpha-4"
   }

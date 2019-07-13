@@ -8,6 +8,7 @@ import Clear from '@material-ui/icons/Clear';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import { Input } from '@material-ui/core';
 
 
 class Search extends Component {
@@ -59,53 +60,63 @@ class Search extends Component {
 
 
                 <Tooltip title={`${this.props.textoTooltip}`} >
-                    <TextField
-                        id={this.props.id}
-                        style={{
-                            width: '100%',
-                        }}
-                        disabled={this.state.loading === 'cargando' ? true : false}
-                        variant="standard"
-                        type='text'
-                        label={`${this.props.textoSearch}`}
-                        value={this.state.buscar}
-                        onChange={this.handleChange('buscar')}
-                        onKeyPress={this._onKeyPress}
-                        margin='none'
-                        InputProps={{
-                            endAdornment: (
-                                <InputAdornment variant="filled" position="end">
-                                    {
-                                        this.state.buscar.length > 0 &&
-                                        <Tooltip title={`Click para borrar`}>
-                                            <IconButton
-                                                aria-label="Toggle clean"
-                                                onClick={() => {
-                                                    this.setState({
-                                                        buscar: ''
-                                                    })
-                                                    this.props.handleSearch('')
-                                                }}
-                                            >
-                                                <Clear />
-                                            </IconButton>
-                                        </Tooltip>
-                                    }
-                                    <Tooltip title={`Click para buscar`}>
-                                        <IconButton
-                                            aria-label="Toggle Search"
-                                            onClick={() => this.props.handleSearch(this.state.buscar)}
-                                        >
-                                            <SearchI />
-                                        </IconButton>
-                                    </Tooltip>
-                                </InputAdornment>
-                            ),
-                        }}
-                    />
+                    <div className='joder' style={{ display: 'flex', flexDirection: 'row' }}>
+                        <Input
+                            id={this.props.id}
+                            style={{
+                                width: '100%',
+                                color: '#545454 !important'
+                            }}
+                            disabled={this.state.loading === 'cargando' ? true : false}
+                            /* variant="standard" */
+                            type='text'
+                            placeholder={`${this.props.textoSearch}`}
+                            value={this.state.buscar}
+                            onChange={this.handleChange('buscar')}
+                            onKeyPress={this._onKeyPress}
+                            margin='none'
+                            disableUnderline={true}
+
+                        />
+                        {
+                            this.state.buscar.length > 0 &&
+                            <Tooltip title={`Click para borrar`}>
+                                <IconButton
+                                    aria-label="Toggle clean"
+                                    onClick={() => {
+                                        this.setState({
+                                            buscar: ''
+                                        })
+                                        this.props.handleSearch('')
+                                    }}
+                                >
+                                    <Clear />
+                                </IconButton>
+                            </Tooltip>
+                        }
+                        <Tooltip title={`Click para buscar`}>
+                            <IconButton
+                                aria-label="Toggle Search"
+                                onClick={() => this.props.handleSearch(this.state.buscar)}
+                            >
+                                <SearchI />
+                            </IconButton>
+                        </Tooltip>
+                    </div>
                 </Tooltip>
 
-
+                <style jsx>{`
+                    .joder{
+                        background: rgba(0,0,0,0.01);
+                        padding-left:16px;
+                        border-radius: 50px;
+                        color:'#545454'
+                    }
+                    .joder:hover{
+                        background: rgba(0,0,0,0.1);
+                        transition: all 400ms;
+                    }
+                `}</style>
 
             </div>
         )

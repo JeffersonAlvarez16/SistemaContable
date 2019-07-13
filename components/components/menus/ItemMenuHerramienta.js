@@ -10,15 +10,19 @@ class ItemMenuHerramienta extends Component {
                 {
                     visible &&
                     <Button
-                        variant="outlined"
+                        /* variant="outlined" */
                         color={color} onClick={onClick}
                         disabled={disabled}
                     >
-                        <div style={{ marginRight: 8, display: 'flex', alignItems: 'center' }}>
-                            {
-                                this.props.children
-                            }
-                        </div>
+                        {
+                            this.props.children &&
+                            <div style={{ marginRight: 8, display: 'flex', alignItems: 'center' }}>
+                                {
+                                    this.props.children
+                                }
+                            </div>
+                        }
+
                         <div>
                             {
                                 titleButton

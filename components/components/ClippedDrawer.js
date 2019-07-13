@@ -40,9 +40,11 @@ import VentasFac from '../pages-content/ventasFac';
 import Retencion from '../pages-content/retencion';
 import DeudasCobrar from '../pages-content/cuentas_cobrar';
 import Usuarios from '../pages-content/usuarios';
+import { ListItem, Tooltip, ListItemIcon, Hidden } from '@material-ui/core';
+import Scrollbar from 'react-scrollbars-custom';
 
 
-const drawerWidth = 260;
+const drawerWidth = '20%';
 
 const styles = theme => ({
   root: {
@@ -54,6 +56,7 @@ const styles = theme => ({
   },
   appBar: {
     zIndex: theme.zIndex.drawer + 1,
+    width: '100%',
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.leavingScreen,
@@ -61,7 +64,7 @@ const styles = theme => ({
   },
   appBarShift: {
     marginLeft: drawerWidth,
-    width: `calc(100% - ${drawerWidth}px)`,
+    width: `calc(100% - ${drawerWidth})`,
     transition: theme.transitions.create(['width', 'margin'], {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -76,9 +79,9 @@ const styles = theme => ({
   },
   drawerPaper: {
     position: 'fixed',
-    height: '100vh',
     whiteSpace: 'nowrap',
     width: drawerWidth,
+    border: 0,
     transition: theme.transitions.create('width', {
       easing: theme.transitions.easing.sharp,
       duration: theme.transitions.duration.enteringScreen,
@@ -114,9 +117,9 @@ const styles = theme => ({
 class ClippedDrawer extends React.Component {
 
   state = {
-    open: false,
+    open: true,
     anchorEl: null,
-    main_contenedor:'inicio'
+    main_contenedor: 'inicio'
   };
 
   handleDrawerOpen = () => {
@@ -156,7 +159,7 @@ class ClippedDrawer extends React.Component {
     })
   }
 
-  cambiarPage=(item)=>{
+  cambiarPage = (item) => {
     this.setState({
       main_contenedor: item
     })
@@ -168,18 +171,33 @@ class ClippedDrawer extends React.Component {
 
     return (
       <div className={classes.root}>
-        <AppBar position="fixed"
+        <div style={{ position: 'fixed', top: 0 }}
           className={classNames(classes.appBar, this.state.open && classes.appBarShift)}>
-          <Toolbar disableGutters={!this.state.open}>
+          <div style={{ display: 'flex', alignItems: 'center', background: 'white' }}>
+            <div style={{
+              marginTop: 8,
+              marginLeft: 16,
+              marginRight: this.state.open ? 8 : 28,
+              marginBottom: 8,
+            }}>
+              <IconButton
+                color="primary"
+                aria-label="Open drawer"
+                onClick={this.handleDrawerOpen}
+                style={{ display: this.state.open ? 'none' : 'block' }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <IconButton
+                color="primary"
+                aria-label="Close drawer"
+                onClick={this.handleDrawerClose}
+                style={{ display: this.state.open ? 'block' : 'none' }}
+              >
+                <ChevronLeftIcon />
+              </IconButton>
+            </div>
 
-            <IconButton
-              color="inherit"
-              aria-label="Open drawer"
-              onClick={this.handleDrawerOpen}
-              className={classNames(classes.menuButton, this.state.open && classes.hide)}
-            >
-              <MenuIcon />
-            </IconButton>
 
             <Typography variant="title" color="inherit" noWrap style={{ flex: 1 }}>
               {this.props.title}
@@ -190,6 +208,7 @@ class ClippedDrawer extends React.Component {
                 :
                 <></>
             }
+            <div style={{ flex: 1 }}></div>
 
             <ButtonBase onClick={this.handleClick} style={{ marginRight: 20 }}>
               <Typography variant="subheading" color="inherit" noWrap style={{ marginRight: 10 }}>
@@ -211,32 +230,80 @@ class ClippedDrawer extends React.Component {
                 this.props.closeSesion()
               }}>Cerrar Sesión</MenuItem>
             </Menu>
-          </Toolbar>
-        </AppBar>
+          </div>
+        </div>
         <Drawer
           variant="permanent"
           classes={{
             paper: classNames(classes.drawerPaper, !this.state.open && classes.drawerPaperClose),
           }}
-          style={{ backgroundColor: '#009688' }}
           open={this.state.open}
         >
-          <div className={classes.toolbar}>
-            <IconButton onClick={this.handleDrawerClose}>
-              {theme.direction === 'rtl' ? <ChevronRightIcon /> : <ChevronLeftIcon />}
-            </IconButton>
-          </div>
-          {/* 
-          <div style={{
-            marginTop: 64,
-            width: drawerWidth
-          }} /> */}
+          <Scrollbar
+            maximalThumbYSize={200}
+            scrollbarWidth={20}
+            disableTracksWidthCompensation={true}
+            thumbYProps={{
+              renderer: props => {
+                const { elementRef, ...restProps } = props;
+                return <div
+                  {...restProps}
+                  ref={elementRef}
+                  style={{
+                    background: this.state.open ? '#009688' : 'white',
+                    borderRadius: 50
+                  }}
+                />
+              }
+            }}
+            trackYProps={{
+              renderer: props => {
+                const { elementRef, ...restProps } = props
+                return < div
+                  {...restProps}
+                  ref={elementRef}
+                  style={{
+                    width: this.state.open ? 5 : 3,
+                    height: '80vh',
+                    background: this.state.open ? '#dcd8d8' : '#009688',
+                    position:'absolute',
+                    right: this.state.open ? '0' : 'auto',
+                    left: this.state.open ? 'auto' : '0',
+                    marginTop: '15vh',
+                    marginBottom: '5vh',
+                    borderRadius: 50
+                  }}
+                />
+              }
+            }}
+            noScrollX={true}>
+            <div style={{
+              background: this.state.open ? 'white' : '#009688',
+              display: 'flex',
+              justifyContent: 'center',
+              paddingTop: 10
+            }}>
+              {
+                this.state.open ?
+                  <img style={{ width: 160 }} src='/static/logo-bienvenida-administracion.png' />
+                  :
+                  <div style={{ height: 54 }} ></div>
+              }
+            </div>
 
-          <List style={{ backgroundColor: '#009688', height: '100vh', opacity: '.9' }}>
-            <MailFolderListItems click={(item) => {
-            this.controlClick(item)
-            this.cambiarPage(item)
-          }} /></List>
+            <List style={{
+              backgroundColor: this.state.open ? 'white' : '#009688'
+            }}>
+              <MailFolderListItems
+                open={this.state.open}
+                main_contenedor={this.state.main_contenedor}
+                nombreUsuario={user.nombre}
+                click={(item) => {
+                  this.controlClick(item)
+                  this.cambiarPage(item)
+                }} />
+            </List>
+          </Scrollbar>
 
         </Drawer>
 
@@ -244,52 +311,46 @@ class ClippedDrawer extends React.Component {
           <div className={classes.toolbar} />
           <div style={{
             display: 'flex',
-            flexDirection: 'row'
+            flexDirection: 'column',
+            width: this.state.open ? '80%' : '95%',
+            height: '100%',
+            position: 'fixed',
+            paddingLeft: this.state.open ? drawerWidth : '5%'
           }}>
+            {this.state.main_contenedor === 'inicio' &&
+              <div><Inicio user={this.props.user}></Inicio></div>
+            }
+            {this.state.main_contenedor === 'caja' &&
+              <div><Caja user={this.props.user}></Caja></div>
+            }
+            {this.state.main_contenedor === 'clientes' &&
+              <div><Clientes user={this.props.user}></Clientes></div>
+            }
+            {this.state.main_contenedor === 'productos' &&
+              <div><Productos user={this.props.user}></Productos></div>
+            }
+            {this.state.main_contenedor === 'stock' &&
+              <div><Stock user={this.props.user}></Stock></div>
+            }
+            {this.state.main_contenedor === 'proveedores' &&
+              <div><Proveedores user={this.props.user}></Proveedores></div>
+            }
+            {this.state.main_contenedor === 'ventas' &&
+              <div><VentasFac user={this.props.user}></VentasFac></div>
+            }
+            {this.state.main_contenedor === 'retenciones' &&
+              <div><Retencion user={this.props.user}></Retencion></div>
+            }
+            {this.state.main_contenedor === 'cuentas_cobrar' &&
+              <div><DeudasCobrar user={this.props.user}></DeudasCobrar></div>
+            }
+            {this.state.main_contenedor === 'usuarios' &&
+              <div><Usuarios user={this.props.user}></Usuarios></div>
+            }
 
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              width: '95%',
-              height: '100%',
-              position: 'fixed',
-              paddingLeft: '5%',
-            }}>
-              {this.state.main_contenedor==='inicio'&&
-                <div><Inicio user={this.props.user}></Inicio></div>
-              }
-              {this.state.main_contenedor==='caja'&&
-                <div><Caja user={this.props.user}></Caja></div>
-              }
-              {this.state.main_contenedor==='clientes'&&
-                <div><Clientes user={this.props.user}></Clientes></div>
-              }
-              {this.state.main_contenedor==='productos'&&
-                <div><Productos user={this.props.user}></Productos></div>
-              }
-              {this.state.main_contenedor==='stock'&&
-                <div><Stock user={this.props.user}></Stock></div>
-              }
-              {this.state.main_contenedor==='proveedores'&&
-                <div><Proveedores user={this.props.user}></Proveedores></div>
-              }
-              {this.state.main_contenedor==='ventas'&&
-                <div><VentasFac user={this.props.user}></VentasFac></div>
-              }
-              {this.state.main_contenedor==='retenciones'&&
-                <div><Retencion user={this.props.user}></Retencion></div>
-              }
-              {this.state.main_contenedor==='cuentas_cobrar'&&
-                <div><DeudasCobrar user={this.props.user}></DeudasCobrar></div>
-              }
-              {this.state.main_contenedor==='usuarios'&&
-                <div><Usuarios user={this.props.user}></Usuarios></div>
-              }
-              
-            </div>
           </div>
         </main>
-      </div>
+      </div >
     )
   }
 }

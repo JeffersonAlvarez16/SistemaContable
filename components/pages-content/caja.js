@@ -1032,8 +1032,7 @@ class Caja extends Component {
                                             color="primary"
                                             visible={true}
                                             onClick={() => this.setState({ openModalCerrarCaja: true })}
-                                        >
-                                            <CloseIcon />
+                                        >  
                                         </ItemMenuHerramienta>
 
                                     </>
@@ -1048,7 +1047,6 @@ class Caja extends Component {
                                                     estadoModalCancelarVenta: true,
                                                 })
                                             }}>
-                                                <MonetizationOn style={{ color: '#EF5350' }} />
                                             </IconButton>
                                         </Tooltip>
                                         <ItemMenuHerramienta
@@ -1057,7 +1055,6 @@ class Caja extends Component {
                                             visible={true}
                                             onClick={() => this.setState({ openModalAbrirCaja: true })}
                                         >
-                                            <OpenInBrowserIcon />
                                         </ItemMenuHerramienta>
                                     </>
                                 }
@@ -1087,8 +1084,6 @@ class Caja extends Component {
                                         }
                                     }}
                                 >
-                                    <AttachMoneyIcon />
-                                    <AddIcon />
                                 </ItemMenuHerramienta>
                                 <ItemMenuHerramienta
                                     titleButton="Retirar dinero"
@@ -1101,8 +1096,6 @@ class Caja extends Component {
                                         }
                                     }}
                                 >
-                                    <AttachMoneyIcon />
-                                    <RemoveIcon />
                                 </ItemMenuHerramienta>
 
                                 <div style={{ flex: 0.84 }}></div>

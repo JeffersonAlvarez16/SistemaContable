@@ -20,6 +20,7 @@ import TablaVacia from '../../plugins/table-vacia';
 
 import TableNormalToolbar from './TableNomalToolbar'
 import TableNormalHead from './TableNormalHead'
+import TableScrollContainer from './TableScrollContainer';
 
 function desc(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -69,7 +70,7 @@ class TablaNormal extends React.Component {
     handleSelectAllClick = event => {
         if (event.target.checked) {
             this.setState(state => ({ selected: state.data.map(n => n.id) }));
-            this.props.itemsSeleccionados(this.getElementosData(this.state.data, this.state.data.map(n => n.id)))        
+            this.props.itemsSeleccionados(this.getElementosData(this.state.data, this.state.data.map(n => n.id)))
             return;
         }
         this.props.itemsSeleccionados([])
@@ -93,14 +94,14 @@ class TablaNormal extends React.Component {
                 selected.slice(selectedIndex + 1),
             );
         }
-        this.props.itemsSeleccionados(this.getElementosData(this.state.data, newSelected))        
+        this.props.itemsSeleccionados(this.getElementosData(this.state.data, newSelected))
         this.setState({ selected: newSelected });
     };
 
-    getElementosData=(data, newSelected)=>{
-        var array=[]
+    getElementosData = (data, newSelected) => {
+        var array = []
         newSelected.forEach(element => {
-            array.push(...data.filter(item=>item.codigo===element))
+            array.push(...data.filter(item => item.codigo === element))
         });
         return array
     }
@@ -175,63 +176,63 @@ class TablaNormal extends React.Component {
                     this.state.estadoTabla === 'llena' &&
                     <div style={{ width: '100%' }}>
                         <div style={{
-                            overflowX: 'auto',
-                            overflowY: 'auto',
-                            height: notTab===true? '73vh':'66vh'
+                            height: notTab === true ? '71vh' : '62vh'
                         }}>
-                            <Table aria-labelledby="tableTitle" style={{ minWidth: 300 }}>
-                                <TableNormalHead
-                                    numSelected={selected.length}
-                                    order={order}
-                                    orderBy={orderBy}
-                                    onSelectAllClick={this.handleSelectAllClick}
-                                    onRequestSort={this.handleRequestSort}
-                                    rowCount={data.length}
-                                    rows={rows}
-                                    selectedItems={selectedItems}
-                                />
-                                <TableBody>
-                                    {stableSort(data, getSorting(order, orderBy))
-                                        .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                        .map(n => {
-                                            const isSelected = this.isSelected(n.id);
-                                            return (
-                                                <TableRow
-                                                    hover
-                                                    onClick={event => {
-                                                        !selectedItems &&
-                                                            this.handleClick(event, n.id)
-                                                    }}
-                                                    role="checkbox"
-                                                    aria-checked={isSelected}
-                                                    tabIndex={-1}
-                                                    key={n.id}
-                                                    selected={isSelected}
-                                                >
-                                                    {
-                                                        !selectedItems &&
-                                                        <TableCell padding="checkbox">
-                                                            <Tooltip title="Seleccionar">
-                                                                <Checkbox checked={isSelected} />
-                                                            </Tooltip>
-                                                        </TableCell>
-                                                    }
+                            <TableScrollContainer>
+                                <Table aria-labelledby="tableTitle" style={{ minWidth: 300 }}>
+                                    <TableNormalHead
+                                        numSelected={selected.length}
+                                        order={order}
+                                        orderBy={orderBy}
+                                        onSelectAllClick={this.handleSelectAllClick}
+                                        onRequestSort={this.handleRequestSort}
+                                        rowCount={data.length}
+                                        rows={rows}
+                                        selectedItems={selectedItems}
+                                    />
+                                    <TableBody>
+                                        {stableSort(data, getSorting(order, orderBy))
+                                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                                            .map(n => {
+                                                const isSelected = this.isSelected(n.id);
+                                                return (
+                                                    <TableRow
+                                                        hover
+                                                        onClick={event => {
+                                                            !selectedItems &&
+                                                                this.handleClick(event, n.id)
+                                                        }}
+                                                        role="checkbox"
+                                                        aria-checked={isSelected}
+                                                        tabIndex={-1}
+                                                        key={n.id}
+                                                        selected={isSelected}
+                                                    >
+                                                        {
+                                                            !selectedItems &&
+                                                            <TableCell padding="checkbox">
+                                                                <Tooltip title="Seleccionar">
+                                                                    <Checkbox checked={isSelected} />
+                                                                </Tooltip>
+                                                            </TableCell>
+                                                        }
 
-                                                    {
-                                                        rows.map((item) => {
-                                                            return <TableCell key={item.id} body>{handleGetData(n, item)}</TableCell>
-                                                        })
-                                                    }
-                                                </TableRow>
-                                            );
-                                        })}
-                                    {emptyRows > 0 && (
-                                        <TableRow style={{ height: 49 * emptyRows }}>
-                                            <TableCell colSpan={6} />
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
+                                                        {
+                                                            rows.map((item) => {
+                                                                return <TableCell key={item.id} body>{handleGetData(n, item)}</TableCell>
+                                                            })
+                                                        }
+                                                    </TableRow>
+                                                );
+                                            })}
+                                        {emptyRows > 0 && (
+                                            <TableRow style={{ height: 49 * emptyRows }}>
+                                                <TableCell colSpan={6} />
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                            </TableScrollContainer>
                         </div>
                         <TablePagination
                             component="div"
