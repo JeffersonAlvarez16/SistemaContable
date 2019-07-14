@@ -58,7 +58,6 @@ class Search extends Component {
                     <CircularProgress size={25} style={{ marginLeft: '40%', position: 'absolute' }} />
                 }
 
-
                 <Tooltip title={`${this.props.textoTooltip}`} >
                     <div className='joder' style={{ display: 'flex', flexDirection: 'row' }}>
                         <Input
@@ -107,7 +106,7 @@ class Search extends Component {
 
                 <style jsx>{`
                     .joder{
-                        background: rgba(0,0,0,0.01);
+                        background: rgba(0,0,0,0.05);
                         padding-left:16px;
                         border-radius: 50px;
                         color:'#545454'

@@ -176,7 +176,7 @@ class TablaNormal extends React.Component {
                     this.state.estadoTabla === 'llena' &&
                     <div style={{ width: '100%' }}>
                         <div style={{
-                            height: notTab === true ? '71vh' : '62vh'
+                            height: notTab === true ? '80vh' : '72vh'
                         }}>
                             <TableScrollContainer>
                                 <Table aria-labelledby="tableTitle" style={{ minWidth: 300 }}>
@@ -253,6 +253,7 @@ class TablaNormal extends React.Component {
                             style={{
                                 position: 'fixed',
                                 bottom: 0,
+                                height:'10vh'
                             }}
                         />
                     </div>

@@ -1,6 +1,4 @@
 import React, { Component } from 'react';
-import Layout from '../../components/containers/Layout';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
 import Search from '../../components/components/Search';
 import { Divider, IconButton, TextField, Button, Chip } from '@material-ui/core';
@@ -9,12 +7,10 @@ import FullScreenDialog from '../../components/components/FullScreenDialog';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
 import Tooltip from '@material-ui/core/Tooltip';
 import CloseIcon from '@material-ui/icons/Close';
-import EditIcon from '@material-ui/icons/Edit';
 import AddIcon from '@material-ui/icons/Add';
 
 import PictureAsPdfIcon from '@material-ui/icons/PictureAsPdf';
 import DoneAllIcon from '@material-ui/icons/DoneAll';
-import LoopIcon from '@material-ui/icons/Loop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ReturnTextTable from '../../components/components/tables/ReturnTextTable';
 
@@ -23,15 +19,13 @@ import 'firebase/database';
 import 'firebase/auth'
 import NuevaRetencion from '../../components/plugins/retenciones/nueva_retencion';
 import funtions from '../../utils/funtions';
-import setSnackBars from '../../components/plugins/setSnackBars';
 
 import ReactToPrint from "react-to-print";
-import ResivoVenta from '../../components/plugins/plantillas/resivo_venta';
-import ContainerPlantillas from '../../components/plugins/plantillas/container_plantillas';
 import ModalContainerNormal from '../../components/modals_container/ModalContainerNormal';
 import ModalEliminarRetencion from '../../components/modals_container/retenciones/ModalEliminarRetencion';
 import colors from '../../utils/colors';
 import ReactGA from 'react-ga';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 
 
 
@@ -367,7 +361,7 @@ class Retencion extends Component {
                 {
                     this.state.estadoPermisos === true &&
                     <div>
-                        <MenuHerramientas>
+                        <ToolbarContainer title={'Retenciones'} open={this.props.open}>
                             <ItemMenuHerramienta
                                 titleButton="Nueva Retencion"
                                 color="primary"
@@ -402,7 +396,7 @@ class Retencion extends Component {
                             />
 
 
-                        </MenuHerramientas>
+                        </ToolbarContainer>
 
                         <Divider />
 

@@ -26,7 +26,7 @@ let TableNormalToolbar = props => {
             <div style={{
                 backgroundColor: '#E1F5FE'
             }}>
-                <Toolbar>
+                <Toolbar >
                     <Typography variant="title" style={{ width: '70%' }} id="tableTitle" >
                         {numSelected === 0 ? `Lista de ${textoTitleP}` : numSelected > 1 ? `${numSelected}  ${textoTitleP} Seleccionados ` : `${numSelected}  ${textoTitleS} Seleccionado`}
                     </Typography>

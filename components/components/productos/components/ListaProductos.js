@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import MenuHerramientas from '../../../../components/components/menus/MenuHerramientas'
 import ItemMenuHerramienta from '../../../../components/components/menus/ItemMenuHerramienta'
 import TablaNormal from '../../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
@@ -32,6 +31,7 @@ import AnadirVencimiento from '../../../plugins/anadirVencimiento';
 import Search from '../../Search';
 import { Chip } from '@material-ui/core';
 import Dolar from '../../../plugins/plugins/Dolar'
+import ToolbarContainer from '../../../pages-content/components/tollbars/ToolbarContainer';
 
 class ListaProductos extends Component {
 
@@ -426,11 +426,11 @@ class ListaProductos extends Component {
     nuevoProducto = () => {
 
 
-  ReactGA.event({
+        ReactGA.event({
             category: 'productos',
             action: 'nuevoProducto'
         })
-        var db=firebase.database()        
+        var db = firebase.database()
         var controlCaja = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto`)
         var controlProductosGuardados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/guardados`)
         var controlProductosCancelados = db.ref(`users/${firebase.auth().currentUser.uid}/control_interaccion/productos/nuevoProducto/cancelados`)
@@ -439,14 +439,14 @@ class ListaProductos extends Component {
                 controlCaja.update({
                     contador: snapshot.val().contador + 1,
                 })
-                controlProductosGuardados.once('value',snap=>{
-                    if(snap.val()){
+                controlProductosGuardados.once('value', snap => {
+                    if (snap.val()) {
                         controlProductosCancelados.update({
-                            contador:(snapshot.val().contador+1)-snap.val().contador
+                            contador: (snapshot.val().contador + 1) - snap.val().contador
                         })
                     }
                 })
-              
+
             } else {
                 controlCaja.update({
                     contador: 1,
@@ -459,7 +459,7 @@ class ListaProductos extends Component {
                 })
             }
         });
-       
+
 
         this.setState({ itemSeleccionado: null })
         this.setState({ openModalFullScreen: true })
@@ -467,11 +467,9 @@ class ListaProductos extends Component {
 
     render() {
         return (
-            <div >
+            <>
 
-
-                <MenuHerramientas>
-
+                <ToolbarContainer title={'Productos'} open={this.props.open}>
                     <ItemMenuHerramienta
                         titleButton="Nuevo Producto"
                         color="primary"
@@ -483,8 +481,6 @@ class ListaProductos extends Component {
                         <AddIcon />
                     </ItemMenuHerramienta>
 
-                    <div style={{ flex: 0.95 }}></div>
-
                     <Search
                         id='buscar-producto'
                         textoSearch="Buscar..."
@@ -492,8 +488,7 @@ class ListaProductos extends Component {
                         handleSearch={this.handleSearch}
                     />
 
-
-                </MenuHerramientas>
+                </ToolbarContainer>
 
                 <Divider />
 
@@ -543,7 +538,7 @@ class ListaProductos extends Component {
                         handleClose={() => this.setState({ estadoModalSimpleFechaNacimiento: false })}
                     />
                 </ModalContainerNormal>
-            </div>
+            </>
         );
     }
 }

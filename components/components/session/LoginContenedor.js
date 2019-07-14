@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import ClippedDrawer from '../ClippedDrawer';
+import ClippedDrawer from '../MenuMain';
 import LoginUsuarios from './LoginUsuarios'
 
 //firebase

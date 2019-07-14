@@ -4,27 +4,14 @@ import 'firebase/auth'
 import React, { Component } from 'react';
 
 import AppBar from '@material-ui/core/AppBar';
-import ChipsArray from '../../components/components/ChipArray';
 import { CircularProgress } from '@material-ui/core';
-import ControlVencimiento from '../../components/components/productos/components/ControlVencimiento'
-import FullScreenDialog from '../../components/components/FullScreenDialog';
 import HistorialVentas_01 from '../../components/components/ventas/HistorialVentas_01'
-import Layout from '../../components/containers/Layout';
-import ListaProductos from '../../components/components/productos/components/ListaProductos'
-import ModalNewProducto from '../../components/modals_container/ModalNewProducto';
-import Proveedores from '../../components/components/productos/components/Proveedores'
-import PuntoVenta from '../../components/components/ventas/PuntoVenta';
 import ReactGA from 'react-ga';
-import Search from '../../components/components/Search';
-import SimpleTable from '../../components/components/TableList';
-import Stock from '../../components/components/productos/components/Stock'
 import Tab from '@material-ui/core/Tab';
 import Tabs from '@material-ui/core/Tabs';
 import VentasDevueltas_01 from '../../components/components/ventas/VentasDevueltas_01'
 import Ventas_01 from '../../components/components/ventas/Ventas_01'
 import firebase from 'firebase/app';
-import funtions from '../../utils/funtions';
-import setSnackBars from '../../components/plugins/setSnackBars';
 
 class VentasFac extends Component {
 
@@ -144,7 +131,7 @@ class VentasFac extends Component {
                         <AppBar position="static" color="inherit">
                             <Tabs indicatorColor="primary" value={this.state.valueTab} onChange={this.handleChangeTab} textColor="primary">
                               {/*   <Tab label="Punto de Venta" /> */}
-                                <Tab label="Facturar" />
+                                <Tab label="Ventas diarias" />
                                 <Tab label="Ventas canceladas" />
                                 <Tab label="Historial de ventas" />
                             </Tabs>

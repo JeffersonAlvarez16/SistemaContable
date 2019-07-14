@@ -69,7 +69,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Inicio" placement="right">
                         <ListItemIcon>
-                            <Trending style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <Trending style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Inicio" />
@@ -82,7 +82,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Caja" placement="right">
                         <ListItemIcon>
-                            <MonetizationOn style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <MonetizationOn style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Caja" />
@@ -93,7 +93,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Productos" placement="right">
                         <ListItemIcon>
-                            <ShoppingBasket style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <ShoppingBasket style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Productos" />
@@ -103,12 +103,12 @@ class MailFolderListItems extends Component {
                 <ListItem selected={main_contenedor === 'stock'} button onClick={() => {
                     this.props.click('stock')
                 }}>
-                    <Tooltip title="Stock" placement="right">
+                    <Tooltip title="Inventario" placement="right">
                         <ListItemIcon>
-                            <History style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <History style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
-                    <ListItemText primary="Stock" />
+                    <ListItemText primary="Inventario" />
                 </ListItem>
 
                 <ListItem selected={main_contenedor === 'proveedores'} button onClick={() => {
@@ -116,7 +116,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Proveedores" placement="right">
                         <ListItemIcon>
-                            <DriveEta style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <DriveEta style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Proveedores" />
@@ -128,7 +128,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Clientes" placement="right">
                         <ListItemIcon>
-                            <SupervisedUserCircle style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <SupervisedUserCircle style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Clientes" />
@@ -140,7 +140,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Ventas" placement="right">
                         <ListItemIcon>
-                            <ShoppingCart style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <ShoppingCart style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Ventas" />
@@ -152,7 +152,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Retenciones" placement="right">
                         <ListItemIcon>
-                            <DonutSmall style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <DonutSmall style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Retenciones" />
@@ -163,12 +163,12 @@ class MailFolderListItems extends Component {
                 <ListItem selected={main_contenedor === 'cuentas_cobrar'} button onClick={() => {
                     this.props.click('cuentas_cobrar')
                 }}>
-                    <Tooltip title="Cuentas Cobrar" placement="right">
+                    <Tooltip title="Cuentas por Cobrar" placement="right">
                         <ListItemIcon>
-                            <Style style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <Style style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
-                    <ListItemText primary="Cuentas Cobrar" />
+                    <ListItemText primary="Cuentas por Cobrar" />
                 </ListItem>
 
 
@@ -178,7 +178,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip style={{ fontSize: 25 }} title="Usuarios" placement="right">
                         <ListItemIcon>
-                            <Usuarios style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <Usuarios style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Usuarios" />
@@ -195,7 +195,7 @@ class MailFolderListItems extends Component {
                 }}>
                     <Tooltip title="Punto de Venta" placement="right">
                         <ListItemIcon>
-                            <LocalAtmIcon style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <LocalAtmIcon style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
                     <ListItemText primary="Punto de Venta" />
@@ -208,14 +208,14 @@ class MailFolderListItems extends Component {
                 </Typography>
                 <div style={{ height: 5 }} />
                 <ListItem button onClick={() => {
-                    window.open('https://puntoventa.facbtaapps.now.sh/', '_blank');
+                    this.props.closeSesion()
                 }}>
-                    <Tooltip title="Salir del sistema" placement="right">
+                    <Tooltip title="Salir" placement="right">
                         <ListItemIcon>
-                            <ExitToAppIcon style={{ color: this.props.open ? '#545454' : '#fff' }} />
+                            <ExitToAppIcon style={{ color:  '#545454'  }} />
                         </ListItemIcon>
                     </Tooltip>
-                    <ListItemText primary="Salir del sistema" />
+                    <ListItemText primary="Salir" />
                 </ListItem>
 
             </div>

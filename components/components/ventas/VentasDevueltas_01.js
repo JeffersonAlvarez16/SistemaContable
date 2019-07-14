@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import MenuHerramientas from '../menus/MenuHerramientas'
 import ItemMenuHerramienta from '../menus/ItemMenuHerramienta'
 import TablaNormal from '../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
@@ -37,6 +36,7 @@ import { CircularProgress, Chip, Avatar } from '@material-ui/core';
 import ReactToPrint from "react-to-print";
 import colors from '../../../utils/colors';
 import ErrorEstado from '../../plugins/plugins/ErrorEstado';
+import ToolbarContainer from '../../pages-content/components/tollbars/ToolbarContainer';
 
 class VentasDevueltas_01 extends Component {
 
@@ -509,6 +509,9 @@ class VentasDevueltas_01 extends Component {
     render() {
         return (
             <div>
+                 <ToolbarContainer title={'Ventas Devueltas'} open={this.props.open}>
+                     
+                 </ToolbarContainer>
                 <TablaNormal
                     textoTitleP="Ventas Canceladas"
                     textoTitleS="Venta"

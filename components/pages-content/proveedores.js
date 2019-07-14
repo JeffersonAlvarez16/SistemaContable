@@ -17,17 +17,16 @@ import funtions from '../../utils/funtions';
 import ReturnTextTable from '../../components/components/tables/ReturnTextTable';
 import Search from '../../components/components/Search';
 import FullScreenDialog from '../../components/components/FullScreenDialog';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import TablaNormal from '../../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
-import Layout from '../../components/containers/Layout';
 import ModalNewEditProveedor from '../../components/modals_container/ModalNewEditProveedor';
 import ModalContainerNormal from '../../components/modals_container/ModalContainerNormal';
 import DeleteActivarDesactivar from '../../components/plugins/deleteActivarDesactivar';
 import setSnackBars from '../../components/plugins/setSnackBars';
-import { TextField, IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
+import { IconButton, Tooltip, CircularProgress, Chip, Avatar } from '@material-ui/core';
 import colors from '../../utils/colors';
 import ReactGA from 'react-ga';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 
 class Proveedores extends Component {
 
@@ -469,7 +468,7 @@ class Proveedores extends Component {
                 {
                     this.state.estadoPermisos === true &&
                     <div>
-                        <MenuHerramientas>
+                        <ToolbarContainer title={'Proveedores'} open={this.props.open}>
                             <ItemMenuHerramienta
                                 titleButton="Nuevo Proveedor"
                                 color="primary"
@@ -490,7 +489,7 @@ class Proveedores extends Component {
                                 textoTooltip="Buscar proveedores"
                                 handleSearch={this.handleSearch}
                             />
-                        </MenuHerramientas>
+                        </ToolbarContainer>
 
                         <Divider />
 

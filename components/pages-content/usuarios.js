@@ -1,11 +1,8 @@
 import React, { Component } from 'react';
-import Layout from '../../components/containers/Layout';
 import EditIcon from '@material-ui/icons/Edit';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
-import Search from '../../components/components/Search';
 import { Divider, Tooltip, IconButton, ExpansionPanel, Typography, ExpansionPanelDetails } from '@material-ui/core';
 import TablaNormal from '../../components/components/tables/TableNormal';
 import funtions from '../../utils/funtions';
@@ -13,7 +10,7 @@ import ExpansionPanelSummary from '@material-ui/core/ExpansionPanelSummary';
 import ExpandMoreIcon from '@material-ui/icons/ExpandMore';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import AddIcon from '@material-ui/icons/Add';
-import { TextField, Button, Chip } from '@material-ui/core';
+import { Chip } from '@material-ui/core';
 import ReactGA from 'react-ga';
 
 
@@ -23,11 +20,12 @@ import 'firebase/database';
 import 'firebase/auth'
 import FullScreenDialog from '../../components/components/FullScreenDialog';
 import ModalNewEditarUsuarios from '../../components/plugins/Usuarios/ModalNewEditarUsuarios';
-import ModalContainerNormal from '../../components/modals_container/ModalContainerNormal';
 import ModalEliminarUsuario from '../../components/modals_container/usuarios/ModalEliminarUsuario';
 import setSnackBars from '../../components/plugins/setSnackBars';
 import ReturnTextTable from '../../components/components/tables/ReturnTextTable';
 import colors from '../../utils/colors';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
+import ModalContainerNormal from '../modals_container/ModalContainerNormal';
 
 
 class Usuarios extends Component {
@@ -62,7 +60,7 @@ class Usuarios extends Component {
             this.obtenerPermisosusuarios()
             this.obtenerDataBaseDatos()
         }, 100)
-        
+
     }
 
     obtenerDataBaseDatos = () => {
@@ -521,8 +519,7 @@ class Usuarios extends Component {
                 {
                     this.state.estadoPermisos === true &&
                     <div>
-                        <MenuHerramientas>
-
+                        <ToolbarContainer title={'Usuarios'} open={this.props.open}>
                             <ItemMenuHerramienta
                                 titleButton="Nuevo Usuario"
                                 color="primary"
@@ -540,7 +537,7 @@ class Usuarios extends Component {
                                 <AddIcon />
                             </ItemMenuHerramienta>
 
-                        </MenuHerramientas>
+                        </ToolbarContainer>
                         <Divider />
                         <TablaNormal
                             textoTitleP="Usuarios"

@@ -24,7 +24,6 @@ import ReturnTextTable from '../../components/components/tables/ReturnTextTable'
 import ModalCompraProductos from '../../components/modals_container/ModalCompraProductos';
 import Search from '../../components/components/Search';
 import FullScreenDialog from '../../components/components/FullScreenDialog';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import TablaNormal from '../../components/components/tables/TableNormal';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
 import Layout from '../../components/containers/Layout';
@@ -33,6 +32,7 @@ import setSnackBars from '../../components/plugins/setSnackBars';
 import colors from '../../utils/colors';
 import Dolar from '../../components/plugins/plugins/Dolar'
 import ReactGA from 'react-ga';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 
 class Stock extends Component {
 
@@ -604,7 +604,7 @@ class Stock extends Component {
         const { titlep, estadoPermisoDevolucionCliente, estadoPermisoDevolucionProveedor, estadoPermisoAjusteStock, estadoPermisoCompraProductos, title } = this.state
         return (
             <>
-                <MenuHerramientas>
+                <ToolbarContainer title={'Inventario'} open={this.props.open}>
                     {
                         this.state.cajaSeleccionada != null && Boolean(this.state.cajaSeleccionada.estado) === true &&
                         <>
@@ -753,7 +753,7 @@ class Stock extends Component {
                         textoTooltip="Buscar en stock"
                         handleSearch={this.handleSearch}
                     />
-                </MenuHerramientas>
+                </ToolbarContainer>
 
                 <Divider />
 

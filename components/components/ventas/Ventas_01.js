@@ -20,7 +20,6 @@ import InputIcon from '@material-ui/icons/Input';
 import ItemMenuHerramienta from '../menus/ItemMenuHerramienta';
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
 import LocalPrintshopIcon from '@material-ui/icons/LocalPrintshop';
-import MenuHerramientas from '../menus/MenuHerramientas';
 import ModalCancelarVenta from '../../modals_container/ventas/ModalCancelarVenta';
 import ModalCompraProductos from '../../modals_container/ModalCompraProductos';
 import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
@@ -42,6 +41,7 @@ import colors from '../../../utils/colors';
 import firebase from 'firebase/app';
 import funtions from '../../../utils/funtions';
 import setSnackBars from '../../plugins/setSnackBars';
+import ToolbarContainer from '../../pages-content/components/tollbars/ToolbarContainer';
 
 //firebase 
 
@@ -998,7 +998,7 @@ class Ventas_01 extends Component {
                 {
                     this.state.estadoPermisos &&
                     <div>
-                        <MenuHerramientas>
+                        <ToolbarContainer title={'Ventas Diarias'} open={this.props.open}>
                             {
                                 Boolean(this.state.estadoCaja) === true ?
 
@@ -1038,7 +1038,7 @@ class Ventas_01 extends Component {
                                 textoTooltip="Buscar venta"
                                 handleSearch={this.handleSearch}
                             />
-                        </MenuHerramientas>
+                        </ToolbarContainer>
 
                         <Divider />
 

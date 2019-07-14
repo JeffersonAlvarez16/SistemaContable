@@ -1,14 +1,8 @@
 import React, { Component } from 'react';
-import Layout from '../../components/containers/Layout';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
 import Search from '../../components/components/Search';
 import Divider from '@material-ui/core/Divider';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
-import CloseIcon from '@material-ui/icons/Close';
-import RemoveIcon from '@material-ui/icons/Remove';
-import AddIcon from '@material-ui/icons/Add';
-import OpenInBrowserIcon from '@material-ui/icons/OpenInBrowser';
 import Tooltip from '@material-ui/core/Tooltip';
 import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
 import Avatar from '@material-ui/core/Avatar';
@@ -33,6 +27,7 @@ import VerTotales from '../../components/modals_container/caja/VerTotales';
 import Dolar from '../../components/plugins/plugins/Dolar';
 
 import ReactGA from 'react-ga';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 class Caja extends Component {
 
     state = {
@@ -1004,111 +999,95 @@ class Caja extends Component {
     render() {
         return (
             <>
+                <ToolbarContainer title={'Caja'} open={this.props.open}>
+                    {
+                        this.state.estadoCaja === null &&
+                        <div style={{ margin: 15 }}>
+                            <CircularProgress size={30} />
+                        </div>
+                    }
+                    {
+                        this.state.estadoCaja != null &&
+                        <>
+                            {
+                                Boolean(this.state.estadoCaja) === true &&
+                                <>
+                                    <Tooltip title="Estado de caja">
+                                        <IconButton >
+                                            <MonetizationOn style={{ color: '#00c853' }} />
+                                        </IconButton>
+                                    </Tooltip>
+                                    <ItemMenuHerramienta
+                                        titleButton="Cerrar Caja"
+                                        color="primary"
+                                        visible={true}
+                                        onClick={() => this.setState({ openModalCerrarCaja: true })}
+                                    >
+                                    </ItemMenuHerramienta>
 
+                                </>
+                            }
+                            {
+                                Boolean(this.state.estadoCaja) === false &&
+                                <>
+                                    <Tooltip title="Estado de caja">
+                                        <IconButton onClick={() => {
+                                            this.setState({
+                                                codigoEmitirFactura: n.codigo,
+                                                estadoModalCancelarVenta: true,
+                                            })
+                                        }}>
+                                        </IconButton>
+                                    </Tooltip>
+                                    <ItemMenuHerramienta
+                                        titleButton="Abrir Caja"
+                                        color="primary"
+                                        visible={true}
+                                        onClick={() => this.setState({ openModalAbrirCaja: true })}
+                                    >
+                                    </ItemMenuHerramienta>
+                                </>
+                            }
+
+                            <ItemMenuHerramienta
+                                titleButton="Agregar dinero"
+                                color="primary"
+                                visible={true}
+                                disabled={!this.state.estadoCaja}
+                                onClick={() => {
+                                    if (this.state.estadoCaja) {
+                                        this.setState({ openModalDineroCajaAgregar: true })
+                                    }
+                                }}
+                            >
+                            </ItemMenuHerramienta>
+                            <ItemMenuHerramienta
+                                titleButton="Retirar dinero"
+                                color="primary"
+                                visible={true}
+                                disabled={!this.state.estadoCaja}
+                                onClick={() => {
+                                    if (this.state.estadoCaja) {
+                                        this.setState({ openModalDineroCajaRetirar: true })
+                                    }
+                                }}
+                            >
+                            </ItemMenuHerramienta>
+
+                            <Search
+                                id='buscar-cliente-clientes'
+                                textoSearch="Buscar..."
+                                textoTooltip="Buscar caja"
+                                handleSearch={this.handleSearch}
+                            />
+                        </>
+
+                    }
+
+                </ToolbarContainer>
                 {
                     this.state.estadoPermisos === true &&
                     <div>
-
-
-                        {
-                            this.state.estadoCaja === null &&
-                            <div style={{ margin: 15 }}>
-                                <CircularProgress size={30} />
-                            </div>
-                        }
-                        {
-                            this.state.estadoCaja != null &&
-                            <MenuHerramientas>
-                                {
-                                    Boolean(this.state.estadoCaja) === true &&
-                                    <>
-                                        <Tooltip title="Estado de caja">
-                                            <IconButton >
-                                                <MonetizationOn style={{ color: '#00c853' }} />
-                                            </IconButton>
-                                        </Tooltip>
-                                        <ItemMenuHerramienta
-                                            titleButton="Cerrar Caja"
-                                            color="primary"
-                                            visible={true}
-                                            onClick={() => this.setState({ openModalCerrarCaja: true })}
-                                        >  
-                                        </ItemMenuHerramienta>
-
-                                    </>
-                                }
-                                {
-                                    Boolean(this.state.estadoCaja) === false &&
-                                    <>
-                                        <Tooltip title="Estado de caja">
-                                            <IconButton onClick={() => {
-                                                this.setState({
-                                                    codigoEmitirFactura: n.codigo,
-                                                    estadoModalCancelarVenta: true,
-                                                })
-                                            }}>
-                                            </IconButton>
-                                        </Tooltip>
-                                        <ItemMenuHerramienta
-                                            titleButton="Abrir Caja"
-                                            color="primary"
-                                            visible={true}
-                                            onClick={() => this.setState({ openModalAbrirCaja: true })}
-                                        >
-                                        </ItemMenuHerramienta>
-                                    </>
-                                }
-
-                                {/* <ItemMenuHerramienta
-                                    titleButton="Ver total"
-                                    color="primary"
-                                    visible={true}
-                                    disabled={!this.state.estadoCaja}
-                                    onClick={() => {
-                                        if (this.state.estadoCaja) {
-                                            this.setState({ estadoModalSimple: true })
-                                        }
-                                    }}
-                                >
-                                    <BarChart />
-                                </ItemMenuHerramienta> */}
-
-                                <ItemMenuHerramienta
-                                    titleButton="Agregar dinero"
-                                    color="primary"
-                                    visible={true}
-                                    disabled={!this.state.estadoCaja}
-                                    onClick={() => {
-                                        if (this.state.estadoCaja) {
-                                            this.setState({ openModalDineroCajaAgregar: true })
-                                        }
-                                    }}
-                                >
-                                </ItemMenuHerramienta>
-                                <ItemMenuHerramienta
-                                    titleButton="Retirar dinero"
-                                    color="primary"
-                                    visible={true}
-                                    disabled={!this.state.estadoCaja}
-                                    onClick={() => {
-                                        if (this.state.estadoCaja) {
-                                            this.setState({ openModalDineroCajaRetirar: true })
-                                        }
-                                    }}
-                                >
-                                </ItemMenuHerramienta>
-
-                                <div style={{ flex: 0.84 }}></div>
-
-                                <Search
-                                    id='buscar-cliente-clientes'
-                                    textoSearch="Buscar..."
-                                    textoTooltip="Buscar caja"
-                                    handleSearch={this.handleSearch}
-                                />
-                            </MenuHerramientas>
-
-                        }
 
 
                         <Divider />
@@ -1176,7 +1155,7 @@ class Caja extends Component {
                                 sumaTotalDineroRetirado={this.state.sumaTotalDineroRetirado}
                                 sumaTotalVentasDevueltas={this.state.sumaTotalVentasDevueltas}
                                 sumaTotalComprasProductos={this.state.sumaTotalComprasProductos}
-                                
+
                                 sumaTotalAjustesEntradas={this.state.sumaTotalAjustesEntradas}
                                 sumaTotalDevolucionesProveedores={this.state.sumaTotalDevolucionesProveedores}
                                 sumaTotalDevolucionesClientes={this.state.sumaTotalDevolucionesClientes}
@@ -1184,7 +1163,7 @@ class Caja extends Component {
                                 sumaTotalVentasCreditoAcreditado={this.state.sumaTotalVentasCreditoAcreditado}
                                 sumaTotalCuentasPagadas={this.state.sumaTotalCuentasPagadas}
 
-                                cajaSelecionada={this.state.cajaSeleccionada} 
+                                cajaSelecionada={this.state.cajaSeleccionada}
                                 handleClose={() => this.setState({ estadoModalSimple: false })}>
                             </VerTotales>
                         </ModalContainerNormal>

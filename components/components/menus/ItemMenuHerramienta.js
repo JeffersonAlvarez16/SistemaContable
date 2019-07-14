@@ -1,12 +1,11 @@
 import React, { Component } from 'react';
-import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 
 class ItemMenuHerramienta extends Component {
     render() {
         const { titleButton, color, visible, onClick, disabled } = this.props
         return (
-            <Grid item >
+            <div item >
                 {
                     visible &&
                     <Button
@@ -31,7 +30,7 @@ class ItemMenuHerramienta extends Component {
                     </Button>
                 }
 
-            </Grid>
+            </div>
         );
     }
 }

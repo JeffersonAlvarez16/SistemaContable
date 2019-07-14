@@ -11,6 +11,7 @@ import 'firebase/firestore'
 import 'firebase/auth'
 import Contador from '../../components/plugins/plugins/Contador';
 import ReactGA from 'react-ga';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 class Inicio extends Component {
 
     state = {
@@ -95,14 +96,14 @@ class Inicio extends Component {
                         })
                         listaVentas.map(item => {
                             console.log(item);
-                       /*      if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
-                                if (item.tipo_pago != 'credito') {
-                                    this.setState({
-                                        total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
-                                    })
-                                }
-
-                            } */
+                            /*      if (item.fecha_venta.substr(5, 2) === this.state.idex_of_mes) {
+                                     if (item.tipo_pago != 'credito') {
+                                         this.setState({
+                                             total_ventas_mensuales: Number(this.state.total_ventas_mensuales) + Number(item.total),
+                                         })
+                                     }
+     
+                                 } */
                         })
 
                         setTimeout(() => {
@@ -243,7 +244,7 @@ class Inicio extends Component {
 
     }
 
-   
+
 
     refrescar = () => {
         var db = firebase.database()
@@ -557,13 +558,16 @@ class Inicio extends Component {
 
     render() {
         return (
-            <div>
+            <div >
+                <ToolbarContainer title={'Inicio'} open={this.props.open}>
+                    
+                </ToolbarContainer>
                 {
                     this.state.initialState ?
                         <div>
-                            <div style={{ marginTop: -15, marginLeft: 75, fontFamily: "cursive",display:'flex',flexDirection:'row',width:"100%" }}>
+                            <div style={{ marginTop: -15, marginLeft: 75, fontFamily: "cursive", display: 'flex', flexDirection: 'row', width: "100%" }}>
                                 <h6 style={{ fontSize: 14, fontWeight: 100 }}> {funtions.fecha()}</h6>
-                                <div style={{flex:.8}}></div>
+                                <div style={{ flex: .8 }}></div>
 
                             </div>
                             <Dashboard

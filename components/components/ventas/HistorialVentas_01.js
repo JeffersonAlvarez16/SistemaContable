@@ -1,5 +1,4 @@
 import React, { Component } from 'react';
-import MenuHerramientas from '../menus/MenuHerramientas'
 import ItemMenuHerramienta from '../menus/ItemMenuHerramienta'
 import TablaNormal from '../tables/TableNormal'
 import Divider from '@material-ui/core/Divider';
@@ -42,6 +41,7 @@ import ErrorEstado from '../../plugins/plugins/ErrorEstado';
 
 import ModalContainerNormal from '../../modals_container/ModalContainerNormal';
 import EmitirFacturaModal from '../../plugins/EmitirFacturaModal';
+import ToolbarContainer from '../../pages-content/components/tollbars/ToolbarContainer';
 
 class HistorialVentas_01 extends Component {
 
@@ -559,8 +559,7 @@ class HistorialVentas_01 extends Component {
     render() {
         return (
             <div>
-                <MenuHerramientas>
-
+                <ToolbarContainer title={'Historial de ventas'} open={this.props.open}>
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <TextField
                             id="datetime-local"
@@ -581,7 +580,7 @@ class HistorialVentas_01 extends Component {
                         textoTooltip="Buscar venta"
                         handleSearch={this.handleSearch}
                     />
-                </MenuHerramientas>
+                </ToolbarContainer>
 
                 <Divider />
 

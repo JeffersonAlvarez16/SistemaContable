@@ -10,7 +10,6 @@ import Dolar from '../../components/plugins/plugins/Dolar';
 import IconButton from '@material-ui/core/IconButton';
 import ItemMenuHerramienta from '../../components/components/menus/ItemMenuHerramienta';
 import Layout from '../../components/containers/Layout';
-import MenuHerramientas from '../../components/components/menus/MenuHerramientas';
 import ModalContainerNormal from '../../components/modals_container/ModalContainerNormal';
 import MonetizationOn from '@material-ui/icons/MonetizationOn';
 import PagarDeuda from '../../components/modals_container/cuentas_por_cobrar/PagarDeuda';
@@ -23,6 +22,7 @@ import colors from '../../utils/colors';
 import firebase from 'firebase/app';
 import funtions from '../../utils/funtions';
 import setSnackBars from '../../components/plugins/setSnackBars';
+import ToolbarContainer from './components/tollbars/ToolbarContainer';
 
 //firebase 
 
@@ -429,7 +429,7 @@ class DeudasCobrar extends Component {
                 {
                     this.state.estadoPermisos === true &&
                     <div>
-                        <MenuHerramientas>
+                        <ToolbarContainer title={'Cuentas por Cobrar'} open={this.props.open}>
                             {
                                 Boolean(this.state.estadoCaja) === true &&
                                 <>
@@ -459,7 +459,7 @@ class DeudasCobrar extends Component {
                                 textoTooltip="Buscar Cliente"
                                 handleSearch={this.handleSearch}
                             />
-                        </MenuHerramientas>
+                        </ToolbarContainer>
 
                         <Divider />
 
